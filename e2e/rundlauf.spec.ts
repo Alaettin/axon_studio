@@ -184,3 +184,65 @@ test("Der Admin kann sich selbst nicht die Rechte nehmen", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Nutzer", exact: true })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Sperren" })).toBeDisabled();
 });
+
+test("Der Programmkatalog steht nur Administratoren offen", async ({ page }) => {
+  await melde(page, NUTZER);
+  await page.goto("/verwaltung/katalog");
+  // Der Waechter schickt zurueck auf die Buehne, nicht auf eine leere Verwaltungsseite.
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Guten");
+});
+
+test("Der Katalog zeigt den Editor mit Umgebungen und Status", async ({ page }) => {
+  await melde(page, ADMIN);
+  await page.goto("/verwaltung/katalog");
+
+  await expect(page.getByRole("heading", { name: "Katalog" })).toBeVisible();
+  const zeile = page.getByRole("button", { name: /AXON Editor/ });
+  await expect(zeile).toBeVisible({ timeout: 20_000 });
+  // Zwei Umgebungen: produktion und lokal. Die zweite steht als "+1" hinter dem Host.
+  await expect(zeile).toContainText("axon-editor.sliplane.app");
+  await expect(zeile).toContainText("+1");
+});
+
+test("Der Assistent laesst nicht vorspringen", async ({ page }) => {
+  /*
+   * Der wichtigste Punkt am Assistenten, und der einzige, der sich ohne echte Clients
+   * pruefen laesst: Schritt 4 legt Registrierungen beim Aussteller an, und dorthin darf
+   * niemand springen, bevor Adresse und Zugriff stehen. Angelegt wird hier nichts.
+   */
+  await melde(page, ADMIN);
+  await page.goto("/verwaltung/katalog/aufnehmen");
+
+  await expect(page.getByRole("heading", { name: "Programm aufnehmen" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /4 Schlüssel/ })).toBeDisabled();
+  await expect(page.getByRole("button", { name: /2 Adresse/ })).toBeDisabled();
+
+  // Ohne Name, Kuerzel und Satz geht es nicht weiter.
+  const weiter = page.getByRole("button", { name: /Weiter/ });
+  await expect(weiter).toBeDisabled();
+
+  await page.getByLabel("Name").fill("Probe Programm");
+  await page.getByLabel("Kürzel").fill("PRB");
+  // Die Kennung leitet sich aus dem Namen ab, ohne dass jemand sie tippt.
+  await expect(page.getByLabel("Kennung")).toHaveValue("probe-programm");
+  await page.getByPlaceholder("Verwaltungsschalen bauen").fill("Nur eine Vorschau.");
+
+  // Die Kachel daneben lebt mit.
+  await expect(page.getByText("Probe Programm")).toBeVisible();
+  await expect(weiter).toBeEnabled();
+});
+
+test("Das Profil zeigt die erteilten Freigaben und den Weg zurueck", async ({ page }) => {
+  /*
+   * Die Zustimmungsseite verspricht seit Runde 1, die Freigabe lasse sich zuruecknehmen.
+   * Bis Runde 3 gab es dafuer keinen Ort. Hier steht er.
+   */
+  await melde(page, NUTZER);
+  await page.goto("/profil");
+  await expect(page.getByText("Erteilte Freigaben")).toBeVisible();
+  await expect(
+    page
+      .getByText("Du hast noch keinem Programm Zugriff auf dein Konto erteilt.")
+      .or(page.getByRole("button", { name: "Zurücknehmen" }).first()),
+  ).toBeVisible({ timeout: 20_000 });
+});

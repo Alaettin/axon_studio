@@ -97,6 +97,7 @@ export function Kopfzeile({ oeffnePalette, gedaempft = false }: Props) {
                   </span>
                 </div>
                 <Eintrag onSelect={() => void gehe("/verwaltung/nutzer")}>Nutzer</Eintrag>
+                <Eintrag onSelect={() => void gehe("/verwaltung/katalog")}>Katalog</Eintrag>
               </>
             )}
 

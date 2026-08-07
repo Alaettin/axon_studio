@@ -31,16 +31,92 @@ export interface Programm {
   readonly url: string | null;
   readonly sortierung: number;
   readonly aktiv: boolean;
+
+  /** Unter welcher Adresse der Dienst läuft, und wo er sich gesund meldet. */
+  readonly basis_adresse: string | null;
+  readonly gesundheitspfad: string;
   /**
-   * Die Kennung des OAuth-Clients, unter der sich dieses Programm beim Hub anmeldet.
-   * `null`, solange es kein Client ist.
+   * Was das Programm anfordern darf.
    *
-   * Sie steht hier, weil `getAuthorizationDetails` zum Client **nur eine Kennung und
-   * keinen Namen** liefert: ohne diese Spalte könnte die Zustimmungsseite nicht sagen,
-   * wer da fragt.
+   * Durchgesetzt wird das auf **unserer** Zustimmungsseite: `createClient` kennt kein
+   * Scope-Feld, ein Client kann technisch jeden der fünf unterstützten Scopes verlangen.
+   * Der Katalog sagt, was verabredet war.
    */
-  readonly oauth_client_id: string | null;
+  readonly scopes: readonly Scope[];
+  readonly zustimmung_ueberspringen: boolean;
+  readonly status: Programmstatus;
+  /** Was die Abnahme zuletzt gemessen hat. */
+  readonly fassung: string | null;
+  readonly zuletzt_geprueft: string | null;
 }
+
+/**
+ * Die wählbaren Akzente eines Programms.
+ *
+ * Sie stehen hier und nicht im Assistenten, weil sie **Daten** sind und keine Erscheinung:
+ * sie landen in `hub_apps.akzent`, genau wie die Werte, die schon in der Datenbank stehen.
+ * Im Bauteilcode hätten sie nichts zu suchen, und der Wächter in `test/erscheinung.test.ts`
+ * würde sie dort auch nicht dulden.
+ */
+export const AKZENTE = [
+  "#00A386",
+  "#3F7FD0",
+  "#B0873E",
+  "#9A5BC4",
+  "#C4585B",
+  "#4FA3A8",
+] as const;
+
+/** Die fünf, die der Server kennt. Ein eigener Scope wird abgewiesen. */
+export const SCOPES = ["openid", "profile", "email", "phone", "offline_access"] as const;
+export type Scope = (typeof SCOPES)[number];
+
+export type Umgebung = "produktion" | "test" | "lokal";
+export type Programmstatus = "entwurf" | "aktiv" | "pruefen";
+
+/** `public.hub_app_clients`: je Umgebung ein eigener Client mit eigenem Geheimnis. */
+export interface Programmclient {
+  readonly id: string;
+  readonly app_id: string;
+  readonly umgebung: Umgebung;
+  readonly oauth_client_id: string;
+  readonly redirect_uri: string;
+  readonly created_at: string;
+}
+
+/** Ein Punkt der Abnahme. `gut === null` heißt: nicht automatisch prüfbar. */
+export interface Abnahmepunkt {
+  readonly name: string;
+  readonly gut: boolean | null;
+  readonly befund: string;
+}
+
+/**
+ * Was ein Scope für einen Menschen bedeutet. Dieselbe Vokabel auf der Zustimmungsseite
+ * und im Assistenten, damit ein Administrator vorher sieht, was der Nutzer nachher liest.
+ */
+export const SCOPE_TEXT: Record<Scope, { titel: string; detail: string }> = {
+  openid: {
+    titel: "Wer du bist",
+    detail: "Deine Kennung in AXON Studio, damit das Programm dich wiedererkennt.",
+  },
+  profile: {
+    titel: "Dein Name",
+    detail: "Anzeigename und Bild, soweit hinterlegt.",
+  },
+  email: {
+    titel: "Deine E-Mail-Adresse",
+    detail: "Lesen, nicht ändern.",
+  },
+  phone: {
+    titel: "Deine Telefonnummer",
+    detail: "Lesen, nicht ändern. Wird hier nirgends gepflegt.",
+  },
+  offline_access: {
+    titel: "Zugang auch ohne dich",
+    detail: "Das Programm darf sich später erneut anmelden, ohne dass du dabei bist.",
+  },
+};
 
 /** `public.hub_invitations`. */
 export interface Einladung {

@@ -47,6 +47,13 @@ export function Palette({ offen, setzeOffen }: Props) {
   const verwaltung: readonly Befehl[] = admin
     ? [
         { id: "nutzer", name: "Nutzer", hinweis: "Verwaltung", gehe: "/verwaltung/nutzer" },
+        { id: "katalog", name: "Katalog", hinweis: "Verwaltung", gehe: "/verwaltung/katalog" },
+        {
+          id: "aufnehmen",
+          name: "Programm aufnehmen",
+          hinweis: "Verwaltung",
+          gehe: "/verwaltung/katalog/aufnehmen",
+        },
         { id: "profil", name: "Mein Profil", hinweis: "Konto", gehe: "/profil" },
       ]
     : [{ id: "profil", name: "Mein Profil", hinweis: "Konto", gehe: "/profil" }];

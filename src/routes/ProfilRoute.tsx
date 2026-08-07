@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 
 import { Brotkrume, Glasflaeche, Seitentitel, Unterlinienfeld } from "@/components/Bausteine";
@@ -189,10 +189,120 @@ export function ProfilRoute() {
               </ul>
             </Glasflaeche>
           </div>
+
+          <Freigaben />
         </div>
       </div>
 
       <Palette offen={paletteOffen} setzeOffen={setzePaletteOffen} />
     </Flaeche>
+  );
+}
+
+/**
+ * Erteilte Freigaben, und der Weg zurueck.
+ *
+ * Die Zustimmungsseite verspricht seit Runde 1 "laesst sich spaeter zuruecknehmen", und
+ * bis hierher gab es dafuer keinen Ort. `revokeGrant` nimmt die Zustimmung zurueck, beendet
+ * die Sitzungen dieses Clients und entwertet seine Refresh-Token.
+ *
+ * Das Programm steht mit Namen da, wenn es im Katalog liegt: `listGrants` liefert nur die
+ * Client-Kennung, und "Ein Programm" waere hier die unbrauchbarste aller Angaben.
+ */
+function Freigaben() {
+  const [grants, setzeGrants] = useState<
+    readonly { clientId: string; scopes: readonly string[]; seit: string; name: string | null }[]
+  >([]);
+  const [laedt, setzeLaedt] = useState(true);
+  const [fehler, setzeFehler] = useState<string | null>(null);
+
+  const laden = useCallback(async () => {
+    setzeLaedt(true);
+    setzeFehler(null);
+    const { data, error } = await supabase.auth.oauth.listGrants();
+    if (error) {
+      setzeFehler(error.message);
+      setzeLaedt(false);
+      return;
+    }
+    const kennungen = (data ?? []).map((g) => g.client.id);
+    const namen = new Map<string, string>();
+    if (kennungen.length > 0) {
+      const { data: treffer } = await supabase
+        .from("hub_app_clients")
+        .select("oauth_client_id, hub_apps(name)")
+        .in("oauth_client_id", kennungen);
+      for (const t of (treffer ?? []) as unknown as {
+        oauth_client_id: string;
+        hub_apps?: { name: string } | null;
+      }[]) {
+        if (t.hub_apps) namen.set(t.oauth_client_id, t.hub_apps.name);
+      }
+    }
+    setzeGrants(
+      (data ?? []).map((g) => ({
+        clientId: g.client.id,
+        scopes: g.scopes,
+        seit: g.granted_at,
+        name: namen.get(g.client.id) ?? null,
+      })),
+    );
+    setzeLaedt(false);
+  }, []);
+
+  useEffect(() => {
+    void laden();
+  }, [laden]);
+
+  async function widerrufen(clientId: string) {
+    setzeFehler(null);
+    const { error } = await supabase.auth.oauth.revokeGrant({ clientId });
+    if (error) setzeFehler(error.message);
+    await laden();
+  }
+
+  return (
+    <Glasflaeche titel="Erteilte Freigaben">
+      {fehler && (
+        <p role="alert" className="px-[22px] py-4 font-sans text-base text-axon-fehler">
+          {fehler}
+        </p>
+      )}
+      {laedt && (
+        <p className="px-[22px] py-4 font-mono text-2xs tracking-etikett uppercase text-axon-schrift-still">
+          Wird geladen
+        </p>
+      )}
+      {!laedt && grants.length === 0 && !fehler && (
+        <p className="px-[22px] py-4 font-sans text-base text-axon-schrift-fein">
+          Du hast noch keinem Programm Zugriff auf dein Konto erteilt.
+        </p>
+      )}
+      <ul className="flex flex-col">
+        {grants.map((g) => (
+          <li
+            key={g.clientId}
+            className="flex items-center gap-4 border-b border-axon-zeile-linie px-[22px] py-[13px] last:border-b-0"
+          >
+            <span className="flex min-w-0 flex-col gap-[3px]">
+              <span className="truncate font-sans text-md text-axon-schrift">
+                {g.name ?? "Nicht im Katalog"}
+              </span>
+              <span className="truncate font-mono text-2xs text-axon-schrift-fein">
+                {g.scopes.join(" ")} · seit{" "}
+                {new Date(g.seit).toLocaleDateString("de-DE")}
+              </span>
+            </span>
+            <button
+              type="button"
+              onClick={() => void widerrufen(g.clientId)}
+              className="ml-auto shrink-0 cursor-pointer border border-axon-linie px-3 py-[6px] font-mono text-2xs tracking-fein uppercase text-axon-schrift-leise transition-colors duration-quick hover:border-axon-fehler-kraeftig hover:text-axon-schrift"
+            >
+              Zurücknehmen
+            </button>
+          </li>
+        ))}
+      </ul>
+    </Glasflaeche>
   );
 }

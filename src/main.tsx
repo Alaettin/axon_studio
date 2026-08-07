@@ -6,6 +6,8 @@ import { AnmeldungRoute } from "@/routes/AnmeldungRoute";
 import { BuehneRoute } from "@/routes/BuehneRoute";
 import { PasswortSetzenRoute } from "@/routes/PasswortSetzenRoute";
 import { ProfilRoute } from "@/routes/ProfilRoute";
+import { AufnahmeRoute } from "@/routes/verwaltung/aufnahme/AufnahmeRoute";
+import { KatalogRoute } from "@/routes/verwaltung/KatalogRoute";
 import { NutzerRoute } from "@/routes/verwaltung/NutzerRoute";
 import { BrauchtAdmin, BrauchtAnmeldung, NichtGesperrt } from "@/routes/Waechter";
 import { ZustimmungRoute } from "@/routes/ZustimmungRoute";
@@ -63,6 +65,36 @@ function App() {
             <NichtGesperrt>
               <BrauchtAdmin>
                 <NutzerRoute />
+              </BrauchtAdmin>
+            </NichtGesperrt>
+          </BrauchtAnmeldung>
+        }
+      />
+
+      {/*
+        Katalog und Assistent teilen sich einen Pfad: `/verwaltung/katalog/aufnehmen` legt
+        neu an, `/verwaltung/katalog/:id` bearbeitet. Dieselben fuenf Schritte, damit es
+        nicht zwei Masken gibt, die auseinanderlaufen.
+      */}
+      <Route
+        path="/verwaltung/katalog"
+        element={
+          <BrauchtAnmeldung>
+            <NichtGesperrt>
+              <BrauchtAdmin>
+                <KatalogRoute />
+              </BrauchtAdmin>
+            </NichtGesperrt>
+          </BrauchtAnmeldung>
+        }
+      />
+      <Route
+        path="/verwaltung/katalog/:id"
+        element={
+          <BrauchtAnmeldung>
+            <NichtGesperrt>
+              <BrauchtAdmin>
+                <AufnahmeRoute />
               </BrauchtAdmin>
             </NichtGesperrt>
           </BrauchtAnmeldung>

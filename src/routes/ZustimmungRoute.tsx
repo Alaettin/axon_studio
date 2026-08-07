@@ -5,6 +5,8 @@ import { Etikett } from "@/components/Bausteine";
 import { Flaeche } from "@/components/Flaeche";
 import { Marke } from "@/components/Marke";
 import { supabase } from "@/lib/supabase";
+import type { Scope } from "@/lib/typen";
+import { SCOPE_TEXT } from "@/lib/typen";
 import { useSitzung } from "@/store/sitzung";
 
 /**
@@ -20,26 +22,6 @@ import { useSitzung } from "@/store/sitzung";
  * Nutzer hat diesem Programm schon einmal zugestimmt und wird ohne Frage weitergeleitet.
  */
 
-/** Was die Scopes fuer einen Menschen bedeuten. Unbekannte werden roh angezeigt. */
-const SCOPE_TEXT: Record<string, { titel: string; detail: string }> = {
-  openid: {
-    titel: "Wer du bist",
-    detail: "Deine Kennung in AXON Studio, damit das Programm dich wiedererkennt.",
-  },
-  email: {
-    titel: "Deine E-Mail-Adresse",
-    detail: "Lesen, nicht ändern.",
-  },
-  profile: {
-    titel: "Dein Name",
-    detail: "Anzeigename und Bild, soweit hinterlegt.",
-  },
-  offline_access: {
-    titel: "Zugang auch ohne dich",
-    detail: "Das Programm darf sich später erneut anmelden, ohne dass du dabei bist.",
-  },
-};
-
 /**
  * Was `getAuthorizationDetails` wirklich liefert, nachgemessen am 07.08.2026:
  *
@@ -48,6 +30,13 @@ const SCOPE_TEXT: Record<string, { titel: string; detail: string }> = {
  * `client` traegt **nur eine Kennung, keinen Namen**. Wer fragt, muss der Hub also selbst
  * nachschlagen, sonst steht auf der Zustimmungsseite "Ein Programm".
  */
+interface Katalogeintrag {
+  readonly name: string;
+  readonly akzent: string;
+  readonly scopes: readonly string[];
+  readonly zustimmung_ueberspringen: boolean;
+}
+
 interface Details {
   readonly authorization_id: string;
   readonly client: { readonly id: string };
@@ -67,7 +56,12 @@ export function ZustimmungRoute() {
    * `null` heisst: nachgesehen und **nicht gefunden**. Das ist etwas anderes als "noch
    * nicht nachgesehen" und wird auch anders angezeigt.
    */
-  const [programm, setzeProgramm] = useState<{ name: string; akzent: string } | null>(null);
+  const [programm, setzeProgramm] = useState<{
+    name: string;
+    akzent: string;
+    scopes: readonly string[];
+    zustimmung_ueberspringen: boolean;
+  } | null>(null);
   const [laedt, setzeLaedt] = useState(true);
   const [fehler, setzeFehler] = useState<string | null>(null);
   const [entscheidet, setzeEntscheidet] = useState(false);
@@ -97,13 +91,38 @@ export function ZustimmungRoute() {
         const einzelheiten = data as unknown as Details;
         setzeDetails(einzelheiten);
 
-        // Wer fragt? Steht nicht in der Antwort, sondern im eigenen Katalog.
+        /*
+         * Wer fragt? Steht nicht in der Antwort, sondern im eigenen Katalog. Der Weg fuehrt
+         * seit den Umgebungen ueber `hub_app_clients`: ein Programm hat mehrere Clients,
+         * einen je Umgebung, und `hub_apps` traegt die Client-Kennung nicht mehr selbst.
+         */
         const { data: treffer } = await supabase
-          .from("hub_apps")
-          .select("name, akzent")
+          .from("hub_app_clients")
+          .select("hub_apps(name, akzent, scopes, zustimmung_ueberspringen)")
           .eq("oauth_client_id", einzelheiten.client.id)
           .maybeSingle();
-        setzeProgramm(treffer ? (treffer as { name: string; akzent: string }) : null);
+        const app = (treffer as { hub_apps?: Katalogeintrag } | null)?.hub_apps ?? null;
+        setzeProgramm(app);
+
+        /*
+         * Ueberspringen, aber nur im verabredeten Rahmen.
+         *
+         * Supabase kennt kein solches Merkmal: die Seite gehoert uns, also winkt sie selbst
+         * durch. Bedingung ist beides, das Haekchen im Katalog **und** dass die Anfrage
+         * nicht mehr verlangt, als dort steht. Sonst waere der Schalter eine Blankovollmacht
+         * fuer jeden spaeteren Scope.
+         */
+        const angefragt = (einzelheiten.scope ?? "").split(" ").filter(Boolean);
+        const imRahmen = angefragt.every((s) => app?.scopes.includes(s));
+        if (app?.zustimmung_ueberspringen && imRahmen) {
+          const { data: durch, error: durchFehler } =
+            await supabase.auth.oauth.approveAuthorization(kennung);
+          if (!durchFehler && durch) {
+            window.location.assign(durch.redirect_url);
+            return;
+          }
+          // Scheitert das Durchwinken, wird eben gefragt. Kein stiller Abbruch.
+        }
       }
       setzeLaedt(false);
     })();
@@ -132,6 +151,12 @@ export function ZustimmungRoute() {
   };
 
   const scopes = (details?.scope ?? "").split(" ").filter(Boolean);
+  /*
+   * Was ueber das hinausgeht, was im Katalog verabredet ist. **Gewarnt, nicht blockiert:**
+   * ein veralteter Katalogeintrag darf niemanden aussperren, und die Entscheidung gehoert
+   * ohnehin dem, der gerade zustimmt.
+   */
+  const darueberHinaus = programm ? scopes.filter((s) => !programm.scopes.includes(s)) : [];
 
   return (
     <Flaeche schleier="mitte" className="items-center justify-center gap-7 p-9">
@@ -204,13 +229,31 @@ export function ZustimmungRoute() {
                 Das Programm fragt keine besonderen Rechte an.
               </li>
             )}
+            {darueberHinaus.length > 0 && (
+              <li className="flex flex-col gap-1 border border-axon-fehler-kraeftig px-4 py-3">
+                <span className="font-sans text-md text-axon-schrift">
+                  Mehr als verabredet
+                </span>
+                <span className="font-sans text-base text-axon-schrift-fein">
+                  Für {programm?.name} steht im Katalog nicht{" "}
+                  {darueberHinaus.join(", ")}. Das kann an einem veralteten Eintrag liegen
+                  oder daran, dass das Programm mehr will als vereinbart.
+                </span>
+              </li>
+            )}
             {scopes.map((scope) => {
-              const text = SCOPE_TEXT[scope];
+              const text = SCOPE_TEXT[scope as Scope] as
+                | { titel: string; detail: string }
+                | undefined;
+              const extra = darueberHinaus.includes(scope);
               return (
                 <li key={scope} className="flex gap-[14px]">
                   <span
                     aria-hidden
-                    className="mt-[7px] size-[5px] shrink-0 rounded-full bg-axon-aktion"
+                    className={
+                      "mt-[7px] size-[5px] shrink-0 rounded-full " +
+                      (extra ? "bg-axon-fehler-kraeftig" : "bg-axon-aktion")
+                    }
                   />
                   <div className="flex flex-col gap-1">
                     <span className="font-sans text-md text-axon-schrift">
