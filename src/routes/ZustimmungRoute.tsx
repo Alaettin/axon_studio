@@ -89,7 +89,6 @@ export function ZustimmungRoute() {
         return;
       } else if (data) {
         const einzelheiten = data as unknown as Details;
-        setzeDetails(einzelheiten);
 
         /*
          * Wer fragt? Steht nicht in der Antwort, sondern im eigenen Katalog. Der Weg fuehrt
@@ -103,6 +102,14 @@ export function ZustimmungRoute() {
           .maybeSingle();
         const app = (treffer as { hub_apps?: Katalogeintrag } | null)?.hub_apps ?? null;
         setzeProgramm(app);
+        /*
+         * Die Einzelheiten erst **nach** dem Nachschlagen. Umgekehrt erschien die Karte
+         * einen Wimpernschlag lang mit "Ein unbekanntes Programm" und der Warnung, es stehe
+         * nicht im Katalog, obwohl die Antwort nur noch unterwegs war. Gesehen am
+         * 07.08.2026 im Rundlauf gegen die ausgelieferten Dienste: eine Falschaussage, und
+         * ausgerechnet die alarmierendste, die diese Seite kennt.
+         */
+        setzeDetails(einzelheiten);
 
         /*
          * Ueberspringen, aber nur im verabredeten Rahmen.
