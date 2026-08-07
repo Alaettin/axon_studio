@@ -499,21 +499,44 @@
   /*
    * Vom Browser ausgefuellte Felder bleiben in unseren Farben.
    *
-   * Chrome und Firefox faerben sie sonst gelb. Auf dunkelblauem Grund ist das ein greller
-   * Balken, und zwar dort, wo der Nutzer als Erstes hinsieht: der Anmeldung.
+   * Chromium und Firefox faerben sie sonst gelb. Auf dunkelblauem Grund ist das ein
+   * greller Balken, und zwar dort, wo der Nutzer als Erstes hinsieht: der Anmeldung.
+   *
+   * Die beiden Browser tun es auf verschiedene Weise, also braucht es zwei Griffe:
+   *
+   * - **Firefox** legt einen `filter` darueber. `filter: none` nimmt ihn weg.
+   * - **Chromium** setzt `background-color` mit `!important` aus dem Browser-Stylesheet.
+   *   Dagegen kommt keine Autorenregel an, auch nicht aus einem Layer. Der uebliche
+   *   `transition: background-color 100000s` half hier **nicht**: er verzoegert einen
+   *   Uebergang, und Chromium setzt die Farbe ohne Uebergang. Nachgesehen am 07.08.2026 im
+   *   ausgelieferten Buendel: die Regel war da, der Balken auch.
+   *
+   *   Was traegt, ist `background-clip: text`. Der Grund des Feldes wird auf die Buchstaben
+   *   beschnitten, und damit ist auch ein `!important`-Grund nur noch dort, wo ohnehin Text
+   *   steht; darueber malt `-webkit-text-fill-color` in unserer Farbe.
    *
    * Bewusst **ohne** den ueblichen `box-shadow: inset 0 0 0 1000px <farbe>`: die Felder der
    * Anmeldung sind durchsichtig und tragen nur eine Unterlinie, ein deckender Schatten
-   * machte daraus einen gefuellten Kasten.
+   * machte daraus einen gefuellten Kasten. Aus demselben Grund ist `background-clip: text`
+   * hier unbedenklich, obwohl es auch den eigenen Grund beschneidet: kein Eingabefeld des
+   * Hubs traegt einen. Die Suchleiste der Nutzerverwaltung hat ihre Flaeche am umgebenden
+   * Kasten, nicht am `input`.
    */
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
   input:autofill {
     filter: none;
-    transition: background-color 100000s ease-in-out 0s;
-    -webkit-text-fill-color: currentcolor;
-    caret-color: currentcolor;
+    -webkit-background-clip: text;
+    background-clip: text;
+    /*
+     * Nicht `currentcolor`: Chromium setzt beim Autofill auch `color` mit `!important`,
+     * und was dabei herauskommt, haengt am `color-scheme`. Auf der Probe war es Schwarz,
+     * und schwarze Schrift auf dunklem Grund ist genauso unbrauchbar wie der gelbe Balken.
+     * Der Rueckfall auf `currentcolor` gilt fuer Felder ausserhalb von `.szene-axon`.
+     */
+    -webkit-text-fill-color: var(--axon-schrift, currentcolor);
+    caret-color: var(--axon-schrift, currentcolor);
   }
 
   :focus-visible {
