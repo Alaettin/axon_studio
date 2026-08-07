@@ -246,3 +246,66 @@ test("Das Profil zeigt die erteilten Freigaben und den Weg zurueck", async ({ pa
       .or(page.getByRole("button", { name: "Zurücknehmen" }).first()),
   ).toBeVisible({ timeout: 20_000 });
 });
+
+test("Hinter dem Nutzerdialog bleibt die Tabelle stehen", async ({ page }) => {
+  /*
+   * Der Sprung wird gemessen, nicht angesehen. Jede Aenderung im Dialog laedt die Liste
+   * nach; lief das laut, schob die Zeile "Nutzer werden geladen" die ganze Tabelle um ihre
+   * eigene Hoehe nach unten und wieder zurueck. Ein Pixel Unterschied hier heisst, dass
+   * das Nachladen wieder laut geworden ist.
+   */
+  await melde(page, ADMIN);
+  await page.goto("/verwaltung/nutzer");
+  await page.getByPlaceholder("Nutzer suchen").fill("axon-probe-nutzer");
+
+  /*
+   * Gemessen wird ueber `data-tabelle`, nicht ueber die Rolle: sobald der Dialog steht,
+   * setzt Radix den Hintergrund auf `aria-hidden`, und ein Rollenselektor findet die Zeile
+   * nicht mehr.
+   */
+  const zeile = page.locator("[data-tabelle] > button").first();
+  await expect(zeile).toBeVisible({ timeout: 20_000 });
+  const vorher = await zeile.boundingBox();
+
+  await zeile.click();
+  const schalter = page.getByRole("switch", { name: /AXON Editor/ });
+  await expect(schalter).toBeVisible();
+  // Vom vorgefundenen Stand ausgehen und ihn am Ende wiederherstellen: die Pruefung teilt
+  // sich den Zugang mit den uebrigen und darf ihn nicht umgelegt hinterlassen.
+  const anfangs = await schalter.getAttribute("aria-checked");
+  const umgelegt = anfangs === "true" ? "false" : "true";
+
+  /*
+   * Waehrend des Umlegens **durchgehend** messen, nicht davor und danach.
+   *
+   * Ein Vergleich zweier Momentaufnahmen sieht den Sprung nicht: er dauert so lange wie das
+   * Nachladen, und danach steht alles wieder an seinem Platz. Gegengeprueft, indem das
+   * stille Nachladen versuchsweise wieder laut gestellt wurde: mit zwei Momentaufnahmen
+   * blieb die Pruefung gruen, mit diesem Mitschnitt wird sie rot.
+   */
+  await page.evaluate(() => {
+    const w = window as unknown as { __proben: number[]; __id: number };
+    const flaeche = document.querySelector("[data-tabelle]");
+    w.__proben = [];
+    const takt = () => {
+      // Die erste Zeile, nicht das erste Kind: der Ladehinweis schiebt sich als Absatz
+      // **davor** und waere selbst wieder das erste Kind an derselben Stelle.
+      const erste = flaeche?.querySelector("button");
+      if (erste) w.__proben.push(Math.round(erste.getBoundingClientRect().y));
+      w.__id = requestAnimationFrame(takt);
+    };
+    takt();
+  });
+
+  await schalter.click();
+  await expect(schalter).toHaveAttribute("aria-checked", umgelegt, { timeout: 15_000 });
+  await schalter.click();
+  await expect(schalter).toHaveAttribute("aria-checked", anfangs ?? "true", { timeout: 15_000 });
+
+  const stellen = await page.evaluate(() => {
+    const w = window as unknown as { __proben: number[]; __id: number };
+    cancelAnimationFrame(w.__id);
+    return [...new Set(w.__proben)];
+  });
+  expect(stellen).toEqual([Math.round(vorher?.y ?? -1)]);
+});

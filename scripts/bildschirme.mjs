@@ -49,5 +49,15 @@ await p.waitForTimeout(500);
 await p.getByRole('button', { name: /Einladen/ }).click();
 await p.waitForTimeout(900);
 await shot('09-einladen');
+await p.keyboard.press('Escape');
+await p.waitForTimeout(500);
+
+// Katalog und Assistent, Bildschirme 10 und 11
+await p.goto('http://localhost:5274/verwaltung/katalog');
+await p.waitForTimeout(2500);
+await shot('10-katalog');
+await p.goto('http://localhost:5274/verwaltung/katalog/aufnehmen');
+await p.waitForTimeout(1500);
+await shot('11-aufnehmen');
 await b.close();
 console.log('fertig');

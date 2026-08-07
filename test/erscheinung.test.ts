@@ -99,7 +99,7 @@ describe("Die Schrift", () => {
      * ein Wert ohne Groessenbezug und damit irgendwo falsch. Ausgenommen sind die drei
      * Stufen, die nur an einer Stelle vorkommen und dort dokumentiert sind.
      */
-    const erlaubt = new Set(["tracking-[0.14em]", "tracking-[0.16em]", "tracking-[-0.005em]", "tracking-[0.02em]"]);
+    const erlaubt = new Set(["tracking-[0.14em]", "tracking-[0.16em]"]);
     const treffer = bauteile.flatMap(({ pfad, inhalt }) =>
       [...inhalt.matchAll(/tracking-\[[^\]]+\]/g)]
         .filter((m) => !erlaubt.has(m[0]))

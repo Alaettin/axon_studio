@@ -225,8 +225,19 @@
   --axon-kante-schein-klein: 0 0 8px 2px rgb(0 253 253 / 0.4);
 
   /*
-   * Die Schleier ueber dem Keyvisual. Ihre Staerke sagt, wie sehr der Inhalt im
-   * Vordergrund steht, und sie ist je Bildschirm eine andere. Werte aus der Vorlage.
+   * Die Schleier ueber dem Keyvisual.
+   *
+   * Die Vorlage staffelte sie von 0,2 auf der Anmeldung bis 0,74 in Tabellen und
+   * Formularen. Der Unterschied hatte einen Grund, solange das Keyvisual der Anmeldung
+   * vorbehalten war; seit es auf allen fuenfzehn Bildschirmen liegt, hat er keinen mehr,
+   * und die App wirkte gegenueber ihrer eigenen Anmeldung dumpf.
+   *
+   * Seit dem 07.08.2026 tragen deshalb **alle Seiten die Deckkraft der Anmeldung**
+   * (Nutzerentscheidung). Was bleibt, ist die Geometrie: die Anmeldung setzt ihren
+   * Mittelpunkt auf 40 Prozent, weil die Karte rechts steht, eine zentrierte Seite nicht.
+   *
+   * Was ebenfalls bleibt, ist der Schritt zum Dialog. `dicht` daempft weiter, nur sanfter
+   * (0,7 auf 0,45): sonst haette "Dialog offen" keine eigene Aussage mehr.
    */
   --axon-schleier-buehne: radial-gradient(
     120% 100% at 40% 50%,
@@ -235,17 +246,17 @@
   );
   --axon-schleier-sammlung: radial-gradient(
     100% 80% at 50% 30%,
-    rgb(8 34 84 / 0.3) 0%,
-    rgb(6 26 64 / 0.74) 100%
+    rgb(8 34 84 / 0) 0%,
+    rgb(6 26 64 / 0.2) 100%
   );
   --axon-schleier-mitte: radial-gradient(
     80% 70% at 50% 50%,
-    rgb(8 32 78 / 0.22) 0%,
-    rgb(6 26 64 / 0.7) 100%
+    rgb(8 32 78 / 0) 0%,
+    rgb(6 26 64 / 0.2) 100%
   );
   /* Flaechig statt Verlauf: was darueber liegt, ist modal und soll den Grund
      zuruecknehmen, nicht ihn modellieren. */
-  --axon-schleier-dicht: rgb(5 22 56 / 0.7);
+  --axon-schleier-dicht: rgb(5 22 56 / 0.45);
 
   /* Die Lichtkante links an der Anmeldeleiste: cyan oben, gruen unten, auslaufend. */
   --axon-kante: linear-gradient(
@@ -367,8 +378,15 @@
   --text-lg--line-height: 1.375rem;
   --text-xl: 1.1875rem; /* 19px, Palettenfeld */
   --text-xl--line-height: 1.5rem;
-  --text-2xl: 1.375rem; /* 22px, Wortmarke im Kopf, Kacheltitel */
+  --text-2xl: 1.375rem; /* 22px, Kacheltitel */
   --text-2xl--line-height: 1.625rem;
+  /*
+   * Die Wortmarke im Kopf. Sie stand auf 22px und trug die Seite nicht: der Kopf ist der
+   * eine Ort, an dem die Marke steht, und er war der leiseste. Um die Haelfte groesser
+   * (Nutzerentscheidung 07.08.2026).
+   */
+  --text-marke: 2.0625rem; /* 33px */
+  --text-marke--line-height: 2.4375rem;
   --text-3xl: 2.125rem; /* 34px, Seitentitel */
   --text-3xl--line-height: 2.25rem;
   --text-4xl: 2.375rem; /* 38px, Wortmarke der Anmeldung */
@@ -384,6 +402,9 @@
   --tracking-titel: -0.025em; /* 34px */
   --tracking-marke: -0.015em; /* 38px, "AXON" */
   --tracking-marke-leicht: 0.01em; /* 38px, "Studio" */
+  /* 33px liegt zwischen den beiden Stufen, also liegt auch die Laufweite dazwischen. */
+  --tracking-marke-kopf: -0.012em; /* 33px, "AXON" */
+  --tracking-marke-kopf-leicht: 0.015em; /* 33px, "Studio" */
   --tracking-etikett: 0.24em; /* 9px Mono */
   --tracking-aktion: 0.18em; /* Knopfbeschriftung */
   --tracking-brotkrume: 0.2em; /* 10px Mono */
@@ -425,8 +446,11 @@
     color-scheme: dark;
 
     /* Feste Masse des Rahmens, damit kein Layoutwert im TSX steht. Aus der Vorlage. */
-    --h-kopfzeile: 34px;
-    --w-kopflogo: 108px;
+    /* `--h-kopfzeile` stand hier und wurde nirgends gelesen: die Kopfzeile richtet sich
+       nach ihrem Inhalt. Ein toter Wert, der nach dem Vergroessern der Marke auch noch
+       falsch gewesen waere. */
+    --w-kopflogo: 162px;
+    --gap-kopfmarke: 20px;
     --w-anmeldelogo: 168px;
 
     /* Anmeldung, Vorlage 01 */

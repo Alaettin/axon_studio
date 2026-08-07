@@ -26,8 +26,18 @@ export function NutzerRoute() {
   const [fehler, setzeFehler] = useState<string | null>(null);
   const [suche, setzeSuche] = useState("");
 
-  const neuLaden = useCallback(async () => {
-    setzeLaedt(true);
+  /**
+   * `still` laesst den Ladehinweis weg.
+   *
+   * Ein Ladehinweis ist beim **ersten** Mal richtig und beim Nachladen falsch: die Daten
+   * stehen dann ja schon da. Aus den Dialogen heraus lief das Nachladen bisher laut, und
+   * die Zeile "Nutzer werden geladen" schob die ganze Tabelle bei jeder Umschaltung um
+   * ihre eigene Hoehe nach unten und wieder zurueck. Hinter einem Dialog, der stillstehen
+   * soll, sieht das aus, als flackere der halbe Bildschirm; die Glasflaeche darueber muss
+   * ihre Streuung dabei zweimal neu rechnen und macht es noch sichtbarer.
+   */
+  const neuLaden = useCallback(async (still = false) => {
+    if (!still) setzeLaedt(true);
     setzeFehler(null);
     try {
       const { nutzer: geladen } = await ladeNutzer();
@@ -35,7 +45,7 @@ export function NutzerRoute() {
     } catch (ursache) {
       setzeFehler(ursache instanceof Error ? ursache.message : "Unbekannter Fehler.");
     }
-    setzeLaedt(false);
+    if (!still) setzeLaedt(false);
   }, []);
 
   useEffect(() => {
@@ -107,7 +117,13 @@ export function NutzerRoute() {
               <span>Status</span>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto">
+            {/*
+              `data-tabelle` ist ein Griff fuer die Pruefung, die misst, dass hier nichts
+              springt, waehrend darueber ein Dialog steht. Ueber die Rolle geht das nicht:
+              Radix setzt den Hintergrund auf `aria-hidden`, und damit findet ihn kein
+              Rollenselektor mehr.
+            */}
+            <div data-tabelle className="min-h-0 flex-1 overflow-y-auto">
               {laedt && (
                 <p className="px-6 py-5 font-mono text-2xs tracking-etikett uppercase text-axon-schrift-still">
                   Nutzer werden geladen
@@ -182,11 +198,14 @@ export function NutzerRoute() {
         <NutzerDetail
           nutzer={gewaehlterNutzer}
           schliesse={() => setzeGewaehlt(null)}
-          neuLaden={neuLaden}
+          neuLaden={() => neuLaden(true)}
         />
       )}
       {einladenOffen && (
-        <EinladenDialog schliesse={() => setzeEinladenOffen(false)} neuLaden={neuLaden} />
+        <EinladenDialog
+          schliesse={() => setzeEinladenOffen(false)}
+          neuLaden={() => neuLaden(true)}
+        />
       )}
       <Palette offen={paletteOffen} setzeOffen={setzePaletteOffen} />
     </Flaeche>
