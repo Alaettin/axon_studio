@@ -40,9 +40,17 @@ const SCOPE_TEXT: Record<string, { titel: string; detail: string }> = {
   },
 };
 
+/**
+ * Was `getAuthorizationDetails` wirklich liefert, nachgemessen am 07.08.2026:
+ *
+ *   { authorization_id, redirect_uri, client: { id }, user: { id, email }, scope }
+ *
+ * `client` traegt **nur eine Kennung, keinen Namen**. Wer fragt, muss der Hub also selbst
+ * nachschlagen, sonst steht auf der Zustimmungsseite "Ein Programm".
+ */
 interface Details {
   readonly authorization_id: string;
-  readonly client: { readonly name?: string };
+  readonly client: { readonly id: string };
   readonly redirect_uri?: string;
   readonly scope?: string;
 }
@@ -54,6 +62,12 @@ export function ZustimmungRoute() {
   const kennung = parameter.get("authorization_id");
 
   const [details, setzeDetails] = useState<Details | null>(null);
+  /**
+   * Das Programm hinter der Client-Kennung, aus `hub_apps` nachgeschlagen.
+   * `null` heisst: nachgesehen und **nicht gefunden**. Das ist etwas anderes als "noch
+   * nicht nachgesehen" und wird auch anders angezeigt.
+   */
+  const [programm, setzeProgramm] = useState<{ name: string; akzent: string } | null>(null);
   const [laedt, setzeLaedt] = useState(true);
   const [fehler, setzeFehler] = useState<string | null>(null);
   const [entscheidet, setzeEntscheidet] = useState(false);
@@ -80,7 +94,16 @@ export function ZustimmungRoute() {
         window.location.assign(data.redirect_url);
         return;
       } else if (data) {
-        setzeDetails(data as unknown as Details);
+        const einzelheiten = data as unknown as Details;
+        setzeDetails(einzelheiten);
+
+        // Wer fragt? Steht nicht in der Antwort, sondern im eigenen Katalog.
+        const { data: treffer } = await supabase
+          .from("hub_apps")
+          .select("name, akzent")
+          .eq("oauth_client_id", einzelheiten.client.id)
+          .maybeSingle();
+        setzeProgramm(treffer ? (treffer as { name: string; akzent: string }) : null);
       }
       setzeLaedt(false);
     })();
@@ -124,15 +147,38 @@ export function ZustimmungRoute() {
           ) : (
             <>
               <p className="font-display text-2xl font-light text-axon-schrift">
-                {details?.client.name ?? "Ein Programm"}
+                {programm ? (
+                  <>
+                    <span
+                      aria-hidden
+                      style={{ backgroundColor: programm.akzent }}
+                      className="mr-3 inline-block size-[9px] rounded-full align-middle"
+                    />
+                    {programm.name}
+                  </>
+                ) : (
+                  "Ein unbekanntes Programm"
+                )}
                 <span className="font-sans text-base text-axon-schrift-leise">
                   {" "}
                   möchte auf dein Konto zugreifen.
                 </span>
               </p>
+              {/*
+                Der Rueckweg ist der eigentliche Vertrauensanker: der Name steht in unserem
+                Katalog, die Adresse dagegen hat Supabase gegen die registrierte
+                Redirect-URI geprueft. Deshalb steht sie hier immer, auch wenn der Name
+                bekannt ist.
+              */}
               {details?.redirect_uri && (
                 <p className="truncate font-mono text-xs text-axon-schrift-fein">
                   {new URL(details.redirect_uri).host}
+                </p>
+              )}
+              {details && !programm && (
+                <p className="font-sans text-base text-axon-fehler">
+                  Dieses Programm steht nicht im Katalog von AXON Studio. Stimme nur zu,
+                  wenn du weißt, wovon die Adresse oben kommt.
                 </p>
               )}
             </>

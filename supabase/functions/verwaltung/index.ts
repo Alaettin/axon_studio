@@ -77,6 +77,10 @@ Deno.serve(async (anfrage) => {
       return await einladen(dienst, auftrag, nutzer.user.id);
     case "status":
       return await status(dienst, auftrag);
+    case "clients":
+      return await clients(dienst);
+    case "client-anlegen":
+      return await clientAnlegen(dienst, auftrag);
     default:
       return antwort({ fehler: `Unbekannte Handlung: ${String(auftrag.handlung)}` }, 400);
   }
@@ -207,4 +211,61 @@ async function status(dienst: Dienst, auftrag: Record<string, unknown>): Promise
   if (error) return antwort({ fehler: error.message }, 500);
 
   return antwort({ kennung, gesperrt });
+}
+
+/**
+ * Die registrierten OAuth-Clients. Ein Unterprogramm wird erst dadurch zu einem, das den
+ * Hub als Identitaetsanbieter benutzen kann.
+ *
+ * Das Geheimnis wird beim Anlegen **einmal** zurueckgegeben und danach nie wieder. Diese
+ * Auflistung zeigt es deshalb nicht; wer es verliert, legt ein neues an.
+ */
+async function clients(dienst: Dienst): Promise<Response> {
+  const { data, error } = await dienst.auth.admin.oauth.listClients();
+  if (error) return antwort({ fehler: error.message }, 500);
+  return antwort({ clients: data });
+}
+
+async function clientAnlegen(
+  dienst: Dienst,
+  auftrag: Record<string, unknown>,
+): Promise<Response> {
+  const name = String(auftrag["name"] ?? "").trim();
+  const uris = Array.isArray(auftrag["redirect_uris"]) ? (auftrag["redirect_uris"] as string[]) : [];
+
+  if (!name) return antwort({ fehler: "Der Client braucht einen Namen." }, 400);
+  if (uris.length === 0) return antwort({ fehler: "Mindestens eine Redirect-URI." }, 400);
+
+  /*
+   * Redirect-URIs kennen keine Platzhalter, anders als die allgemeinen Redirect-URLs des
+   * Projekts. Sie muessen vollstaendig dastehen, mit Schema, Host, Pfad und Port. Ein
+   * Tippfehler faellt erst beim ersten echten Anmeldeversuch auf, deshalb hier eine
+   * Vorpruefung statt einer Ueberraschung spaeter.
+   */
+  for (const u of uris) {
+    try {
+      const geprueft = new URL(u);
+      if (geprueft.search || geprueft.hash) {
+        return antwort({ fehler: `Redirect-URI mit Abfrage oder Anker: ${u}` }, 400);
+      }
+    } catch {
+      return antwort({ fehler: `Keine gueltige Redirect-URI: ${u}` }, 400);
+    }
+  }
+
+  /*
+   * **Vertraulich**, nicht oeffentlich. Der Codetausch laeuft im Server des
+   * Unterprogramms, das Token verlaesst ihn nie, und der Browser behaelt sein
+   * httpOnly-Sitzungscookie. Ein oeffentlicher Client legte das Token in den Browser und
+   * waere gegenueber dem heutigen Stand ein Rueckschritt.
+   */
+  const { data, error } = await dienst.auth.admin.oauth.createClient({
+    name,
+    redirect_uris: uris,
+    client_type: "confidential",
+    token_endpoint_auth_method: "client_secret_basic",
+  });
+  if (error) return antwort({ fehler: error.message }, 400);
+
+  return antwort({ client: data });
 }

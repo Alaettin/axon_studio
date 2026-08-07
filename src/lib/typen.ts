@@ -31,6 +31,15 @@ export interface Programm {
   readonly url: string | null;
   readonly sortierung: number;
   readonly aktiv: boolean;
+  /**
+   * Die Kennung des OAuth-Clients, unter der sich dieses Programm beim Hub anmeldet.
+   * `null`, solange es kein Client ist.
+   *
+   * Sie steht hier, weil `getAuthorizationDetails` zum Client **nur eine Kennung und
+   * keinen Namen** liefert: ohne diese Spalte könnte die Zustimmungsseite nicht sagen,
+   * wer da fragt.
+   */
+  readonly oauth_client_id: string | null;
 }
 
 /** `public.hub_invitations`. */

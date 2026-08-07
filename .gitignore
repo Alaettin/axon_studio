@@ -19,3 +19,7 @@ supabase/.branches/
 
 # Maschinenlokale Symlinks auf .agents/skills, von `npx skills add` angelegt
 .claude/skills/
+
+# Die OAuth-Client-Zugangsdaten des Editors. Das Geheimnis gibt es nur einmal.
+.oauth-client.json
+.m4-code.json
