@@ -1,0 +1,21 @@
+node_modules/
+dist/
+.env
+.env.local
+*.local
+
+# Schluessel gehoeren nie ins Repo. Die beiden Muster stehen hier, weil im AAS Editor
+# genau das einmal fast passiert waere.
+*key*.txt
+*.pem
+
+.vite/
+coverage/
+test-results/
+playwright-report/
+.DS_Store
+supabase/.temp/
+supabase/.branches/
+
+# Maschinenlokale Symlinks auf .agents/skills, von `npx skills add` angelegt
+.claude/skills/

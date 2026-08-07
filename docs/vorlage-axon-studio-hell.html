@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<template id="__bundler_thumbnail">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="#071C3E"/><circle cx="140" cy="150" r="90" fill="#1858B0" opacity="0.55"/><circle cx="270" cy="120" r="70" fill="#00A386" opacity="0.45"/><path d="M120 150 H300" stroke="#00FDFD" stroke-width="6" stroke-linecap="round"/><text x="200" y="168" font-family="Helvetica,Arial,sans-serif" font-size="54" font-weight="300" fill="#FFFFFF" text-anchor="middle">AX</text></svg>
+</template>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin: 0; padding: 0; background: #0A0F1C; }
+  * { box-sizing: border-box; }
+  a { color: rgba(255,255,255,0.62); text-decoration: none; }
+  a:hover { color: #00FDFD; }
+  input, button { font-family: inherit; }
+  input::placeholder { color: rgba(255,255,255,0.32); }
+  .dv-turn { padding: 44px 48px 36px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+  .dv-thd { display: flex; align-items: baseline; gap: 10px; margin: 0 0 8px; }
+  .dv-tid { font: 600 10px ui-monospace, Menlo, monospace; padding: 3px 7px; background: #00A386; color: #fff; border-radius: 4px; text-decoration: none; }
+  .dv-tname { font: 600 13px/1.2 'Helvetica Neue', Helvetica, sans-serif; color: rgba(255,255,255,0.9); }
+  .dv-sub { margin: 0 0 22px; font: 400 12px/1.6 'Helvetica Neue', Helvetica, sans-serif; color: rgba(255,255,255,0.45); max-width: 78ch; }
+  .dv-rowlabel { margin: 34px 0 18px; font: 500 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.38); }
+  .dv-opts { display: flex; flex-wrap: wrap; gap: 30px; align-items: flex-start; }
+  .dv-opt { flex: none; display: flex; flex-direction: column; gap: 9px; scroll-margin-top: 16px; }
+  .dv-oid { font: 600 10.5px ui-monospace, Menlo, monospace; padding: 3px 7px; background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.92); border-radius: 5px; text-decoration: none; }
+  .dv-olabel { display: flex; align-items: baseline; gap: 8px; font: 400 11px/1.3 'Helvetica Neue', Helvetica, sans-serif; color: rgba(255,255,255,0.5); }
+  .dv-card { position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #071C3E; box-shadow: 0 18px 50px rgba(0,0,0,0.45); }
+  .dv-opt:target .dv-oid { background: #00FDFD; color: #04203A; }
+  .dv-next { margin: 26px 0 0; font: 12px/1.6 'Helvetica Neue', Helvetica, sans-serif; color: rgba(255,255,255,0.42); }
+  @media (prefers-reduced-transparency: reduce) { .glas { backdrop-filter: none !important; } }
+  @keyframes axonEdge { 0% { top: -8%; opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { top: 104%; opacity: 0; } }
+  @keyframes axonBreathe { 0%, 100% { opacity: 0.35; transform: scale(1); } 50% { opacity: 1; transform: scale(1.35); } }
+  @media (prefers-reduced-motion: reduce) { .kante { animation: none !important; opacity: 0.9 !important; top: 38% !important; } .kante + .kante { top: 64% !important; } }
+</style>
+</helmet>
+<section class="dv-turn" id="alle">
+<div class="dv-thd"><a class="dv-tid" href="#alle">HELL</a><span class="dv-tname">AXON Studio — alle Bildschirme, hell</span></div>
+<p class="dv-sub">Dieselben fünfzehn Bildschirme auf Kernblau. Glas ist dichter, Konturen und stille Schrift kräftiger — sonst bleicht auf dem hellen Grund aus, was auf dem dunklen noch trug.</p>
+<div class="dv-rowlabel">Für alle</div>
+<div class="dv-opts" style="flex-direction: column;">
+  <div class="dv-opt" id="s01">
+    <div class="dv-olabel"><a class="dv-oid" href="#s01">01</a>Anmeldung</div>
+    <div class="dv-card" style="width: 1280px; height: 800px;">
+      <canvas ref="{{ bgRefB }}" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block;"></canvas>
+      <div style="position: absolute; inset: 0; background: radial-gradient(120% 100% at 40% 50%, rgba(8,30,72,0) 0%, rgba(6,24,60,0.2) 100%);"></div>
+
+      <div style="position: relative; z-index: 2; height: 100%; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+        <img src="assets/neoception-logo-white.png" alt="Neoception – Pepperl+Fuchs" style="position: absolute; left: 48px; top: 40px; width: 168px; height: auto; display: block;" />
+
+        <div ref="{{ cardRef }}" class="glas" style="position: absolute; right: 0; top: 0; bottom: 0; width: 38%; min-width: 420px; padding: 0 8% 0 6%; background: rgba(6,30,72,0.42); backdrop-filter: blur(10px); border-left: 1px solid rgba(255,255,255,0.2); display: flex; flex-direction: column; justify-content: center; gap: 34px;">
+          <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 1px; background: linear-gradient(to bottom, rgba(0,253,253,0) 0%, #00FDFD 28%, #00A386 72%, rgba(0,163,134,0) 100%);"></div>
+          <div class="kante" style="position: absolute; left: -2px; width: 5px; height: 5px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 0 12px 3px rgba(0,253,253,0.7); animation: axonEdge 7.5s cubic-bezier(0.45, 0, 0.55, 1) infinite;"></div>
+          <div class="kante" style="position: absolute; left: -1px; width: 3px; height: 3px; border-radius: 50%; background: rgba(0,253,253,0.8); box-shadow: 0 0 8px 2px rgba(0,253,253,0.4); animation: axonEdge 7.5s cubic-bezier(0.45, 0, 0.55, 1) infinite; animation-delay: -3.75s;"></div>
+
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: flex; align-items: baseline; gap: 12px; line-height: 1.05;">
+                <span style="font-size: 38px; font-weight: 400; letter-spacing: -0.015em; color: #FFFFFF;">AXON</span>
+                <span style="font-size: 38px; font-weight: 200; letter-spacing: 0.01em; color: rgba(255,255,255,0.6);">Studio</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 20px;">
+            <label style="display: flex; flex-direction: column; gap: 9px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.64);">E-Mail</span>
+              <input type="email" placeholder="name@unternehmen.de" style="height: 30px; padding: 0; border: none; border-bottom: 1px solid rgba(255,255,255,0.24); background: transparent; color: #FFFFFF; font-size: 15px; outline: none; transition: border-color 220ms ease;" style-focus="border-bottom-color: #00FDFD;" />
+            </label>
+            <label style="display: flex; flex-direction: column; gap: 9px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.64);">Passwort</span>
+              <input type="password" placeholder="••••••••••" style="height: 30px; padding: 0; border: none; border-bottom: 1px solid rgba(255,255,255,0.24); background: transparent; color: #FFFFFF; font-size: 15px; outline: none; transition: border-color 220ms ease;" style-focus="border-bottom-color: #00FDFD;" />
+            </label>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="height: 52px; padding: 0 20px; border: 1px solid #00A386; border-radius: 2px; background: transparent; color: #FFFFFF; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: background 200ms ease, border-color 200ms ease;" style-hover="background: #00A386; border-color: #1EB095;">
+              <span>Anmelden</span>
+              <span style="font-size: 15px;">&#8594;</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: rgba(255,255,255,0.68);">
+              <a href="#3i">Passwort vergessen</a>
+              <span>AXON Studio&#8202;//&#8202;1.0.0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dv-opt" id="s02">
+    <div class="dv-olabel"><a class="dv-oid" href="#s02">02</a>Bühne — die freigeschalteten Programme</div>
+    <div class="dv-card" style="width: 1280px; height: 800px;">
+      <canvas ref="{{ bgRefB }}" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block;"></canvas>
+      <div style="position: absolute; inset: 0; background: radial-gradient(100% 80% at 50% 58%, rgba(8,32,78,0.18) 0%, rgba(6,26,64,0.62) 100%);"></div>
+      <div style="position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; align-items: center; padding: 30px 56px 40px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+        <div style="position: relative; display: flex; align-items: center; justify-content: center; gap: 16px; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 13px;">
+          <img src="assets/neoception-logo-white.png" alt="Neoception – Pepperl+Fuchs" style="width: 108px; height: auto; display: block; opacity: 0.92;" />
+          <div style="display: flex; align-items: baseline; gap: 8px;">
+            <span style="font-size: 22px; font-weight: 400; letter-spacing: -0.005em; color: #FFFFFF;">AXON</span>
+            <span style="font-size: 22px; font-weight: 200; letter-spacing: 0.02em; color: rgba(255,255,255,0.68);">Studio</span>
+          </div>
+        </div>
+          <span style="position: absolute; right: 48px; top: 50%; margin-top: -13px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 5px 9px; border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.64); cursor: pointer;" style-hover="border-color: rgba(255,255,255,0.68); color: #FFFFFF;">&#8984;K</span>
+          <span style="position: absolute; right: 0; top: 50%; margin-top: -17px; width: 34px; height: 34px; border-radius: 50%; background: rgba(0,163,134,0.3); border: 1px solid rgba(0,163,134,0.7); color: #FFFFFF; font-size: 11px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: border-color 180ms ease;" style-hover="border-color: #00FDFD;">AB</span>
+        </div>
+
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 56px; width: 100%;">
+          <div style="font-size: 56px; font-weight: 200; line-height: 1; letter-spacing: -0.038em; color: #FFFFFF; text-align: center;">Guten Morgen, Anna.</div>
+          <div style="display: flex; gap: 20px; align-items: stretch;">
+            <sc-for list="{{ appsFrei }}" as="a" hint-placeholder-count="3">
+              <div class="glas" style="position: relative; width: 236px; display: flex; flex-direction: column; gap: 14px; padding: 26px 24px 24px; background: rgba(6,28,66,0.66); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.22); cursor: pointer; transition: transform 200ms cubic-bezier(0.2,0.8,0.2,1), border-color 200ms ease, box-shadow 200ms ease;" style-hover="transform: translateY(-5px); border-color: rgba(0,253,253,0.5); box-shadow: 0 22px 54px rgba(2,10,28,0.66);">
+                <span style="position: absolute; left: -1px; right: -1px; top: -1px; height: 2px; background: {{ a.akzent }};"></span>
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.6);">{{ a.kuerzel }}</div>
+                <div style="font-size: 22px; font-weight: 300; line-height: 1.15; letter-spacing: -0.015em; color: #FFFFFF;">{{ a.name }}</div>
+                <div style="font-size: 13px; line-height: 1.55; color: rgba(255,255,255,0.58); text-wrap: pretty;">{{ a.kurz }}</div>
+                <div style="margin-top: auto; padding-top: 18px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.72);">Öffnen &#8594;</div>
+              </div>
+            </sc-for>
+            <sc-if value="{{ showLocked }}" hint-placeholder-val="{{ true }}">
+              <div style="width: 236px; display: flex; flex-direction: column; gap: 10px; padding: 26px 24px 24px; border: 1px dashed rgba(255,255,255,0.3); cursor: pointer;" style-hover="border-color: rgba(255,255,255,0.32);">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.5);">Gesperrt</div>
+                <div style="font-size: 22px; font-weight: 300; line-height: 1.15; color: rgba(255,255,255,0.68);">Drei weitere Programme</div>
+                <div style="font-size: 13px; line-height: 1.55; color: rgba(255,255,255,0.54);">Konformitätsprüfung, Sensor-Registry, Datenraum-Brücke.</div>
+                <div style="margin-top: auto; padding-top: 18px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.52);">Zugang anfragen</div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="dv-opt" id="s03">
+    <div class="dv-olabel"><a class="dv-oid" href="#s03">03</a>Palette — ⌘K, Programme und Verwaltung in einer Liste</div>
+    <div class="dv-card" style="width: 1280px; height: 800px;">
+      <canvas ref="{{ bgRefB }}" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block;"></canvas>
+      <div style="position: absolute; inset: 0; background: rgba(5,22,56,0.7);"></div>
+      <div style="position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; align-items: center; padding: 30px 56px 40px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+        <div style="display: flex; align-items: center; gap: 13px; opacity: 0.45;">
+          <img src="assets/neoception-logo-white.png" alt="Neoception – Pepperl+Fuchs" style="width: 108px; height: auto; display: block;" />
+          <div style="display: flex; align-items: baseline; gap: 8px;">
+            <span style="font-size: 22px; font-weight: 400; letter-spacing: -0.005em; color: #FFFFFF;">AXON</span>
+            <span style="font-size: 22px; font-weight: 200; letter-spacing: 0.02em; color: rgba(255,255,255,0.68);">Studio</span>
+          </div>
+        </div>
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
+          <div style="width: 720px; background: #071F45; border: 1px solid rgba(0,253,253,0.24); box-shadow: 0 34px 90px rgba(2,8,22,0.66); display: flex; flex-direction: column;">
+            <div style="display: flex; align-items: center; gap: 14px; padding: 20px 22px; border-bottom: 1px solid rgba(255,255,255,0.2);">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.68);">&#8984;K</span>
+              <span style="font-size: 19px; color: #FFFFFF;">kat</span>
+              <span style="width: 1px; height: 20px; background: #00FDFD;"></span>
+              <span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.5);">6 Treffer</span>
+            </div>
+            <div style="padding: 14px 0 8px;">
+              <div style="padding: 0 22px 8px; font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.5);">Programme</div>
+              <sc-for list="{{ palProg }}" as="p" hint-placeholder-count="2">
+                <div style="display: flex; align-items: center; gap: 14px; padding: 12px 22px; cursor: pointer;" style-hover="background: rgba(0,253,253,0.09);">
+                  <span style="width: 5px; height: 5px; border-radius: 50%; background: #00A386;"></span>
+                  <span style="font-size: 15px; color: #FFFFFF;">{{ p.name }}</span>
+                  <span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.54);">{{ p.hint }}</span>
+                </div>
+              </sc-for>
+              <div style="padding: 16px 22px 8px; display: flex; align-items: center; gap: 10px;">
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.5);">Verwaltung</span>
+                <span style="padding: 2px 6px; border: 1px solid rgba(0,253,253,0.35); font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: #00FDFD;">Nur Admin</span>
+              </div>
+              <sc-for list="{{ palCmd }}" as="c" hint-placeholder-count="4">
+                <div style="display: flex; align-items: center; gap: 14px; padding: 12px 22px; cursor: pointer;" style-hover="background: rgba(0,253,253,0.09);">
+                  <span style="width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.32);"></span>
+                  <span style="font-size: 15px; color: rgba(255,255,255,0.86);">{{ c.name }}</span>
+                  <span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.54);">{{ c.hint }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display: flex; align-items: center; gap: 18px; padding: 14px 22px; border-top: 1px solid rgba(255,255,255,0.2); font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: rgba(255,255,255,0.54);">
+              <span>&#8593;&#8595; Auswahl</span><span>&#8629; Öffnen</span><span>Esc Schließen</span>
+              <span style="margin-left: auto;">Programme und Verwaltung in derselben Liste</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dv-opt" id="s04">
+    <div class="dv-olabel"><a class="dv-oid" href="#s04">04</a>Zustimmung — ein Programm fragt Zugang an</div>
+    <div class="dv-card" style="width: 1280px; height: 800px;">
+      <canvas ref="{{ bgRefB }}" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block;"></canvas>
+      <div style="position: absolute; inset: 0; background: radial-gradient(80% 70% at 50% 50%, rgba(8,32,78,0.22) 0%, rgba(6,26,64,0.7) 100%);"></div>
+      <div style="position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; padding: 36px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="display: flex; align-items: center; gap: 13px;">
+          <img src="assets/neoception-logo-white.png" alt="Neoception – Pepperl+Fuchs" style="width: 108px; height: auto; display: block; opacity: 0.92;" />
+          <div style="display: flex; align-items: baseline; gap: 8px;">
+            <span style="font-size: 22px; font-weight: 400; letter-spacing: -0.005em; color: #FFFFFF;">AXON</span>
+            <span style="font-size: 22px; font-weight: 200; letter-spacing: 0.02em; color: rgba(255,255,255,0.68);">Studio</span>
+          </div>
+        </div>
+        </div>
+        <div class="glas" style="width: 480px; background: rgba(6,28,66,0.72); backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.13); box-shadow: 0 26px 70px rgba(2,8,22,0.55); display: flex; flex-direction: column;">
+          <div style="padding: 26px 26px 22px; display: flex; flex-direction: column; gap: 14px;">
+            <div style="display: flex; align-items: center; gap: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.64);">
+              <span style="width: 6px; height: 6px; border-radius: 50%; background: #00FDFD;"></span><span>Anfrage von einem Programm</span>
+            </div>
+            <div style="font-size: 22px; font-weight: 300; line-height: 1.3; letter-spacing: -0.015em; color: #FFFFFF; text-wrap: pretty;"><strong style="font-weight: 500;">AAS Editor</strong> möchte auf dein Konto zugreifen.</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.6);">aas-editor.neoception.app</div>
+          </div>
+          <div style="padding: 4px 26px 8px; display: flex; flex-direction: column;">
+            <sc-for list="{{ scopes }}" as="s" hint-placeholder-count="3">
+              <div style="display: flex; align-items: flex-start; gap: 12px; padding: 13px 0; border-top: 1px solid rgba(255,255,255,0.07);">
+                <span style="margin-top: 5px; width: 5px; height: 5px; border-radius: 50%; background: #00A386; flex: 0 0 auto;"></span>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                  <span style="font-size: 14px; color: #FFFFFF;">{{ s.titel }}</span>
+                  <span style="font-size: 12px; line-height: 1.5; color: rgba(255,255,255,0.64);">{{ s.detail }}</span>
+                </div>
+                <span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.5);">{{ s.scope }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="padding: 18px 26px 24px; display: flex; flex-direction: column; gap: 14px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="flex: 1; height: 46px; display: flex; align-items: center; justify-content: center; background: #00A386; color: #FFFFFF; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer;" style-hover="background: #1EB095;">Erlauben</span>
+              <span style="height: 46px; padding: 0 20px; display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.22); color: rgba(255,255,255,0.8); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer;" style-hover="border-color: #FFFFFF; color: #FFFFFF;">Ablehnen</span>
+            </div>
+            <div style="font-size: 12px; line-height: 1.6; color: rgba(255,255,255,0.6); text-wrap: pretty;">Du bist als anna.bergmann@neoception.com angemeldet. Die Freigabe lässt sich im Profil jederzeit zurücknehmen.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dv-opt" id="s05">
+    <div class="dv-olabel"><a class="dv-oid" href="#s05">05</a>Kontomenü — der Weg in Konto und Verwaltung</div>
+    <div class="dv-card" style="width: 1280px; height: 800px;">
+      <canvas ref="{{ bgRefB }}" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block;"></canvas>
+      <div style="position: absolute; inset: 0; background: radial-gradient(100% 80% at 50% 58%, rgba(8,32,78,0.18) 0%, rgba(6,26,64,0.62) 100%);"></div>
+      <div style="position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; align-items: center; padding: 30px 56px 40px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+        <div style="position: relative; display: flex; align-items: center; justify-content: center; gap: 16px; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 13px;">
+          <img src="assets/neoception-logo-white.png" alt="Neoception – Pepperl+Fuchs" style="width: 108px; height: auto; display: block; opacity: 0.92;" />
+          <div style="display: flex; align-items: baseline; gap: 8px;">
+            <span style="font-size: 22px; font-weight: 400; letter-spacing: -0.005em; color: #FFFFFF;">AXON</span>
+            <span style="font-size: 22px; font-weight: 200; letter-spacing: 0.02em; color: rgba(255,255,255,0.68);">Studio</span>
+          </div>
+        </div>
+          <span style="position: absolute; right: 48px; top: 50%; margin-top: -13px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 5px 9px; border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.64); cursor: pointer;">&#8984;K</span>
+          <span style="position: absolute; right: 0; top: 50%; margin-top: -17px; width: 34px; height: 34px; border-radius: 50%; background: rgba(0,163,134,0.3); border: 1px solid #00FDFD; color: #FFFFFF; font-size: 11px; display: flex; align-items: center; justify-content: center; cursor: pointer;">AB</span>
+          <div style="position: absolute; right: 0; top: 46px; width: 268px; transform-origin: top right; background: #071F45; border: 1px solid rgba(255,255,255,0.16); box-shadow: 0 26px 64px rgba(2,8,22,0.7); display: flex; flex-direction: column; padding: 6px 0; text-align: left;">
+            <div style="padding: 14px 18px 12px; display: flex; flex-direction: column; gap: 3px; border-bottom: 1px solid rgba(255,255,255,0.09);">
+              <span style="font-size: 14px; color: #FFFFFF;">Anna Bergmann</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: #00FDFD;">Administrator</span>
+            </div>
+            <div style="padding: 8px 0;">
+              <a href="#3f" style="padding: 10px 18px; font-size: 14px; color: rgba(255,255,255,0.86); cursor: pointer; display: flex; align-items: center;" style-hover="background: rgba(0,253,253,0.09); color: #FFFFFF;">Profil<span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.3);">3f</span></a>
+              <div style="padding: 10px 18px; font-size: 14px; color: rgba(255,255,255,0.86); cursor: pointer;" style-hover="background: rgba(0,253,253,0.09); color: #FFFFFF;">Meine Freischaltungen</div>
+            </div>
+            <div style="padding: 10px 18px 6px; display: flex; align-items: center; gap: 9px; border-top: 1px solid rgba(255,255,255,0.09);">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255,255,255,0.5);">Verwaltung</span>
+              <span style="padding: 2px 6px; border: 1px solid rgba(0,253,253,0.35); font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: #00FDFD;">Nur Admin</span>
+            </div>
+            <div style="padding: 4px 0 8px;">
+              <a href="#3b" style="padding: 10px 18px; font-size: 14px; color: rgba(255,255,255,0.86); cursor: pointer; display: flex; align-items: center;" style-hover="background: rgba(0,253,253,0.09); color: #FFFFFF;">Nutzer<span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.3);">3b</span></a>
+              <a href="#3c" style="padding: 10px 18px; font-size: 14px; color: rgba(255,255,255,0.86); cursor: pointer; display: flex; align-items: center;" style-hover="background: rgba(0,253,253,0.09); color: #FFFFFF;">Katalog<span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.3);">3c</span></a>
+              <a href="#3e" style="padding: 10px 18px; font-size: 14px; color: rgba(255,255,255,0.86); cursor: pointer; display: flex; align-items: center;" style-hover="background: rgba(0,253,253,0.09); color: #FFFFFF;">Einladungen<span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #F06A38;">1</span></a>
+            </div>
+            <div style="padding: 10px 18px; border-top: 1px solid rgba(255,255,255,0.09); font-size: 14px; color: rgba(255,255,255,0.7); cursor: pointer;" style-hover="color: #FFFFFF;">Abmelden</div>
+          </div>
+        </div>
+
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 56px; width: 100%;">
+          <div style="font-size: 56px; font-weight: 200; line-height: 1; letter-spacing: -0.038em; color: #FFFFFF; text-align: center;">Guten Morgen, Anna.</div>
+          <div style="display: flex; gap: 20px; align-items: stretch;">
+            <sc-for list="{{ appsFrei }}" as="a" hint-placeholder-count="3">
+              <div class="glas" style="position: relative; width: 236px; display: flex; flex-direction: column; gap: 14px; padding: 26px 24px 24px; background: rgba(6,28,66,0.66); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.22); cursor: pointer; transition: transform 200ms cubic-bezier(0.2,0.8,0.2,1), border-color 200ms ease;" style-hover="transform: translateY(-5px); border-color: rgba(0,253,253,0.5);">
+                <span style="position: absolute; left: -1px; right: -1px; top: -1px; height: 2px; background: {{ a.akzent }};"></span>
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.6);">{{ a.kuerzel }}</div>
+                <div style="font-size: 22px; font-weight: 300; line-height: 1.15; letter-spacing: -0.015em; color: #FFFFFF;">{{ a.name }}</div>
+                <div style="font-size: 13px; line-height: 1.55; color: rgba(255,255,255,0.58); text-wrap: pretty;">{{ a.kurz }}</div>
+                <div style="margin-top: auto; padding-top: 18px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.72);">Öffnen &#8594;</div>
+              </div>
+            </sc-for>
+            <sc-if value="{{ showLocked }}" hint-placeholder-val="{{ true }}">
+              <div style="width: 236px; display: flex; flex-direction: column; gap: 10px; padding: 26px 24px 24px; border: 1px dashed rgba(255,255,255,0.3); cursor: pointer;" style-hover="border-color: rgba(255,255,255,0.32);">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.5);">Gesperrt</div>
+                <div style="font-size: 22px; font-weight: 300; line-height: 1.15; color: rgba(255,255,255,0.68);">Drei weitere Programme</div>
+                <div style="font-size: 13px; line-height: 1.55; color: rgba(255,255,255,0.54);">Konformitätsprüfung, Sensor-Registry, Datenraum-Brücke.</div>
+                <div style="margin-top: auto; padding-top: 18px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.52);">Zugang anfragen</div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dv-opt" id="s06">
+    <div class="dv-olabel"><a class="dv-oid" href="#s06">06</a>Profil</div>
+    <div class="dv-card" style="width: 1280px; height: 800px;">
+      <canvas ref="{{ bgRefB }}" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block;"></canvas>
+      <div style="position: absolute; inset: 0; background: radial-gradient(100% 80% at 50% 30%, rgba(8,34,84,0.3) 0%, rgba(6,26,64,0.74) 100%);"></div>
+      <div style="position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; padding: 30px 56px 34px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+        <div style="position: relative; display: flex; align-items: center; justify-content: center; gap: 16px; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 13px;">
+          <img src="assets/neoception-logo-white.png" alt="Neoception – Pepperl+Fuchs" style="width: 108px; height: auto; display: block; opacity: 0.92;" />
+          <div style="display: flex; align-items: baseline; gap: 8px;">
+            <span style="font-size: 22px; font-weight: 400; letter-spacing: -0.005em; color: #FFFFFF;">AXON</span>
+            <span style="font-size: 22px; font-weight: 200; letter-spacing: 0.02em; color: rgba(255,255,255,0.68);">Studio</span>
+          </div>
+        </div>
+          <span style="position: absolute; right: 48px; top: 50%; margin-top: -13px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 5px 9px; border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.64); cursor: pointer;">&#8984;K</span>
+          <span style="position: absolute; right: 0; top: 50%; margin-top: -17px; width: 34px; height: 34px; border-radius: 50%; background: rgba(0,163,134,0.3); border: 1px solid #00FDFD; color: #FFFFFF; font-size: 11px; display: flex; align-items: center; justify-content: center; cursor: pointer;">AB</span>
+        </div>
+
+        <div style="flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; padding-top: 34px;">
+          <div style="width: 1000px; max-width: 100%; display: flex; flex-direction: column; gap: 24px;">
+            <div style="display: flex; flex-direction: column; gap: 9px;">
+              <div style="display: flex; align-items: center; gap: 9px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.6);">
+                <a href="#3a" style="color: rgba(255,255,255,0.68);">&#8592; Studio</a><span style="color: rgba(255,255,255,0.22);">/</span><span>Konto</span>
+              </div>
+              <div style="font-size: 34px; font-weight: 200; letter-spacing: -0.025em; color: #FFFFFF;">Profil</div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 18px;">
+              <span style="width: 60px; height: 60px; border-radius: 50%; background: rgba(0,163,134,0.24); border: 1px solid rgba(0,163,134,0.6); color: #FFFFFF; font-size: 18px; display: flex; align-items: center; justify-content: center;">AB</span>
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <span style="font-size: 21px; font-weight: 300; color: #FFFFFF;">Anna Bergmann</span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #00FDFD;">Administrator</span>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 22px; align-items: flex-start;">
+            <div class="glas" style="flex: 1; min-width: 0; display: flex; flex-direction: column; background: rgba(6,28,66,0.64); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.2);">
+              <div style="padding: 17px 22px; border-bottom: 1px solid rgba(255,255,255,0.14); font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.64);">Angaben</div>
+              <div style="padding: 22px; display: flex; flex-direction: column; gap: 20px;">
+                <label style="display: flex; flex-direction: column; gap: 9px;">
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.64);">Name</span>
+                  <input value="Anna Bergmann" style="height: 32px; padding: 0; border: none; border-bottom: 1px solid rgba(255,255,255,0.24); background: transparent; color: #FFFFFF; font-size: 15px; outline: none;" style-focus="border-bottom-color: #00FDFD;" />
+                </label>
+                <label style="display: flex; flex-direction: column; gap: 9px;">
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.64);">E-Mail</span>
+                  <input value="anna.bergmann@neoception.com" style="height: 32px; padding: 0; border: none; border-bottom: 1px solid rgba(255,255,255,0.24); background: transparent; color: #FFFFFF; font-size: 15px; outline: none;" style-focus="border-bottom-color: #00FDFD;" />
+                </label>
+                <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 4px;">
+                  <span style="font-size: 13px; color: rgba(255,255,255,0.6);">Die E-Mail ist auch die Kennung für die Anmeldung.</span>
+                  <span style="height: 38px; padding: 0 18px; display: flex; align-items: center; background: #00A386; color: #FFFFFF; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer;" style-hover="background: #1EB095;">Speichern</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="width: 330px; flex: 0 0 330px; display: flex; flex-direction: column; gap: 18px;">
+            <div class="glas" style="display: flex; flex-direction: column; background: rgba(6,28,66,0.64); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.2);">
+              <div style="padding: 17px 22px; border-bottom: 1px solid rgba(255,255,255,0.14); font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.64);">Meine Freischaltungen</div>
+              <div style="padding: 6px 22px 12px;">
+                <sc-for list="{{ meineApps }}" as="m" hint-placeholder-count="3">
+                  <div style="display: flex; align-items: center; gap: 12px; padding: 13px 0; border-bottom: 1px solid rgba(255,255,255,0.12);">
+                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #00A386;"></span>
+                    <span style="font-size: 14px; color: #FFFFFF;">{{ m.name }}</span>
+                    <span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.6);">seit {{ m.seit }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 10px;">
+              <span style="height: 42px; padding: 0 18px; display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.24); color: #FFFFFF; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer;" style-hover="border-color: #00FDFD; color: #00FDFD;">Passwort ändern</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.68);">Zuletzt geändert 12.07.2026</span>
+            </div>
+            </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="dv-rowlabel">Verwaltung — nur für Administratoren</div>
+<div class="dv-opts" style="flex-direction: column;">
+  <div class="dv-opt" id="s07">
+    <div class="dv-olabel"><a class="dv-oid" href="#s07">07</a>Nutzer</div>
+    <div class="dv-card" style="width: 1280px; height: 800px;">
+      <canvas ref="{{ bgRefB }}" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block;"></canvas>
+      <div style="position: absolute; inset: 0; background: radial-gradient(100% 80% at 50% 30%, rgba(8,34,84,0.3) 0%, rgba(6,26,64,0.74) 100%);"></div>
+      <div style="position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; padding: 30px 56px 34px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+        <div style="position: relative; display: flex; align-items: center; justify-content: center; gap: 16px; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 13px;">
+          <img src="assets/neoception-logo-white.png" alt="Neoception – Pepperl+Fuchs" style="width: 108px; height: auto; display: block; opacity: 0.92;" />
+          <div style="display: flex; align-items: baseline; gap: 8px;">
+            <span style="font-size: 22px; font-weight: 400; letter-spacing: -0.005em; color: #FFFFFF;">AXON</span>
+            <span style="font-size: 22px; font-weight: 200; letter-spacing: 0.02em; color: rgba(255,255,255,0.68);">Studio</span>
+          </div>
+        </div>
+          <span style="position: absolute; right: 48px; top: 50%; margin-top: -13px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 5px 9px; border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.64); cursor: pointer;">&#8984;K</span>
+          <span style="position: absolute; right: 0; top: 50%; margin-top: -17px; width: 34px; height: 34px; border-radius: 50%; background: rgba(0,163,134,0.3); border: 1px solid rgba(0,163,134,0.7); color: #FFFFFF; font-size: 11px; display: flex; align-items: center; justify-content: center; cursor: pointer;">AB</span>
+        </div>
+
+        <div style="flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; padding-top: 34px;">
+          <div style="width: 1040px; max-width: 100%; display: flex; flex-direction: column; gap: 22px; min-height: 0;">
+            <div style="display: flex; align-items: flex-end; gap: 20px;">
+              <div style="display: flex; flex-direction: column; gap: 9px;">
+                <div style="display: flex; align-items: center; gap: 9px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.6);">
+                  <a href="#3a" style="color: rgba(255,255,255,0.68);">&#8592; Studio</a><span style="color: rgba(255,255,255,0.22);">/</span><span>Verwaltung</span>
+                </div>
+                <div style="font-size: 34px; font-weight: 200; letter-spacing: -0.025em; color: #FFFFFF;">Nutzer</div>
+              </div>
+              <div class="glas" style="margin-left: auto; display: flex; align-items: center; height: 40px; padding: 0 14px; background: rgba(6,28,66,0.66); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.16);">
+                <input placeholder="Nutzer suchen" style="width: 190px; height: 100%; padding: 0; background: transparent; border: none; color: #FFFFFF; font-size: 14px; outline: none;" />
+              </div>
+              <div style="height: 40px; padding: 0 20px; display: flex; align-items: center; gap: 10px; background: #00A386; color: #FFFFFF; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer;" style-hover="background: #1EB095;">Einladen <span style="font-size: 15px;">+</span></div>
+            </div>
+
+            <div class="glas" style="flex: 1; min-height: 0; display: flex; flex-direction: column; background: rgba(6,28,66,0.64); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,0.2);">
+              <div style="display: grid; grid-template-columns: 2.2fr 2fr 1fr 1.1fr 1.3fr 1fr; gap: 12px; padding: 15px 24px; font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.68); border-bottom: 1px solid rgba(255,255,255,0.14);">
+                <span>Nutzer</span><span>E-Mail</span><span>Rolle</span><span>Programme</span><span>Letzte Anmeldung</span><span>Status</span>
+              </div>
+              <div style="flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none;">
+                <sc-for list="{{ users }}" as="u" hint-placeholder-count="5">
+                  <div style="display: grid; grid-template-columns: 2.2fr 2fr 1fr 1.1fr 1.3fr 1fr; gap: 12px; align-items: center; padding: 15px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); cursor: pointer;" style-hover="background: rgba(255,255,255,0.1);">
+                    <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+                      <span style="width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.8); font-size: 10px; display: flex; align-items: center; justify-content: center; flex: 0 0 auto;">{{ u.initialen }}</span>
+                      <span style="font-size: 14px; color: #FFFFFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ u.name }}</span>
+                    </div>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.68); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ u.mail }}</span>
+                    <span style="font-size: 13px; color: rgba(255,255,255,0.75);">{{ u.rolle }}</span>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: rgba(255,255,255,0.7);">{{ u.apps }}</span>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: rgba(255,255,255,0.64);">{{ u.zuletzt }}</span>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: {{ u.dot }};">{{ u.status }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dv-opt" id="s08">
+    <div class="dv-olabel"><a class="dv-oid" href="#s08">08</a>Nutzer-Detail — Rolle und Freischaltungen</div>
+    <div class="dv-card" style="width: 1280px; height: 800px;">
+      <canvas ref="{{ bgRefB }}" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block;"></canvas>
+      <div style="position: absolute; inset: 0; background: rgba(5,22,56,0.7);"></div>
+      <div style="position: relative; z-index: 2; height: 100%; display: flex; align-items: center; justify-content: center; padding: 40px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+        <div style="width: 620px; background: #071F45; border: 1px solid rgba(255,255,255,0.16); box-shadow: 0 34px 90px rgba(2,8,22,0.7); display: flex; flex-direction: column; max-height: 100%;">
+          <div style="padding: 24px 26px 20px; border-bottom: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; gap: 14px;">
+            <span style="width: 44px; height: 44px; border-radius: 50%; background: rgba(0,163,134,0.24); border: 1px solid rgba(0,163,134,0.6); color: #FFFFFF; font-size: 14px; display: flex; align-items: center; justify-content: center;">JR</span>
+            <div style="display: flex; flex-direction: column; gap: 3px;">
+              <span style="font-size: 20px; font-weight: 300; color: #FFFFFF;">Jonas Reuter</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.64);">jonas.reuter@neoception.com</span>
+            </div>
+            <span style="margin-left: auto; font-size: 18px; color: rgba(255,255,255,0.64); cursor: pointer;" style-hover="color: #FFFFFF;">&#10005;</span>
+          </div>
+          <div style="flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; padding: 22px 26px; display: flex; flex-direction: column; gap: 26px;">
+            <div style="display: flex; align-items: center; gap: 20px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.58);">Rolle</span>
+              <div style="flex: 1; display: flex; border: 1px solid rgba(255,255,255,0.16);">
+                <div style="flex: 1; padding: 10px 0; text-align: center; font-size: 13px; color: #FFFFFF; background: rgba(0,253,253,0.12); border-right: 1px solid rgba(255,255,255,0.16);">Nutzer</div>
+                <div style="flex: 1; padding: 10px 0; text-align: center; font-size: 13px; color: rgba(255,255,255,0.68); cursor: pointer;" style-hover="color: #FFFFFF; background: rgba(255,255,255,0.12);">Administrator</div>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.58); padding-bottom: 6px;">Freischaltungen</div>
+              <sc-for list="{{ zugang }}" as="z" hint-placeholder-count="6">
+                <div onClick="{{ z.toggle }}" style="display: flex; align-items: center; gap: 14px; padding: 12px 2px; border-bottom: 1px solid rgba(255,255,255,0.12); cursor: pointer;">
+                  <span style="font-size: 14px; color: #FFFFFF;">{{ z.name }}</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: rgba(255,255,255,0.68);">{{ z.kuerzel }}</span>
+                  <span style="margin-left: auto; width: 40px; height: 22px; flex: 0 0 auto; border-radius: 11px; position: relative; background: {{ z.trackBg }}; border: 1px solid {{ z.trackBorder }}; transition: background 200ms ease, border-color 200ms ease;">
+                    <span style="position: absolute; top: 2px; left: {{ z.knobLeft }}; width: 16px; height: 16px; border-radius: 50%; background: #FFFFFF; transition: left 220ms cubic-bezier(0.2,0.8,0.2,1);"></span>
+                  </span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display: flex; gap: 34px; font-size: 13px; color: rgba(255,255,255,0.6);">
+              <div style="display: flex; flex-direction: column; gap: 5px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.68);">Letzte Anmeldung</span><span>06.08.2026, 17:41</span></div>
+              <div style="display: flex; flex-direction: column; gap: 5px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.68);">Eingeladen von</span><span>Anna Bergmann</span></div>
+            </div>
+          </div>
+          <div style="padding: 18px 26px; border-top: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; gap: 14px;">
+            <span style="height: 42px; padding: 0 18px; display: flex; align-items: center; border: 1px solid rgba(240,106,56,0.5); color: #F06A38; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer;" style-hover="background: rgba(240,106,56,0.12);">Sperren</span>
+            <span style="margin-left: auto; height: 42px; padding: 0 18px; display: flex; align-items: center; color: rgba(255,255,255,0.6); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer;" style-hover="color: #FFFFFF;">Abbrechen</span>
+            <span style="height: 42px; padding: 0 22px; display: flex; align-items: center; background: #00A386; color: #FFFFFF; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer;" style-hover="background: #1EB095;">Speichern</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dv-opt" id="s09">
+    <div class="dv-olabel"><a class="dv-oid" href="#s09">09</a>Einladung versenden</div>
+    <div class="dv-card" style="width: 1280px; height: 800px;">
+      <canvas ref="{{ bgRefB }}" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block;"></canvas>
+      <div style="position: absolute; inset: 0; background: rgba(5,22,56,0.7);"></div>
+      <div style="position: relative; z-index: 2; height: 100%; display: flex; align-items: center; justify-content: center; padding: 40px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+        <div style="width: 580px; background: #071F45; border: 1px solid rgba(255,255,255,0.16); box-shadow: 0 34px 90px rgba(2,8,22,0.7); display: flex; flex-direction: column;">
+          <div style="padding: 24px 26px 20px; border-bottom: 1px solid rgba(255,255,255,0.2); display: flex; flex-direction: column; gap: 8px;">
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.64);">Zugang nur auf Einladung</div>
+            <div style="font-size: 24px; font-weight: 300; letter-spacing: -0.015em; color: #FFFFFF;">Nutzer einladen</div>
+          </div>
+          <div style="padding: 24px 26px; display: flex; flex-direction: column; gap: 24px;">
+            <label style="display: flex; flex-direction: column; gap: 9px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.64);">E-Mail</span>
+              <input placeholder="name@unternehmen.de" style="height: 34px; padding: 0; border: none; border-bottom: 1px solid rgba(255,255,255,0.24); background: transparent; color: #FFFFFF; font-size: 15px; outline: none;" style-focus="border-bottom-color: #00FDFD;" />
+            </label>
+            <div style="display: flex; flex-direction: column; gap: 11px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.64);">Rolle</span>
+              <div style="display: flex; border: 1px solid rgba(255,255,255,0.16);">
+                <div style="flex: 1; padding: 11px 0; text-align: center; font-size: 13px; color: #FFFFFF; background: rgba(0,253,253,0.12); border-right: 1px solid rgba(255,255,255,0.16);">Nutzer</div>
+                <div style="flex: 1; padding: 11px 0; text-align: center; font-size: 13px; color: rgba(255,255,255,0.68); cursor: pointer;" style-hover="color: #FFFFFF; background: rgba(255,255,255,0.12);">Administrator</div>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 11px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.64);">Sofort freischalten</span>
+              <div style="display: flex; flex-wrap: wrap; gap: 9px;">
+                <sc-for list="{{ appsAlle }}" as="a" hint-placeholder-count="6">
+                  <span style="padding: 8px 13px; border: 1px solid {{ a.chipBorder }}; background: {{ a.chipBg }}; color: {{ a.chipColor }}; font-size: 13px; cursor: pointer;">{{ a.name }}</span>
+                </sc-for>
+              </div>
+            </div>
+            <div style="font-size: 13px; line-height: 1.6; color: rgba(255,255,255,0.68); text-wrap: pretty;">Die Einladung läuft nach sieben Tagen ab. Bis dahin steht der Nutzer in der Liste als „offen“.</div>
+          </div>
+          <div style="padding: 18px 26px; border-top: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; gap: 14px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: rgba(255,255,255,0.68);">1 offene Einladung</span>
+            <span style="margin-left: auto; height: 42px; padding: 0 18px; display: flex; align-items: center; color: rgba(255,255,255,0.6); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer;" style-hover="color: #FFFFFF;">Abbrechen</span>
+            <span style="height: 42px; padding: 0 22px; display: flex; align-items: center; gap: 10px; background: #00A386; color: #FFFFFF; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer;" style-hover="background: #1EB095;">Einladung senden <span style="font-size: 15px;">&#8594;</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dv-opt" id="s10">
+    <div class="dv-olabel"><a class="dv-oid" href="#s10">10</a>Katalog der Unterprogramme</div>
+    <div class="dv-card" style="width: 1280px; height: 800px;">
+      <canvas ref="{{ bgRefB }}" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block;"></canvas>
+      <div style="position: absolute; inset: 0; background: radial-gradient(100% 80% at 50% 30%, rgba(8,34,84,0.3) 0%, rgba(6,26,64,0.74) 100%);"></div>
+      <div style="position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; padding: 30px 56px 34px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+        <div style="position: relative; display: flex; align-items: center; justify-content: center; gap: 16px; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 13px;">
+          <img src="assets/neoception-logo-white.png" alt="Neoception – Pepperl+Fuchs" style="width: 108px; height: auto; display: block; opacity: 0.92;" />
+          <div style="display: flex; align-items: baseline; gap: 8px;">
+            <span style="font-size: 22px; font-weight: 400; letter-spacing: -0.005em; color: #FFFFFF;">AXON</span>
+            <span style="font-size: 22px; font-weight: 200; letter-spacing: 0.02em; color: rgba(255,255,255,0.68);">Studio</span>
+          </div>
+        </div>
+          <span style="position: absolute; right: 48px; top: 50%; margin-top: -13px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 5px 9px; border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.64); cursor: pointer;">&#8984;K</span>
+          <span style="position: absolute; right: 0; top: 50%; margin-top: -17px; width: 34px; height: 34px; border-radius: 50%; background: rgba(0,163,134,0.3); border: 1px solid rgba(0,163,134,0.7); color: #FFFFFF; font-size: 11px; display: flex; align-items: center; justify-content: center; cursor: pointer;">AB</span>
+        </div>
+
+        <div style="flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; padding-top: 34px;">
+          <div style="width: 1040px; max-width: 100%; display: flex; flex-direction: column; gap: 22px; min-height: 0;">
+            <div style="display: flex; align-items: flex-end; gap: 20px;">
+              <div style="display: flex; flex-direction: column; gap: 9px;">
+                <div style="display: flex; align-items: center; gap: 9px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.6);">
+                  <a href="#3a" style="color: rgba(255,255,255,0.68);">&#8592; Studio</a><span style="color: rgba(255,255,255,0.22);">/</span><span>Verwaltung</span>
+                </div>
+                <div style="font-size: 34px; font-weight: 200; letter-spacing: -0.025em; color: #FFFFFF;">Katalog</div>
+              </div>
+              <div style="margin-left: auto; height: 40px; padding: 0 20px; display: flex; align-items: center; gap: 10px; background: #00A386; color: #FFFFFF; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer;" style-hover="background: #1EB095;">Programm aufnehmen <span style="font-size: 15px;">+</span></div>
+            </div>
+
+            <div class="glas" style="flex: 1; min-height: 0; display: flex; flex-direction: column; background: rgba(6,28,66,0.64); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,0.2);">
+              <div style="display: grid; grid-template-columns: 2.4fr 0.8fr 1.6fr 1fr 0.8fr 0.9fr; gap: 12px; padding: 15px 24px; font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.68); border-bottom: 1px solid rgba(255,255,255,0.14);">
+                <span>Programm</span><span>Kürzel</span><span>Adresse</span><span>Freigeschaltet</span><span>Fassung</span><span>Status</span>
+              </div>
+              <div style="flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none;">
+                <sc-for list="{{ appsAlle }}" as="a" hint-placeholder-count="6">
+                  <div style="display: grid; grid-template-columns: 2.4fr 0.8fr 1.6fr 1fr 0.8fr 0.9fr; gap: 12px; align-items: center; padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); cursor: pointer;" style-hover="background: rgba(255,255,255,0.1);">
+                    <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+                      <span style="width: 6px; height: 6px; border-radius: 50%; background: {{ a.dot }}; flex: 0 0 auto;"></span>
+                      <span style="font-size: 14px; color: #FFFFFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ a.name }}</span>
+                    </div>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: rgba(255,255,255,0.7);">{{ a.kuerzel }}</span>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.64); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ a.host }}</span>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: rgba(255,255,255,0.7);">{{ a.nutzer }}</span>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: rgba(255,255,255,0.68);">{{ a.version }}</span>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: {{ a.dot }};">{{ a.status }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dv-opt" id="s11">
+    <div class="dv-olabel"><a class="dv-oid" href="#s11">11</a>Programm aufnehmen — 1 Programm</div>
+    <div class="dv-card" style="width: 1280px; height: 800px;">
+      <canvas ref="{{ bgRefB }}" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block;"></canvas>
+      <div style="position: absolute; inset: 0; background: radial-gradient(100% 80% at 50% 30%, rgba(8,34,84,0.3) 0%, rgba(6,26,64,0.74) 100%);"></div>
+      <div style="position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; padding: 30px 56px 34px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+        <div style="position: relative; display: flex; align-items: center; justify-content: center; gap: 16px; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 13px;">
+          <img src="assets/neoception-logo-white.png" alt="Neoception – Pepperl+Fuchs" style="width: 108px; height: auto; display: block; opacity: 0.92;" />
+          <div style="display: flex; align-items: baseline; gap: 8px;">
+            <span style="font-size: 22px; font-weight: 400; letter-spacing: -0.005em; color: #FFFFFF;">AXON</span>
+            <span style="font-size: 22px; font-weight: 200; letter-spacing: 0.02em; color: rgba(255,255,255,0.68);">Studio</span>
+          </div>
+        </div>
+          <span style="position: absolute; right: 0; top: 50%; margin-top: -17px; width: 34px; height: 34px; border-radius: 50%; background: rgba(0,163,134,0.3); border: 1px solid rgba(0,163,134,0.7); color: #FFFFFF; font-size: 11px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: border-color 180ms ease;">AB</span>
+        </div>
+
+        <div style="flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; padding-top: 30px;">
+          <div style="width: 980px; max-width: 100%; display: flex; flex-direction: column; gap: 24px; min-height: 0;">
+            <div style="display: flex; flex-direction: column; gap: 9px;">
+              <div style="display: flex; align-items: center; gap: 9px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.6);">
+                <a href="#3c" style="color: rgba(255,255,255,0.68);">&#8592; Katalog</a><span style="color: rgba(255,255,255,0.22);">/</span><span>Programm aufnehmen</span>
+              </div>
+              <div style="font-size: 34px; font-weight: 200; letter-spacing: -0.025em; color: #FFFFFF;">Programm aufnehmen</div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 0; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;">
+              <span style="padding: 9px 14px; background: rgba(0,253,253,0.12); border: 1px solid rgba(0,253,253,0.4); color: #FFFFFF;">1 Programm</span>
+              <span style="width: 22px; height: 1px; background: rgba(255,255,255,0.16);"></span>
+              <span style="padding: 9px 14px; border: 1px solid rgba(255,255,255,0.22); color: rgba(255,255,255,0.68);">2 Adresse</span>
+              <span style="width: 22px; height: 1px; background: rgba(255,255,255,0.16);"></span>
+              <span style="padding: 9px 14px; border: 1px solid rgba(255,255,255,0.22); color: rgba(255,255,255,0.68);">3 Zugriff</span>
+              <span style="width: 22px; height: 1px; background: rgba(255,255,255,0.16);"></span>
+              <span style="padding: 9px 14px; border: 1px solid rgba(255,255,255,0.22); color: rgba(255,255,255,0.68);">4 Schlüssel</span>
+              <span style="width: 22px; height: 1px; background: rgba(255,255,255,0.16);"></span>
+              <span style="padding: 9px 14px; border: 1px solid rgba(255,255,255,0.22); color: rgba(255,255,255,0.68);">5 Abnahme</span>
+            </div>
+
+            <div style="flex: 1; min-height: 0; display: flex; gap: 26px;">
+              <div class="glas" style="flex: 1; min-width: 0; display: flex; flex-direction: column; background: rgba(6,28,66,0.64); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,0.2);">
+                <div style="padding: 17px 22px; border-bottom: 1px solid rgba(255,255,255,0.14); font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.64);">Was ist das für ein Programm</div>
+                <div style="padding: 22px; display: flex; flex-direction: column; gap: 22px;">
+                  <div style="display: flex; gap: 20px;">
+                    <label style="flex: 1; display: flex; flex-direction: column; gap: 9px;">
+                      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.64);">Name</span>
+                      <input value="Konformitätsprüfung" style="height: 32px; padding: 0; border: none; border-bottom: 1px solid rgba(255,255,255,0.24); background: transparent; color: #FFFFFF; font-size: 15px; outline: none;" style-focus="border-bottom-color: #00FDFD;" />
+                    </label>
+                    <label style="width: 110px; display: flex; flex-direction: column; gap: 9px;">
+                      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.64);">Kürzel</span>
+                      <input value="KFP" style="height: 32px; padding: 0; border: none; border-bottom: 1px solid rgba(255,255,255,0.24); background: transparent; color: #FFFFFF; font-family: 'IBM Plex Mono', monospace; font-size: 15px; letter-spacing: 0.14em; outline: none;" style-focus="border-bottom-color: #00FDFD;" />
+                    </label>
+                  </div>
+                  <label style="display: flex; flex-direction: column; gap: 9px;">
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.64);">Ein Satz für die Kachel</span>
+                    <input value="Schalen gegen die IDTA-Spezifikationen prüfen." style="height: 32px; padding: 0; border: none; border-bottom: 1px solid rgba(255,255,255,0.24); background: transparent; color: #FFFFFF; font-size: 15px; outline: none;" style-focus="border-bottom-color: #00FDFD;" />
+                    <span style="font-size: 12px; color: rgba(255,255,255,0.68);">Höchstens 60 Zeichen, sonst bricht die Kachel um.</span>
+                  </label>
+                  <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.64);">Farbe der Kachel</span>
+                    <div style="display: flex; align-items: center; gap: 14px;">
+                      <sc-for list="{{ farben }}" as="f" hint-placeholder-count="6">
+                        <span onClick="{{ f.pick }}" style="{{ f.style }}"></span>
+                      </sc-for>
+                      <span style="margin-left: 8px; font-size: 12px; color: rgba(255,255,255,0.55);">Sie trägt die Kante der Kachel, nicht die Schrift.</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="width: 268px; flex: 0 0 268px; display: flex; flex-direction: column; gap: 12px;">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.58);">So sieht die Kachel aus</div>
+                <div class="glas" style="position: relative; display: flex; flex-direction: column; gap: 14px; padding: 24px; background: rgba(6,28,66,0.66); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.22);">
+                  <span style="position: absolute; left: -1px; right: -1px; top: -1px; height: 2px; background: {{ neuFarbe }};"></span>
+                  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.6);">KFP</div>
+                  <div style="font-size: 21px; font-weight: 300; line-height: 1.15; letter-spacing: -0.015em; color: #FFFFFF;">Konformitätsprüfung</div>
+                  <div style="font-size: 13px; line-height: 1.55; color: rgba(255,255,255,0.58); text-wrap: pretty;">Schalen gegen die IDTA-Spezifikationen prüfen.</div>
+                  <div style="margin-top: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.72);">Öffnen &#8594;</div>
+                </div>
+                <div style="font-size: 12px; line-height: 1.6; color: rgba(255,255,255,0.68); text-wrap: pretty;">Sichtbar wird sie erst, wenn Schritt 5 durch ist und jemand freigeschaltet wurde.</div>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: rgba(255,255,255,0.54);">Schritt 1 von 5</span>
+              <span style="margin-left: auto; height: 42px; padding: 0 18px; display: flex; align-items: center; color: rgba(255,255,255,0.6); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer;" style-hover="color: #FFFFFF;">Abbrechen</span>
+              <span style="height: 42px; padding: 0 22px; display: flex; align-items: center; gap: 10px; background: #00A386; color: #FFFFFF; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer;" style-hover="background: #1EB095;">Weiter <span style="font-size: 15px;">&#8594;</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dv-opt" id="s12">
+    <div class="dv-olabel"><a class="dv-oid" href="#s12">12</a>Programm aufnehmen — 2 Adresse und Umgebungen</div>
+    <div class="dv-card" style="width: 1280px; height: 800px;">
+      <canvas ref="{{ bgRefB }}" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block;"></canvas>
+      <div style="position: absolute; inset: 0; background: radial-gradient(100% 80% at 50% 30%, rgba(8,34,84,0.3) 0%, rgba(6,26,64,0.74) 100%);"></div>
+      <div style="position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; padding: 30px 56px 34px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+        <div style="position: relative; display: flex; align-items: center; justify-content: center; gap: 16px; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 13px;">
+          <img src="assets/neoception-logo-white.png" alt="Neoception – Pepperl+Fuchs" style="width: 108px; height: auto; display: block; opacity: 0.92;" />
+          <div style="display: flex; align-items: baseline; gap: 8px;">
+            <span style="font-size: 22px; font-weight: 400; letter-spacing: -0.005em; color: #FFFFFF;">AXON</span>
+            <span style="font-size: 22px; font-weight: 200; letter-spacing: 0.02em; color: rgba(255,255,255,0.68);">Studio</span>
+          </div>
+        </div>
+          <span style="position: absolute; right: 0; top: 50%; margin-top: -17px; width: 34px; height: 34px; border-radius: 50%; background: rgba(0,163,134,0.3); border: 1px solid rgba(0,163,134,0.7); color: #FFFFFF; font-size: 11px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: border-color 180ms ease;">AB</span>
+        </div>
+
+        <div style="flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; padding-top: 30px;">
+          <div style="width: 980px; max-width: 100%; display: flex; flex-direction: column; gap: 24px; min-height: 0;">
+            <div style="display: flex; flex-direction: column; gap: 9px;">
+              <div style="display: flex; align-items: center; gap: 9px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.6);">
+                <a href="#3c" style="color: rgba(255,255,255,0.68);">&#8592; Katalog</a><span style="color: rgba(255,255,255,0.22);">/</span><span>Konformitätsprüfung</span>
+              </div>
+              <div style="font-size: 34px; font-weight: 200; letter-spacing: -0.025em; color: #FFFFFF;">Adresse und Umgebungen</div>
+            </div>
+
+            <div style="display: flex; align-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;">
+              <span style="padding: 9px 14px; border: 1px solid rgba(0,163,134,0.5); color: rgba(255,255,255,0.7);">1 &#10003;</span>
+              <span style="width: 22px; height: 1px; background: rgba(255,255,255,0.16);"></span>
+              <span style="padding: 9px 14px; background: rgba(0,253,253,0.12); border: 1px solid rgba(0,253,253,0.4); color: #FFFFFF;">2 Adresse</span>
+              <span style="width: 22px; height: 1px; background: rgba(255,255,255,0.16);"></span>
+              <span style="padding: 9px 14px; border: 1px solid rgba(255,255,255,0.22); color: rgba(255,255,255,0.68);">3 Zugriff</span>
+              <span style="width: 22px; height: 1px; background: rgba(255,255,255,0.16);"></span>
+              <span style="padding: 9px 14px; border: 1px solid rgba(255,255,255,0.22); color: rgba(255,255,255,0.68);">4 Schlüssel</span>
+              <span style="width: 22px; height: 1px; background: rgba(255,255,255,0.16);"></span>
+              <span style="padding: 9px 14px; border: 1px solid rgba(255,255,255,0.22); color: rgba(255,255,255,0.68);">5 Abnahme</span>
+            </div>
+
+            <div style="flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; display: flex; flex-direction: column; gap: 20px;">
+              <div class="glas" style="display: flex; flex-direction: column; background: rgba(6,28,66,0.64); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,0.2);">
+                <div style="padding: 17px 22px; border-bottom: 1px solid rgba(255,255,255,0.14); font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.64);">Wo läuft der Dienst</div>
+                <div style="padding: 22px; display: flex; gap: 24px;">
+                  <label style="flex: 2; display: flex; flex-direction: column; gap: 9px;">
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.64);">Basis-Adresse</span>
+                    <input value="https://konformitaet.neoception.app" style="height: 32px; padding: 0; border: none; border-bottom: 1px solid rgba(255,255,255,0.24); background: transparent; color: #FFFFFF; font-family: 'IBM Plex Mono', monospace; font-size: 14px; outline: none;" style-focus="border-bottom-color: #00FDFD;" />
+                  </label>
+                  <label style="flex: 1; display: flex; flex-direction: column; gap: 9px;">
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.64);">Gesundheitspfad</span>
+                    <input value="/api/health" style="height: 32px; padding: 0; border: none; border-bottom: 1px solid rgba(255,255,255,0.24); background: transparent; color: #FFFFFF; font-family: 'IBM Plex Mono', monospace; font-size: 14px; outline: none;" style-focus="border-bottom-color: #00FDFD;" />
+                  </label>
+                </div>
+              </div>
+
+              <div class="glas" style="display: flex; flex-direction: column; background: rgba(6,28,66,0.64); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,0.2);">
+                <div style="padding: 17px 22px; border-bottom: 1px solid rgba(255,255,255,0.14); display: flex; align-items: center; gap: 12px;">
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.64);">Redirect-URIs</span>
+                  <span style="font-size: 12px; color: rgba(255,255,255,0.6);">Vollständig mit Schema, Domain, Pfad und Port. Keine Platzhalter.</span>
+                </div>
+                <div style="padding: 8px 22px 18px; display: flex; flex-direction: column;">
+                  <div style="display: grid; grid-template-columns: 130px 1fr 90px; gap: 14px; align-items: center; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.12);">
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.68);">Produktion</span>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">https://konformitaet.neoception.app/auth/callback</span>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: #00A386;">Geprüft</span>
+                  </div>
+                  <div style="display: grid; grid-template-columns: 130px 1fr 90px; gap: 14px; align-items: center; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.12);">
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.68);">Test</span>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">https://kfp-test.neoception.app/auth/callback</span>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: #00A386;">Geprüft</span>
+                  </div>
+                  <div style="display: grid; grid-template-columns: 130px 1fr 90px; gap: 14px; align-items: center; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.12);">
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.68);">Lokal</span>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFFFFF;">http://localhost:5173/auth/callback</span>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.68);">Offen</span>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 10px; padding: 15px 0 0; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.6); cursor: pointer;" style-hover="color: #00FDFD;"><span style="font-size: 14px;">+</span> Umgebung hinzufügen</div>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 14px; padding: 16px 20px; border: 1px solid rgba(240,106,56,0.4); background: rgba(240,106,56,0.08);">
+                <span style="margin-top: 5px; width: 6px; height: 6px; border-radius: 50%; background: #F06A38; flex: 0 0 auto;"></span>
+                <div style="font-size: 13px; line-height: 1.6; color: rgba(255,255,255,0.75); text-wrap: pretty;">Jede Umgebung bekommt einen <strong style="font-weight: 500;">eigenen Client mit eigenem Geheimnis</strong>. Ändert sich später die Domain, ändert sich auch der Ort der Zustimmungsseite — dann laufen alle Anmeldungen dieses Programms ins Leere, bis die URI hier nachgezogen ist.</div>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: rgba(255,255,255,0.54);">Schritt 2 von 5</span>
+              <span style="margin-left: auto; height: 42px; padding: 0 18px; display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.22); color: rgba(255,255,255,0.8); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer;" style-hover="border-color: #FFFFFF; color: #FFFFFF;">Zurück</span>
+              <span style="height: 42px; padding: 0 22px; display: flex; align-items: center; gap: 10px; background: #00A386; color: #FFFFFF; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer;" style-hover="background: #1EB095;">Weiter <span style="font-size: 15px;">&#8594;</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dv-opt" id="s13">
+    <div class="dv-olabel"><a class="dv-oid" href="#s13">13</a>Programm aufnehmen — 3 Zugriff</div>
+    <div class="dv-card" style="width: 1280px; height: 800px;">
+      <canvas ref="{{ bgRefB }}" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block;"></canvas>
+      <div style="position: absolute; inset: 0; background: radial-gradient(100% 80% at 50% 30%, rgba(8,34,84,0.3) 0%, rgba(6,26,64,0.74) 100%);"></div>
+      <div style="position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; padding: 30px 56px 34px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+        <div style="position: relative; display: flex; align-items: center; justify-content: center; gap: 16px; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 13px;">
+          <img src="assets/neoception-logo-white.png" alt="Neoception – Pepperl+Fuchs" style="width: 108px; height: auto; display: block; opacity: 0.92;" />
+          <div style="display: flex; align-items: baseline; gap: 8px;">
+            <span style="font-size: 22px; font-weight: 400; letter-spacing: -0.005em; color: #FFFFFF;">AXON</span>
+            <span style="font-size: 22px; font-weight: 200; letter-spacing: 0.02em; color: rgba(255,255,255,0.68);">Studio</span>
+          </div>
+        </div>
+          <span style="position: absolute; right: 0; top: 50%; margin-top: -17px; width: 34px; height: 34px; border-radius: 50%; background: rgba(0,163,134,0.3); border: 1px solid rgba(0,163,134,0.7); color: #FFFFFF; font-size: 11px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: border-color 180ms ease;">AB</span>
+        </div>
+
+        <div style="flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; padding-top: 30px;">
+          <div style="width: 980px; max-width: 100%; display: flex; flex-direction: column; gap: 24px; min-height: 0;">
+            <div style="display: flex; flex-direction: column; gap: 9px;">
+              <div style="display: flex; align-items: center; gap: 9px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.6);">
+                <a href="#3c" style="color: rgba(255,255,255,0.68);">&#8592; Katalog</a><span style="color: rgba(255,255,255,0.22);">/</span><span>Konformitätsprüfung</span>
+              </div>
+              <div style="font-size: 34px; font-weight: 200; letter-spacing: -0.025em; color: #FFFFFF;">Zugriff</div>
+            </div>
+
+            <div style="display: flex; align-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;">
+              <span style="padding: 9px 14px; border: 1px solid rgba(0,163,134,0.5); color: rgba(255,255,255,0.7);">1 &#10003;</span>
+              <span style="width: 22px; height: 1px; background: rgba(255,255,255,0.16);"></span>
+              <span style="padding: 9px 14px; border: 1px solid rgba(0,163,134,0.5); color: rgba(255,255,255,0.7);">2 &#10003;</span>
+              <span style="width: 22px; height: 1px; background: rgba(255,255,255,0.16);"></span>
+              <span style="padding: 9px 14px; background: rgba(0,253,253,0.12); border: 1px solid rgba(0,253,253,0.4); color: #FFFFFF;">3 Zugriff</span>
+              <span style="width: 22px; height: 1px; background: rgba(255,255,255,0.16);"></span>
+              <span style="padding: 9px 14px; border: 1px solid rgba(255,255,255,0.22); color: rgba(255,255,255,0.68);">4 Schlüssel</span>
+              <span style="width: 22px; height: 1px; background: rgba(255,255,255,0.16);"></span>
+              <span style="padding: 9px 14px; border: 1px solid rgba(255,255,255,0.22); color: rgba(255,255,255,0.68);">5 Abnahme</span>
+            </div>
+
+            <div style="flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; display: flex; gap: 22px;">
+              <div class="glas" style="flex: 1; min-width: 0; display: flex; flex-direction: column; background: rgba(6,28,66,0.64); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,0.2);">
+                <div style="padding: 17px 22px; border-bottom: 1px solid rgba(255,255,255,0.14); font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.64);">Was das Programm anfordern darf</div>
+                <div style="padding: 8px 22px 16px;">
+                  <div style="display: flex; align-items: flex-start; gap: 14px; padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.12);">
+                    <span style="margin-top: 4px; width: 14px; height: 14px; border: 1px solid rgba(255,255,255,0.3); background: #00A386; flex: 0 0 auto;"></span>
+                    <div style="display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 14px; color: #FFFFFF;">Wer du bist</span><span style="font-size: 12px; line-height: 1.5; color: rgba(255,255,255,0.64);">Name, E-Mail und Rolle. Ohne das gibt es keine Anmeldung.</span></div>
+                    <span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.68);">openid profile</span>
+                  </div>
+                  <div style="display: flex; align-items: flex-start; gap: 14px; padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.12);">
+                    <span style="margin-top: 4px; width: 14px; height: 14px; border: 1px solid rgba(255,255,255,0.3); background: #00A386; flex: 0 0 auto;"></span>
+                    <div style="display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 14px; color: #FFFFFF;">Deine Freischaltungen</span><span style="font-size: 12px; line-height: 1.5; color: rgba(255,255,255,0.64);">Damit das Programm selbst prüfen kann, ob du hinein darfst.</span></div>
+                    <span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.68);">apps.read</span>
+                  </div>
+                  <div style="display: flex; align-items: flex-start; gap: 14px; padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.12);">
+                    <span style="margin-top: 4px; width: 14px; height: 14px; border: 1px solid rgba(255,255,255,0.3); background: transparent; flex: 0 0 auto;"></span>
+                    <div style="display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 14px; color: rgba(255,255,255,0.8);">Angemeldet bleiben</span><span style="font-size: 12px; line-height: 1.5; color: rgba(255,255,255,0.64);">Sitzung erneuern, ohne neue Anmeldung. Nur wenn nötig.</span></div>
+                    <span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.68);">offline_access</span>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 14px; padding: 17px 0 6px;">
+                    <div style="display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 14px; color: #FFFFFF;">Zustimmungsseite überspringen</span><span style="font-size: 12px; color: rgba(255,255,255,0.64);">Nur für eigene Programme aus diesem Haus.</span></div>
+                    <span style="margin-left: auto; width: 40px; height: 22px; flex: 0 0 auto; border-radius: 11px; position: relative; background: rgba(0,163,134,0.55); border: 1px solid rgba(0,163,134,0.9);">
+                      <span style="position: absolute; top: 2px; left: 20px; width: 16px; height: 16px; border-radius: 50%; background: #FFFFFF;"></span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div style="width: 300px; flex: 0 0 300px; display: flex; flex-direction: column; gap: 12px;">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.58);">Das sieht der Nutzer</div>
+                <div class="glas" style="background: rgba(6,28,66,0.66); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,0.11); padding: 20px; display: flex; flex-direction: column; gap: 12px;">
+                  <div style="font-size: 16px; font-weight: 300; line-height: 1.35; color: #FFFFFF; text-wrap: pretty;"><strong style="font-weight: 500;">Konformitätsprüfung</strong> möchte auf dein Konto zugreifen.</div>
+                  <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: rgba(255,255,255,0.6);">
+                    <span>&#183; Wer du bist</span><span>&#183; Deine Freischaltungen</span>
+                  </div>
+                  <a href="#3g" style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #00FDFD;">Ganze Seite ansehen &#8594; 3g</a>
+                </div>
+                <div style="font-size: 12px; line-height: 1.6; color: rgba(255,255,255,0.68); text-wrap: pretty;">Mit übersprungener Zustimmung bekommt der Nutzer diese Seite nie zu sehen — der Sprung von der Kachel ins Programm ist dann bruchlos.</div>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: rgba(255,255,255,0.54);">Schritt 3 von 5</span>
+              <span style="margin-left: auto; height: 42px; padding: 0 18px; display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.22); color: rgba(255,255,255,0.8); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer;">Zurück</span>
+              <span style="height: 42px; padding: 0 22px; display: flex; align-items: center; gap: 10px; background: #00A386; color: #FFFFFF; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer;" style-hover="background: #1EB095;">Client erzeugen <span style="font-size: 15px;">&#8594;</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dv-opt" id="s14">
+    <div class="dv-olabel"><a class="dv-oid" href="#s14">14</a>Programm aufnehmen — 4 Schlüssel</div>
+    <div class="dv-card" style="width: 1280px; height: 800px;">
+      <canvas ref="{{ bgRefB }}" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block;"></canvas>
+      <div style="position: absolute; inset: 0; background: radial-gradient(100% 80% at 50% 30%, rgba(8,34,84,0.3) 0%, rgba(6,26,64,0.74) 100%);"></div>
+      <div style="position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; padding: 30px 56px 34px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+        <div style="position: relative; display: flex; align-items: center; justify-content: center; gap: 16px; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 13px;">
+          <img src="assets/neoception-logo-white.png" alt="Neoception – Pepperl+Fuchs" style="width: 108px; height: auto; display: block; opacity: 0.92;" />
+          <div style="display: flex; align-items: baseline; gap: 8px;">
+            <span style="font-size: 22px; font-weight: 400; letter-spacing: -0.005em; color: #FFFFFF;">AXON</span>
+            <span style="font-size: 22px; font-weight: 200; letter-spacing: 0.02em; color: rgba(255,255,255,0.68);">Studio</span>
+          </div>
+        </div>
+          <span style="position: absolute; right: 0; top: 50%; margin-top: -17px; width: 34px; height: 34px; border-radius: 50%; background: rgba(0,163,134,0.3); border: 1px solid rgba(0,163,134,0.7); color: #FFFFFF; font-size: 11px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: border-color 180ms ease;">AB</span>
+        </div>
+
+        <div style="flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; padding-top: 30px;">
+          <div style="width: 980px; max-width: 100%; display: flex; flex-direction: column; gap: 24px; min-height: 0;">
+            <div style="display: flex; flex-direction: column; gap: 9px;">
+              <div style="display: flex; align-items: center; gap: 9px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.6);">
+                <a href="#3c" style="color: rgba(255,255,255,0.68);">&#8592; Katalog</a><span style="color: rgba(255,255,255,0.22);">/</span><span>Konformitätsprüfung</span>
+              </div>
+              <div style="font-size: 34px; font-weight: 200; letter-spacing: -0.025em; color: #FFFFFF;">Schlüssel</div>
+            </div>
+
+            <div style="display: flex; align-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;">
+              <span style="padding: 9px 14px; border: 1px solid rgba(0,163,134,0.5); color: rgba(255,255,255,0.7);">1 &#10003;</span>
+              <span style="width: 22px; height: 1px; background: rgba(255,255,255,0.16);"></span>
+              <span style="padding: 9px 14px; border: 1px solid rgba(0,163,134,0.5); color: rgba(255,255,255,0.7);">2 &#10003;</span>
+              <span style="width: 22px; height: 1px; background: rgba(255,255,255,0.16);"></span>
+              <span style="padding: 9px 14px; border: 1px solid rgba(0,163,134,0.5); color: rgba(255,255,255,0.7);">3 &#10003;</span>
+              <span style="width: 22px; height: 1px; background: rgba(255,255,255,0.16);"></span>
+              <span style="padding: 9px 14px; background: rgba(0,253,253,0.12); border: 1px solid rgba(0,253,253,0.4); color: #FFFFFF;">4 Schlüssel</span>
+              <span style="width: 22px; height: 1px; background: rgba(255,255,255,0.16);"></span>
+              <span style="padding: 9px 14px; border: 1px solid rgba(255,255,255,0.22); color: rgba(255,255,255,0.68);">5 Abnahme</span>
+            </div>
+
+            <div style="flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; display: flex; flex-direction: column; gap: 20px;">
+              <div style="display: flex; gap: 14px; padding: 16px 20px; border: 1px solid rgba(0,253,253,0.35); background: rgba(0,253,253,0.07);">
+                <span style="margin-top: 5px; width: 6px; height: 6px; border-radius: 50%; background: #00FDFD; flex: 0 0 auto;"></span>
+                <div style="font-size: 13px; line-height: 1.6; color: rgba(255,255,255,0.8); text-wrap: pretty;">Das Geheimnis steht <strong style="font-weight: 500;">nur auf dieser Seite</strong>. Verlässt du sie, ist es fort und muss neu erzeugt werden — das trennt jede laufende Anmeldung dieses Programms.</div>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <label style="display: flex; flex-direction: column; gap: 9px;">
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.64);">Client-Kennung</span>
+                  <span style="display: flex; align-items: center; gap: 14px; padding: 14px 18px; background: rgba(4,18,44,0.72); border: 1px solid rgba(255,255,255,0.22);">
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: #FFFFFF;">kfp_prod_9c4a1f7e2b</span>
+                    <span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.6); cursor: pointer;" style-hover="color: #00FDFD;">Kopieren</span>
+                  </span>
+                </label>
+                <label style="display: flex; flex-direction: column; gap: 9px;">
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.64);">Geheimnis</span>
+                  <span style="display: flex; align-items: center; gap: 14px; padding: 14px 18px; background: rgba(4,18,44,0.72); border: 1px solid rgba(0,253,253,0.3);">
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: #FFFFFF;">sk_live_7Qd2·····································</span>
+                    <span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.6); cursor: pointer;" style-hover="color: #00FDFD;">Zeigen</span>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.6); cursor: pointer;" style-hover="color: #00FDFD;">Kopieren</span>
+                  </span>
+                </label>
+              </div>
+
+              <div class="glas" style="display: flex; flex-direction: column; background: rgba(6,28,66,0.64); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,0.2);">
+                <div style="padding: 17px 22px; border-bottom: 1px solid rgba(255,255,255,0.14); display: flex; align-items: center; gap: 12px;">
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.64);">Endpunkte für die Umgebungsvariablen</span>
+                  <span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.6); cursor: pointer;" style-hover="color: #00FDFD;">Als .env kopieren</span>
+                </div>
+                <div style="padding: 18px 22px; display: flex; flex-direction: column; gap: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; line-height: 1.7; color: rgba(255,255,255,0.72);">
+                  <span>OIDC_ISSUER = https://studio.neoception.app/auth/v1</span>
+                  <span>OIDC_DISCOVERY = /.well-known/openid-configuration</span>
+                  <span>OIDC_AUTHORIZE = /oauth/authorize</span>
+                  <span>OIDC_TOKEN = /oauth/token</span>
+                  <span>OIDC_JWKS = /.well-known/jwks.json</span>
+                  <span>OIDC_SIGNING = ES256</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: rgba(255,255,255,0.54);">Schritt 4 von 5</span>
+              <span style="margin-left: auto; height: 42px; padding: 0 18px; display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.22); color: rgba(255,255,255,0.8); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer;">Neu erzeugen</span>
+              <span style="height: 42px; padding: 0 22px; display: flex; align-items: center; gap: 10px; background: #00A386; color: #FFFFFF; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer;" style-hover="background: #1EB095;">Gespeichert, weiter <span style="font-size: 15px;">&#8594;</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dv-opt" id="s15">
+    <div class="dv-olabel"><a class="dv-oid" href="#s15">15</a>Programm aufnehmen — 5 Abnahme</div>
+    <div class="dv-card" style="width: 1280px; height: 800px;">
+      <canvas ref="{{ bgRefB }}" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block;"></canvas>
+      <div style="position: absolute; inset: 0; background: radial-gradient(100% 80% at 50% 30%, rgba(8,34,84,0.3) 0%, rgba(6,26,64,0.74) 100%);"></div>
+      <div style="position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; padding: 30px 56px 34px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+        <div style="position: relative; display: flex; align-items: center; justify-content: center; gap: 16px; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 13px;">
+          <img src="assets/neoception-logo-white.png" alt="Neoception – Pepperl+Fuchs" style="width: 108px; height: auto; display: block; opacity: 0.92;" />
+          <div style="display: flex; align-items: baseline; gap: 8px;">
+            <span style="font-size: 22px; font-weight: 400; letter-spacing: -0.005em; color: #FFFFFF;">AXON</span>
+            <span style="font-size: 22px; font-weight: 200; letter-spacing: 0.02em; color: rgba(255,255,255,0.68);">Studio</span>
+          </div>
+        </div>
+          <span style="position: absolute; right: 0; top: 50%; margin-top: -17px; width: 34px; height: 34px; border-radius: 50%; background: rgba(0,163,134,0.3); border: 1px solid rgba(0,163,134,0.7); color: #FFFFFF; font-size: 11px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: border-color 180ms ease;">AB</span>
+        </div>
+
+        <div style="flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; padding-top: 30px;">
+          <div style="width: 980px; max-width: 100%; display: flex; flex-direction: column; gap: 24px; min-height: 0;">
+            <div style="display: flex; flex-direction: column; gap: 9px;">
+              <div style="display: flex; align-items: center; gap: 9px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.6);">
+                <a href="#3c" style="color: rgba(255,255,255,0.68);">&#8592; Katalog</a><span style="color: rgba(255,255,255,0.22);">/</span><span>Konformitätsprüfung</span>
+              </div>
+              <div style="font-size: 34px; font-weight: 200; letter-spacing: -0.025em; color: #FFFFFF;">Abnahme</div>
+            </div>
+
+            <div style="display: flex; align-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;">
+              <span style="padding: 9px 14px; border: 1px solid rgba(0,163,134,0.5); color: rgba(255,255,255,0.7);">1 &#10003;</span>
+              <span style="width: 22px; height: 1px; background: rgba(255,255,255,0.16);"></span>
+              <span style="padding: 9px 14px; border: 1px solid rgba(0,163,134,0.5); color: rgba(255,255,255,0.7);">2 &#10003;</span>
+              <span style="width: 22px; height: 1px; background: rgba(255,255,255,0.16);"></span>
+              <span style="padding: 9px 14px; border: 1px solid rgba(0,163,134,0.5); color: rgba(255,255,255,0.7);">3 &#10003;</span>
+              <span style="width: 22px; height: 1px; background: rgba(255,255,255,0.16);"></span>
+              <span style="padding: 9px 14px; border: 1px solid rgba(0,163,134,0.5); color: rgba(255,255,255,0.7);">4 &#10003;</span>
+              <span style="width: 22px; height: 1px; background: rgba(255,255,255,0.16);"></span>
+              <span style="padding: 9px 14px; background: rgba(0,253,253,0.12); border: 1px solid rgba(0,253,253,0.4); color: #FFFFFF;">5 Abnahme</span>
+            </div>
+
+            <div style="flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; display: flex; gap: 22px;">
+              <div class="glas" style="flex: 1; min-width: 0; display: flex; flex-direction: column; background: rgba(6,28,66,0.64); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,0.2);">
+                <div style="padding: 17px 22px; border-bottom: 1px solid rgba(255,255,255,0.14); display: flex; align-items: center; gap: 12px;">
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.64);">Rundlauf</span>
+                  <span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #00FDFD; cursor: pointer;">Erneut prüfen</span>
+                </div>
+                <div style="padding: 8px 22px 16px;">
+                  <div style="display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.12);">
+                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #00A386;"></span><span style="font-size: 14px; color: #FFFFFF;">Dienst antwortet</span><span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.64);">/api/health &#8594; 200</span>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.12);">
+                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #00A386;"></span><span style="font-size: 14px; color: #FFFFFF;">Redirect-URI stimmt exakt</span><span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.64);">Produktion</span>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.12);">
+                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #00A386;"></span><span style="font-size: 14px; color: #FFFFFF;">Code gegen Token getauscht</span><span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.64);">PKCE, 312 ms</span>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.12);">
+                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #00A386;"></span><span style="font-size: 14px; color: #FFFFFF;">ID-Token prüfbar</span><span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.64);">ES256 gegen JWKS</span>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 14px; padding: 14px 0;">
+                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #F06A38;"></span><span style="font-size: 14px; color: #FFFFFF;">Abmelden wirkt in beide Richtungen</span><span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #F06A38;">Sitzung bleibt offen</span>
+                  </div>
+                  <div style="padding: 12px 0 0; font-size: 12px; line-height: 1.6; color: rgba(255,255,255,0.6); text-wrap: pretty;">Vier von fünf. Der letzte Punkt ist kein Fehler des Studios: das Programm muss beim Abmelden seine eigene Sitzung mitbeenden. Aufnehmen geht trotzdem — dann steht es im Katalog auf „Prüfen“.</div>
+                </div>
+              </div>
+
+              <div style="width: 300px; flex: 0 0 300px; display: flex; flex-direction: column; gap: 14px;">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.58);">Wer die Kachel sieht</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 9px;">
+                  <span style="padding: 8px 13px; border: 1px solid rgba(0,163,134,0.7); background: rgba(0,163,134,0.22); color: #FFFFFF; font-size: 13px; cursor: pointer;">Anna Bergmann</span>
+                  <span style="padding: 8px 13px; border: 1px solid rgba(0,163,134,0.7); background: rgba(0,163,134,0.22); color: #FFFFFF; font-size: 13px; cursor: pointer;">Jonas Reuter</span>
+                  <span style="padding: 8px 13px; border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.6); font-size: 13px; cursor: pointer;" style-hover="border-color: rgba(255,255,255,0.68); color: #FFFFFF;">Milena Fuchs</span>
+                  <span style="padding: 8px 13px; border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.6); font-size: 13px; cursor: pointer;" style-hover="border-color: rgba(255,255,255,0.68); color: #FFFFFF;">Tobias Krahl</span>
+                  <span style="padding: 8px 13px; border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.6); font-size: 13px; cursor: pointer;" style-hover="border-color: rgba(255,255,255,0.68); color: #FFFFFF;">Sarah Lindqvist</span>
+                </div>
+                <div style="font-size: 12px; line-height: 1.6; color: rgba(255,255,255,0.68); text-wrap: pretty;">Niemand freizuschalten ist erlaubt: das Programm steht dann im Katalog, aber auf keiner Bühne.</div>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: rgba(255,255,255,0.54);">Schritt 5 von 5</span>
+              <span style="margin-left: auto; height: 42px; padding: 0 18px; display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.22); color: rgba(255,255,255,0.8); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer;">Zurück</span>
+              <span style="height: 42px; padding: 0 22px; display: flex; align-items: center; gap: 10px; background: #00A386; color: #FFFFFF; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer;" style-hover="background: #1EB095;">Aufnehmen &amp; freischalten <span style="font-size: 15px;">&#8594;</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;bgIntensity&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1,&quot;min&quot;:0.2,&quot;max&quot;:1.6,&quot;step&quot;:0.1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Keyvisual&quot;},&quot;frontBand&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Cyan&quot;,&quot;Hellrosa&quot;,&quot;Lila&quot;,&quot;Orange&quot;,&quot;Aus allem etwas&quot;],&quot;default&quot;:&quot;Cyan&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Keyvisual&quot;},&quot;dotFlow&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Keyvisual&quot;},&quot;showLocked&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Inhalt&quot;}}">
+const DW = 720, DH = 450, CY = 225;
+const PINK = '#E0B0E0', PURPLE = '#8838C0', CYAN = '#00FDFD', ORANGE = '#F06A38', GREEN = '#00A386', GREEN2 = '#1EB095';
+
+const APPS = [
+  { name: 'AAS Editor', kuerzel: 'AAS', akzent: '#00FDFD', kurz: 'Verwaltungsschalen bauen, prüfen und ausliefern.', version: '1.0.0', host: 'aas-editor.neoception.app', nutzer: '5 von 5', frei: true, seit: '06.08.2026' },
+  { name: 'Typenschild-Generator', kuerzel: 'TSG', akzent: '#F06A38', kurz: 'Digitales Typenschild aus den Stammdaten erzeugen.', version: '0.9.2', host: 'typenschild.neoception.app', nutzer: '4 von 5', frei: true, seit: '06.08.2026' },
+  { name: 'Submodell-Katalog', kuerzel: 'SMK', akzent: '#8838C0', kurz: 'Vorlagen und Teilmodelle an einer Stelle pflegen.', version: '0.7.0', host: 'submodelle.neoception.app', nutzer: '3 von 5', frei: true, seit: '07.08.2026' },
+  { name: 'Konformitätsprüfung', kuerzel: 'KFP', akzent: '#00A386', kurz: 'Schalen gegen die IDTA-Spezifikationen prüfen.', version: '0.4.1', host: 'konformitaet.neoception.app', nutzer: '1 von 5', frei: false, status: 'Gesperrt' },
+  { name: 'Sensor-Registry', kuerzel: 'SRG', akzent: '#E0B0E0', kurz: 'Geräte, Seriennummern und Schalen verknüpfen.', version: '0.3.0', host: 'registry.neoception.app', nutzer: '2 von 5', frei: false, status: 'Gesperrt' },
+  { name: 'Datenraum-Brücke', kuerzel: 'DRB', akzent: '#1EB095', kurz: 'Schalen an einen gemeinsamen Datenraum übergeben.', version: '—', host: 'noch nicht ausgeliefert', nutzer: '0 von 5', frei: false, status: 'Geplant' }
+];
+
+const USERS = [
+  { name: 'Anna Bergmann', initialen: 'AB', mail: 'anna.bergmann@neoception.com', rolle: 'Administrator', apps: '6 von 6', zuletzt: 'heute, 08:12', status: 'Aktiv', dot: '#00A386' },
+  { name: 'Jonas Reuter', initialen: 'JR', mail: 'jonas.reuter@neoception.com', rolle: 'Nutzer', apps: '3 von 6', zuletzt: 'gestern, 17:41', status: 'Aktiv', dot: '#00A386' },
+  { name: 'Milena Fuchs', initialen: 'MF', mail: 'milena.fuchs@neoception.com', rolle: 'Nutzer', apps: '2 von 6', zuletzt: '04.08.2026', status: 'Aktiv', dot: '#00A386' },
+  { name: 'Tobias Krahl', initialen: 'TK', mail: 't.krahl@extern-partner.de', rolle: 'Nutzer', apps: '1 von 6', zuletzt: '28.07.2026', status: 'Gesperrt', dot: '#F06A38' },
+  { name: 'Sarah Lindqvist', initialen: 'SL', mail: 's.lindqvist@extern-partner.de', rolle: 'Nutzer', apps: '—', zuletzt: 'nie', status: 'Offen', dot: '#E0B0E0' }
+];
+
+const G20 = [
+  { label: 'Schalen & Daten', items: [
+    { name: 'AAS Editor', kuerzel: 'AAS', akzent: '#00FDFD', frei: true },
+    { name: 'Typenschild-Generator', kuerzel: 'TSG', akzent: '#F06A38', frei: true },
+    { name: 'Submodell-Katalog', kuerzel: 'SMK', akzent: '#8838C0', frei: true },
+    { name: 'Massen-Import', kuerzel: 'IMP', frei: true },
+    { name: 'Merkmalsdienst ECLASS', kuerzel: 'ECL', frei: false }
+  ] },
+  { label: 'Prüfen & Konformität', items: [
+    { name: 'Konformitätsprüfung', kuerzel: 'KFP', akzent: '#00A386', frei: true },
+    { name: 'Prüfberichte', kuerzel: 'PRB', frei: true },
+    { name: 'IDTA-Vorlagen', kuerzel: 'IDT', frei: true },
+    { name: 'Spezifikations-Diff', kuerzel: 'DIF', frei: false }
+  ] },
+  { label: 'Geräte & Betrieb', items: [
+    { name: 'Sensor-Registry', kuerzel: 'SRG', akzent: '#E0B0E0', frei: true },
+    { name: 'OPC-UA-Brücke', kuerzel: 'OPC', frei: true },
+    { name: 'Inbetriebnahme-Assistent', kuerzel: 'IBN', frei: false },
+    { name: 'Firmware-Übersicht', kuerzel: 'FWÜ', frei: false }
+  ] },
+  { label: 'Datenräume & Partner', items: [
+    { name: 'DPP-Vorschau', kuerzel: 'DPP', frei: true },
+    { name: 'Datenraum-Brücke', kuerzel: 'DRB', akzent: '#1EB095', frei: false },
+    { name: 'Partner-Freigaben', kuerzel: 'PFG', frei: false },
+    { name: 'Lieferketten-Abfrage', kuerzel: 'LKA', frei: false }
+  ] },
+  { label: 'Verwaltung', items: [
+    { name: 'Nutzer', kuerzel: 'USR', frei: true },
+    { name: 'Katalog', kuerzel: 'KAT', frei: true },
+    { name: 'Ereignisstrom', kuerzel: 'EVT', frei: true }
+  ] }
+];
+
+const FAV20 = [
+  { name: 'AAS Editor', kuerzel: 'AAS', akzent: '#00FDFD', kurz: 'Verwaltungsschalen bauen und prüfen.' },
+  { name: 'Typenschild-Generator', kuerzel: 'TSG', akzent: '#F06A38', kurz: 'Digitales Typenschild aus Stammdaten.' },
+  { name: 'Prüfberichte', kuerzel: 'PRB', kurz: 'Befunde je Projekt und Fassung.' },
+  { name: 'Sensor-Registry', kuerzel: 'SRG', akzent: '#E0B0E0', kurz: 'Geräte und Schalen verknüpfen.' }
+];
+
+const PAL_PROG = [
+  { name: 'Submodell-Katalog', hint: 'Programm', kuerzel: 'SMK' },
+  { name: 'Katalog der Unterprogramme', hint: 'Verwaltung', kuerzel: 'KAT' }
+];
+
+const PAL_CMD = [
+  { name: 'Programm in den Katalog aufnehmen', hint: 'Befehl' },
+  { name: 'Nutzer einladen', hint: 'Befehl' },
+  { name: 'Nutzerverwaltung öffnen', hint: 'Springen' },
+  { name: 'Meine Freischaltungen ansehen', hint: 'Springen' }
+];
+
+const SCOPES = [
+  { titel: 'Wer du bist', detail: 'Name, E-Mail und deine Rolle im Studio.', scope: 'openid profile' },
+  { titel: 'Deine Freischaltungen', detail: 'Welche Programme für dich freigegeben sind.', scope: 'apps.read' },
+  { titel: 'Angemeldet bleiben', detail: 'Die Sitzung erneuern, solange du sie nicht beendest.', scope: 'offline_access' }
+];
+
+class Component extends DCLogic {
+  state = { neuFarbe: '#00A386', zugang: { AAS: true, TSG: true, SMK: false, KFP: false, SRG: true, DRB: false } };
+
+  constructor(props) {
+    super(props);
+    this.canvases = [];
+    this.canvasesB = [];
+    this.bgRef = el => { if (el && this.canvases.indexOf(el) === -1) this.canvases.push(el); };
+    this.bgRefB = el => { if (el && this.canvasesB.indexOf(el) === -1) this.canvasesB.push(el); };
+    this.cardRef = React.createRef();
+    this.flash = 0;
+  }
+
+  farbenListe() {
+    const sel = this.state.neuFarbe;
+    return ['#00FDFD', '#00A386', '#1EB095', '#F06A38', '#8838C0', '#E0B0E0'].map(c => ({
+      style: 'width: 30px; height: 30px; background: ' + c + '; cursor: pointer; outline: ' + (c === sel ? '2px solid #FFFFFF' : '1px solid rgba(255,255,255,0.25)') + '; outline-offset: 2px;',
+      pick: () => this.setState({ neuFarbe: c })
+    }));
+  }
+
+  renderVals() {
+    const st = this.state.zugang;
+    const dotFor = a => a.frei ? '#00A386' : (a.status === 'Geplant' ? 'rgba(255,255,255,0.35)' : '#F06A38');
+    return {
+      bgRef: this.bgRef,
+      neuFarbe: this.state.neuFarbe,
+      farben: this.farbenListe(),
+      bgRefB: this.bgRefB,
+      cardRef: this.cardRef,
+      showLocked: this.props.showLocked ?? true,
+      appsFrei: APPS.filter(a => a.frei),
+      appsGesperrt: APPS.filter(a => !a.frei),
+      appsAlle: APPS.map(a => Object.assign({}, a, {
+        status: a.frei ? 'Aktiv' : a.status,
+        dot: dotFor(a),
+        chipBorder: st[a.kuerzel] ? 'rgba(0,163,134,0.7)' : 'rgba(255,255,255,0.18)',
+        chipBg: st[a.kuerzel] ? 'rgba(0,163,134,0.22)' : 'transparent',
+        chipColor: st[a.kuerzel] ? '#FFFFFF' : 'rgba(255,255,255,0.6)'
+      })),
+      users: USERS,
+      scopes: SCOPES,
+      fav20: FAV20,
+      gruppen20: G20.map(g => ({
+        label: g.label,
+        items: g.items.map(i => Object.assign({}, i, {
+          rand: i.frei ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.14)',
+          grund: i.frei ? 'rgba(6,28,66,0.5)' : 'rgba(4,18,44,0.34)',
+          stil: i.frei ? 'solid' : 'dashed',
+          titelFarbe: i.frei ? '#FFFFFF' : 'rgba(255,255,255,0.5)',
+          marke: i.frei ? 'Frei' : 'Gesperrt',
+          markeFarbe: i.frei ? '#00FDFD' : 'rgba(255,255,255,0.34)'
+        }))
+      })),
+      palProg: PAL_PROG,
+      palCmd: PAL_CMD,
+      meineApps: APPS.filter(a => a.frei),
+      zugang: APPS.map(a => ({
+        name: a.name,
+        kuerzel: a.kuerzel,
+        trackBg: st[a.kuerzel] ? 'rgba(0,163,134,0.55)' : 'rgba(255,255,255,0.08)',
+        trackBorder: st[a.kuerzel] ? 'rgba(0,163,134,0.9)' : 'rgba(255,255,255,0.2)',
+        knobLeft: st[a.kuerzel] ? '20px' : '2px',
+        toggle: () => this.setState(s => ({ zugang: Object.assign({}, s.zugang, { [a.kuerzel]: !s.zugang[a.kuerzel] }) }))
+      }))
+    };
+  }
+
+  componentDidMount() {
+    this.build();
+    this.makeGlow();
+    this.off = document.createElement('canvas');
+    this.off.width = DW; this.off.height = DH;
+    this.offB = document.createElement('canvas');
+    this.offB.width = DW; this.offB.height = DH;
+    this.t0 = performance.now();
+    this.dots = []; this.outs = []; this.spawnIn = 0.2; this.railCursor = 0; this.bgAt = -1;
+    this.calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.frame = this.frame.bind(this);
+    if (this.calm) { this.frameDots = []; this.render1(0, 0); this.renderBright(0); this.blit(); }
+    else this.raf = requestAnimationFrame(this.frame);
+  }
+
+  componentWillUnmount() { if (this.raf) cancelAnimationFrame(this.raf); }
+
+  makeGlow() {
+    const s = 48, c = document.createElement('canvas');
+    c.width = c.height = s;
+    const x = c.getContext('2d');
+    const g = x.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+    g.addColorStop(0, 'rgba(255,255,255,0.8)');
+    g.addColorStop(0.25, 'rgba(210,245,255,0.3)');
+    g.addColorStop(1, 'rgba(200,240,255,0)');
+    x.fillStyle = g; x.fillRect(0, 0, s, s);
+    this.glow = c;
+  }
+
+  build() {
+    const n = 14, spec = [];
+    for (let i = 0; i < n; i++) {
+      const r = (i * 0.6180339887) % 1;
+      const fb = this.props.frontBand || 'Cyan';
+      const MAP = { 'Cyan': CYAN, 'Hellrosa': '#F0B0DC', 'Lila': PURPLE, 'Orange': ORANGE };
+      const fbMix = this._front ? this._front === 'mix' : fb === 'Aus allem etwas';
+      const FRONT = this._front && this._front !== 'mix' ? this._front : (MAP[fb] || CYAN);
+      let color = PINK, z = 0, mix = false;
+      if (i === n - 1) { color = FRONT; z = 3; mix = fbMix; }
+      else if (i === n - 2) { color = ORANGE; z = 2; }
+      else if (i === 2 || i === 6) { color = PURPLE; z = 1; }
+      const spread = i === n - 1 ? -0.35 : i === n - 2 ? -0.68 : (i === 2 || i === 6) ? 0.72 : (r - 0.5) * 1.95;
+      spec.push({ color, z, mix, base: spread * 172, amp: 45 + r * 100, f1: 0.7 + r * 1.5, f2: 1.3 + ((i * 0.3819) % 1) * 2.5, p1: i * 1.37, p2: i * 2.19 + 0.7, s1: 0.2 + r * 0.24, s2: 0.13 + ((i * 0.7549) % 1) * 0.28, drift: 0.06 + r * 0.1, bias: (r - 0.5) * 74 });
+    }
+    spec.sort((a, b) => a.z - b.z);
+    this.lines = spec;
+    this.node = DW * 0.31;
+    this.xEnd = this.node - 3;
+    this.conv = this.xEnd - 16; // gerade Strecke links, so lang wie der Schienenstamm rechts
+    this.startX = -DW * 0.06;
+    const rails = [];
+    [31, 85, 143, 202].forEach((o, i) => {
+      [-1, 1].forEach(sgn => rails.push({ y: CY + sgn * o, rank: 3 - i, color: i % 2 === 0 ? GREEN : GREEN2, ph: (i * 0.37 + (sgn > 0 ? 0.5 : 0)) % 1 }));
+    });
+    rails.sort((a, b) => a.y - b.y);
+    this.rails = rails;
+  }
+
+
+  // Standbilder für den Farbvergleich: einmal gezeichnet, kein Dauerlauf
+  renderStills() {
+    const list = Array.prototype.slice.call(document.querySelectorAll('canvas[data-front]'));
+    if (!list.length) return;
+    list.forEach(c => {
+      this._front = c.getAttribute('data-front');
+      this.build();
+      this.frameDots = [];
+      const hell = c.getAttribute('data-mode') === 'hell';
+      hell ? this.renderBright(0) : this.render1(0, 0);
+      const src = hell ? this.offB : this.off;
+      const w = c.clientWidth, h = c.clientHeight;
+      if (!w || !h) return;
+      if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
+      const s = Math.max(w / DW, h / DH), dw = DW * s, dh = DH * s;
+      c.getContext('2d').drawImage(src, (w - dw) / 2, (h - dh) / 2, dw, dh);
+    });
+    this._front = null;
+    this.build();
+  }
+
+  mixStroke(ctx) {
+    const g = ctx.createLinearGradient(this.startX, 0, this.xEnd, 0);
+    g.addColorStop(0, PINK);
+    g.addColorStop(0.34, PURPLE);
+    g.addColorStop(0.68, ORANGE);
+    g.addColorStop(1, CYAN);
+    return g;
+  }
+
+  componentDidUpdate() { this.build(); }
+
+  lineY(L, t, time) {
+    const env = Math.pow(1 - t, 1.25);
+    const v = Math.sin(t * L.f1 * Math.PI + L.p1 + time * L.s1) + 0.62 * Math.sin(t * L.f2 * Math.PI + L.p2 - time * L.s2);
+    return CY + env * (L.base + L.amp * v * 0.6 + L.bias * Math.sin(time * L.drift + L.p2));
+  }
+
+  linePoint(L, u, time) {
+    const x = this.startX + Math.max(0, Math.min(1, u)) * (this.xEnd - this.startX);
+    return { x, y: this.lineY(L, Math.max(0, Math.min(1, x / this.conv)), time) };
+  }
+
+  railPoint(R, u, time) {
+    const dy = R.y - CY, split = this.node + 3 + R.rank * 9, run = 120 + Math.abs(dy) * 1.05;
+    const tailX = DW + 45, a = split - this.node;
+    const total = a + run + Math.max(30, tailX - (split + run));
+    const d = Math.max(0, Math.min(1, u)) * total;
+    let x, y;
+    if (d <= a) { x = this.node + 3 + d; y = CY; }
+    else if (d <= a + run) {
+      const k = (d - a) / run, e = k * k * k * (k * (6 * k - 15) + 10);
+      x = split + k * run; y = CY + dy * e;
+    } else { x = split + run + (d - a - run); y = CY + dy; }
+    const ramp = Math.max(0, Math.min(1, (x - split) / 160));
+    y += ramp * (5.5 * Math.sin(x * 0.011 - time * 1.05 + R.ph * 6.283) + 2.2 * Math.sin(x * 0.024 - time * 1.5 + R.ph * 3.1));
+    return { x, y };
+  }
+
+  blobs(ctx, time, amt, base) {
+    ctx.fillStyle = base || '#08203f';
+    ctx.fillRect(0, 0, DW, DH);
+    [
+      { x: 0.22, y: 0.34, r: 0.62, c: '20,110,205', a: 0.5, sx: 0.09, sy: 0.13, p: 0 },
+      { x: 0.62, y: 0.72, r: 0.7, c: '10,58,132', a: 0.55, sx: 0.07, sy: 0.1, p: 2.1 },
+      { x: 0.85, y: 0.24, r: 0.55, c: '34,124,220', a: 0.38, sx: 0.11, sy: 0.08, p: 4.2 }
+    ].forEach(b => {
+      const cx = DW * (b.x + 0.06 * Math.sin(time * b.sx + b.p));
+      const cy = DH * (b.y + 0.08 * Math.sin(time * b.sy * 1.3 + b.p * 1.7));
+      const rad = DH * b.r * (1 + 0.08 * Math.sin(time * 0.12 + b.p));
+      const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, rad);
+      g.addColorStop(0, 'rgba(' + b.c + ',' + (b.a * amt) + ')');
+      g.addColorStop(1, 'rgba(' + b.c + ',0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, DW, DH);
+    });
+  }
+
+  dot(ctx, x, y, r, alpha) {
+    const g = r * 6;
+    ctx.globalAlpha = alpha * 0.7;
+    ctx.drawImage(this.glow, x - g, y - g, g * 2, g * 2);
+    ctx.globalAlpha = alpha;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  render1(time, dt) {
+    const amt = this.props.bgIntensity ?? 1;
+    const ctx = this.off.getContext('2d');
+    if (!this.bgc) { this.bgc = document.createElement('canvas'); this.bgc.width = DW; this.bgc.height = DH; }
+    if (time - this.bgAt > 0.12) {
+      this.bgAt = time;
+      this.blobs(this.bgc.getContext('2d'), time, amt);
+    }
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.drawImage(this.bgc, 0, 0);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    ctx.globalAlpha = 0.2 * amt;
+    this.lines.forEach(L => {
+      ctx.beginPath();
+      for (let i = 0; i <= 60; i++) {
+        const x = this.startX + (i / 60) * (this.xEnd - this.startX);
+        const y = this.lineY(L, Math.max(0, Math.min(1, x / this.conv)), time);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = L.mix ? this.mixStroke(ctx) : L.color;
+      ctx.lineWidth = 3.4;
+      ctx.stroke();
+    });
+    ctx.globalAlpha = 0.26 * amt;
+    this.rails.forEach(R => {
+      ctx.beginPath();
+      for (let i = 0; i <= 50; i++) {
+        const p = this.railPoint(R, i / 50, time);
+        i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y);
+      }
+      ctx.strokeStyle = R.color;
+      ctx.lineWidth = 3.8;
+      ctx.stroke();
+    });
+    ctx.globalAlpha = 1;
+
+    (this.frameDots || []).forEach(p => this.dot(ctx, p.x, p.y, p.r, p.a));
+    this.dot(ctx, this.node, CY, 5, 0.55 * amt);
+  }
+
+  renderBright(time) {
+    const ctx = this.offB.getContext('2d');
+    if (!this.bgcB) { this.bgcB = document.createElement('canvas'); this.bgcB.width = DW; this.bgcB.height = DH; this.bgBAt = -1; }
+    if (time - this.bgBAt > 0.12) {
+      this.bgBAt = time;
+      this.blobs(this.bgcB.getContext('2d'), time, 1, '#1858B0');
+    }
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.drawImage(this.bgcB, 0, 0);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    this.lines.forEach(L => {
+      ctx.beginPath();
+      for (let i = 0; i <= 60; i++) {
+        const x = this.startX + (i / 60) * (this.xEnd - this.startX);
+        const y = this.lineY(L, Math.max(0, Math.min(1, x / this.conv)), time);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = L.mix ? this.mixStroke(ctx) : L.color;
+      ctx.lineWidth = 3.6;
+      ctx.stroke();
+    });
+    this.rails.forEach(R => {
+      ctx.beginPath();
+      for (let i = 0; i <= 50; i++) {
+        const p = this.railPoint(R, i / 50, time);
+        i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y);
+      }
+      ctx.strokeStyle = R.color;
+      ctx.lineWidth = 4;
+      ctx.stroke();
+    });
+    (this.frameDots || []).forEach(p => this.dot(ctx, p.x, p.y, p.r * 1.5, Math.min(1, p.a * 2)));
+    this.dot(ctx, this.node, CY, 6, 1);
+  }
+
+  stepDots(time, dt) {
+    this.spawnIn -= dt;
+    if (this.spawnIn <= 0) {
+      this.spawnIn = 0.7 + Math.random() * 0.6;
+      const L = this.lines[Math.floor(Math.random() * this.lines.length)];
+      this.dots.push({ L, u: 0, v: 0.14 + Math.random() * 0.1, r: 1.7 + Math.random() * 1.1, j: 0.5 + Math.random() * 1.6, jp: Math.random() * 6.283 });
+    }
+    this.dots = this.dots.filter(p => {
+      p.u += p.v * dt * (1 + 0.14 * Math.sin(time * p.j * 0.5 + p.jp));
+      if (p.u >= 1) {
+        this.outs.push({ R: this.rails[this.railCursor++ % this.rails.length], u: 0.02, r: 2.1 });
+        return false;
+      }
+      const pt = this.linePoint(p.L, p.u, time);
+      this.frameDots.push({ x: pt.x, y: pt.y, r: p.r, a: Math.min(1, p.u * 6) * 0.5 });
+      return true;
+    });
+    this.outs = this.outs.filter(o => {
+      o.u += 0.26 * dt;
+      if (o.u >= 1) { this.flash = 1; return false; }
+      const pt = this.railPoint(o.R, o.u, time);
+      this.frameDots.push({ x: pt.x, y: pt.y, r: o.r, a: 0.55 });
+      return true;
+    });
+  }
+
+  blit() {
+    this.canvases = this.canvases.filter(c => c.isConnected);
+    this.canvasesB = this.canvasesB.filter(c => c.isConnected);
+    this.paint(this.canvases, this.off);
+    this.paint(this.canvasesB, this.offB);
+  }
+
+  paint(list, src) {
+    list.forEach(c => {
+      const w = c.clientWidth, h = c.clientHeight;
+      if (!w || !h) return;
+      const r = c.getBoundingClientRect();
+      if (r.bottom < -400 || r.top > window.innerHeight + 400) return;
+      if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
+      const s = Math.max(w / DW, h / DH);
+      const dw = DW * s, dh = DH * s;
+      const ctx = c.getContext('2d');
+      ctx.drawImage(src, (w - dw) / 2, (h - dh) / 2, dw, dh);
+    });
+  }
+
+  frame(now) {
+    this.raf = requestAnimationFrame(this.frame);
+    if (now - (this.lastFrame || 0) < 32) return;
+    this.lastFrame = now;
+    const time = (now - this.t0) / 1000;
+    const dt = Math.min(0.06, (now - (this.last || now)) / 1000);
+    this.last = now;
+    this.frameDots = [];
+    if ((this.props.dotFlow ?? true) && !this.calm) this.stepDots(time, dt);
+    this.render1(time, dt);
+    if (this.canvasesB.length) this.renderBright(time);
+    this.blit();
+    this.stepFlash(dt);
+    if (!this.stillsDone) { this.stillsDone = true; this.renderStills(); }
+  }
+
+  // Blitz auf der Anmeldeleiste, sobald ein Datenpaket das Ende einer Schiene erreicht
+  stepFlash(dt) {
+    const card = this.cardRef.current;
+    if (!card) return;
+    if (this.flash > 0) {
+      this.flash = Math.max(0, this.flash - dt * 1.6);
+      card.style.borderLeftColor = 'rgba(0,253,253,' + (0.1 + 0.5 * this.flash) + ')';
+      card.style.boxShadow = '0 0 ' + (20 + 40 * this.flash) + 'px rgba(0,253,253,' + (0.16 * this.flash) + ')';
+      this.flashed = true;
+    } else if (this.flashed) {
+      this.flashed = false;
+      card.style.borderLeftColor = 'rgba(255,255,255,0.1)';
+      card.style.boxShadow = 'none';
+    }
+  }
+}
+
+</script>
+</body>
+</html>
