@@ -7,12 +7,17 @@ import { ladeEinladung } from "@/lib/verwaltung";
 import { useSitzung } from "@/store/sitzung";
 
 /**
- * Bildschirm 09 der Vorlage: eine Einladung verschicken.
+ * Bildschirm 09 der Vorlage: einen Zugang anlegen.
  *
- * Zugang gibt es nur auf Einladung, es gibt keine Selbstregistrierung. Damit ist der
- * Mailversand hier kein Beiwerk, sondern der einzige Weg herein. Solange der eingebaute
- * Versand von Supabase benutzt wird, steht das unter dem Formular, und zwar so, dass man
- * es liest.
+ * **Es wird keine Mail verschickt.** Der Dialog legt den Nutzer an und zeigt den
+ * Einladungslink; weitergeschickt wird er von Hand (Entscheidung 07.08.2026). Der
+ * eingebaute Versand von Supabase ist nicht fuer den Betrieb gedacht, und ein eigener
+ * SMTP-Dienst braucht Absender und DNS-Eintraege, die es beide noch nicht gibt.
+ *
+ * Der Link ist damit das Ergebnis dieses Dialogs, nicht eine Randnotiz: er ist der einzige
+ * Weg herein. Deshalb steht er vollstaendig da, auswaehlbar, mit einer Schaltflaeche zum
+ * Kopieren, und der Hinweis, dass keine Mail unterwegs ist, steht vor dem Link und nicht
+ * darunter.
  */
 
 interface Props {
@@ -28,7 +33,8 @@ export function EinladenDialog({ schliesse, neuLaden }: Props) {
   const [gewaehlt, setzeGewaehlt] = useState<readonly string[]>([]);
   const [laeuft, setzeLaeuft] = useState(false);
   const [fehler, setzeFehler] = useState<string | null>(null);
-  const [fertig, setzeFertig] = useState<string | null>(null);
+  const [fertig, setzeFertig] = useState<{ email: string; link: string } | null>(null);
+  const [kopiert, setzeKopiert] = useState(false);
 
   const umschalten = (id: string) => {
     setzeGewaehlt((bisher) =>
@@ -41,8 +47,8 @@ export function EinladenDialog({ schliesse, neuLaden }: Props) {
     setzeLaeuft(true);
     setzeFehler(null);
     try {
-      const { email: adresse } = await ladeEinladung(email, rolle, gewaehlt);
-      setzeFertig(adresse);
+      const { email: adresse, link } = await ladeEinladung(email, rolle, gewaehlt);
+      setzeFertig({ email: adresse, link });
       await neuLaden();
     } catch (ursache) {
       setzeFehler(ursache instanceof Error ? ursache.message : "Unbekannter Fehler.");
@@ -60,15 +66,48 @@ export function EinladenDialog({ schliesse, neuLaden }: Props) {
       {fertig ? (
         <div className="flex flex-col gap-5 px-[26px] py-7">
           <p className="font-sans text-lg text-axon-schrift">
-            Die Einladung an <span className="font-mono text-md">{fertig}</span> ist unterwegs.
+            Der Zugang für <span className="font-mono text-md">{fertig.email}</span> ist
+            angelegt.
           </p>
+          {/*
+            Es wird bewusst keine Mail verschickt. Der Link steht deshalb hier, und zwar
+            vollstaendig und auswaehlbar: er ist der einzige Weg herein, und wer ihn
+            verliert, muss die Einladung neu erzeugen.
+          */}
           <p className="font-sans text-base text-axon-schrift-fein">
-            Sie enthält einen Link, über den sich ein Passwort setzen lässt. Bis dahin steht
-            der Zugang in der Liste, ohne dass sich jemand angemeldet hätte.
+            Es wurde <strong className="text-axon-schrift">keine Mail verschickt</strong>.
+            Schick diesen Link selbst weiter. Er gilt einmalig und führt zum Setzen des
+            Passworts.
           </p>
-          <div className="flex justify-end">
-            <Aktion onClick={schliesse}>Fertig</Aktion>
+
+          <label className="flex flex-col gap-[9px]">
+            <Etikett>Einladungslink</Etikett>
+            <textarea
+              readOnly
+              rows={3}
+              value={fertig.link}
+              onFocus={(e) => e.currentTarget.select()}
+              className="resize-none border border-axon-linie bg-axon-flaeche p-3 font-mono text-xs break-all text-axon-schrift outline-none focus:border-axon-fokus"
+            />
+          </label>
+
+          <div className="flex items-center gap-3">
+            <Aktion
+              onClick={() => {
+                void navigator.clipboard.writeText(fertig.link).then(() => {
+                  setzeKopiert(true);
+                });
+              }}
+            >
+              {kopiert ? "Kopiert" : "Link kopieren"}
+            </Aktion>
+            <Nebenaktion onClick={schliesse}>Fertig</Nebenaktion>
           </div>
+
+          <p className="font-sans text-sm text-axon-schrift-fein">
+            Bis der Link benutzt wird, steht der Zugang in der Liste mit „Nie" als letzter
+            Anmeldung.
+          </p>
         </div>
       ) : (
         <form onSubmit={(e) => void senden(e)} className="flex flex-col gap-6 px-[26px] py-6">
@@ -132,7 +171,7 @@ export function EinladenDialog({ schliesse, neuLaden }: Props) {
 
           <div className="flex items-center gap-3">
             <Aktion typ="submit" disabled={laeuft || !email.includes("@")}>
-              {laeuft ? "Wird versendet" : "Einladung senden"}
+              {laeuft ? "Wird angelegt" : "Zugang anlegen"}
             </Aktion>
             <Nebenaktion onClick={schliesse} disabled={laeuft}>
               Abbrechen

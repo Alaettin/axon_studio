@@ -115,6 +115,29 @@ test("Der Admin sieht alle Nutzer und kann eine Freischaltung entziehen", async 
   await expect(schalter).toHaveAttribute("aria-checked", "true", { timeout: 15_000 });
 });
 
+test("Der Einladen-Dialog sagt, dass keine Mail verschickt wird", async ({ page }) => {
+  /*
+   * Hier wird bewusst **nicht** abgeschickt: jeder Durchlauf legte sonst einen Nutzer im
+   * echten Bestand an, und aus dem Browser heraus laesst er sich nicht wieder entfernen.
+   * Den ganzen Weg (anlegen, Link benutzen, Passwort setzen, anmelden) belegt
+   * `scripts/einladung-rundlauf.mjs`, das hinterher aufraeumen kann.
+   *
+   * Was hier geprueft wird, ist das eine, was der Dialog niemals verschweigen darf: dass
+   * niemand eine Mail bekommt und der Link von Hand weiterzugeben ist.
+   */
+  await melde(page, ADMIN);
+  await page.goto("/verwaltung/nutzer");
+  await page.getByRole("button", { name: /Einladen/ }).click();
+
+  await expect(page.getByText("Zugang nur auf Einladung")).toBeVisible();
+  await expect(page.getByText("Sofort freischalten")).toBeVisible();
+
+  const anlegen = page.getByRole("button", { name: "Zugang anlegen" });
+  await expect(anlegen).toBeDisabled();
+  await page.getByLabel("E-Mail").fill("wird-nicht-abgeschickt@example.invalid");
+  await expect(anlegen).toBeEnabled();
+});
+
 test("Der Admin kann sich selbst nicht die Rechte nehmen", async ({ page }) => {
   await melde(page, ADMIN);
   await page.goto("/verwaltung/nutzer");

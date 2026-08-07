@@ -125,13 +125,36 @@ async function einladen(
 
   if (!email.includes("@")) return antwort({ fehler: "Das ist keine E-Mail-Adresse." }, 400);
 
-  const { data: eingeladen, error: einladeFehler } = await dienst.auth.admin.inviteUserByEmail(
+  /*
+   * `generateLink` statt `inviteUserByEmail`: es legt den Nutzer genauso an, verschickt
+   * aber **keine** Mail, sondern gibt den Link zurueck. Der Admin schickt ihn selbst.
+   *
+   * Grund (Entscheidung 07.08.2026): der eingebaute Versand von Supabase ist nicht fuer den
+   * Betrieb gedacht, und ein eigener SMTP-Dienst braucht Absender und DNS-Eintraege, die es
+   * beide noch nicht gibt. Bei einer Handvoll interner Nutzer ist der Link ehrlicher als
+   * eine Mail-Einrichtung, und er ist sofort pruefbar: der Einladeweg war bisher der
+   * einzige Pfad, den niemand durchlaufen konnte.
+   */
+  const { data: eingeladen, error: einladeFehler } = await dienst.auth.admin.generateLink({
+    type: "invite",
     email,
-    ziel ? { redirectTo: ziel } : undefined,
-  );
-  if (einladeFehler) return antwort({ fehler: einladeFehler.message }, 400);
+    options: ziel ? { redirectTo: ziel } : undefined,
+  });
+  if (einladeFehler) {
+    // Der haeufigste Fall ist "gibt es schon", und das ist kein Serverfehler.
+    const schon = /already|registered|exists/i.test(einladeFehler.message);
+    return antwort(
+      {
+        fehler: schon
+          ? "Zu dieser Adresse gibt es bereits ein Konto."
+          : einladeFehler.message,
+      },
+      400,
+    );
+  }
 
   const neueKennung = eingeladen.user.id;
+  const link = eingeladen.properties.action_link;
 
   /*
    * Die Zeile in `profiles` legt der Trigger `handle_new_user` an, und zwar immer mit der
@@ -149,13 +172,15 @@ async function einladen(
     if (error) return antwort({ fehler: error.message }, 500);
   }
 
-  // Historie. Ein Konflikt hier darf die Einladung nicht scheitern lassen, sie ist schon
-  // unterwegs: der eindeutige Index deckt nur offene Einladungen je Adresse ab.
+  // Historie. Ein Konflikt hier darf die Einladung nicht scheitern lassen, der Nutzer ist
+  // schon angelegt: der eindeutige Index deckt nur offene Einladungen je Adresse ab.
   await dienst
     .from("hub_invitations")
     .insert({ email, rolle, apps, eingeladen_von: von });
 
-  return antwort({ kennung: neueKennung, email });
+  // Der Link ist das Ergebnis, nicht ein Nebenprodukt: ohne ihn kommt der Eingeladene
+  // nicht herein, und es gibt keinen zweiten Weg, ihn zu bekommen.
+  return antwort({ kennung: neueKennung, email, link });
 }
 
 async function status(dienst: Dienst, auftrag: Record<string, unknown>): Promise<Response> {

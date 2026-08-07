@@ -47,11 +47,15 @@ export function ladeNutzer(): Promise<{ nutzer: Nutzerzeile[] }> {
   return rufe<{ nutzer: Nutzerzeile[] }>("liste");
 }
 
+/**
+ * Legt den Nutzer an und gibt den Einladungslink zurueck. Es wird **keine Mail
+ * verschickt**: der Admin gibt den Link selbst weiter (Entscheidung 07.08.2026).
+ */
 export function ladeEinladung(
   email: string,
   rolle: Rolle,
   apps: readonly string[],
-): Promise<{ kennung: string; email: string }> {
+): Promise<{ kennung: string; email: string; link: string }> {
   return rufe("einladen", {
     email,
     rolle,
