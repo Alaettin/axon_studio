@@ -1,0 +1,19 @@
+node_modules
+dist
+.git
+.github
+.claude
+.agents
+test-results
+playwright-report
+coverage
+e2e
+test
+scripts
+docs
+*.md
+
+# Die lokale .env darf den Bau nicht beeinflussen: sie ueberschriebe `.env.production`
+# und damit genau die Werte, mit denen ausgeliefert werden soll.
+.env
+.env.local

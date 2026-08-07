@@ -58,8 +58,18 @@ export function ZustimmungRoute() {
   const [fehler, setzeFehler] = useState<string | null>(null);
   const [entscheidet, setzeEntscheidet] = useState(false);
 
+  /*
+   * Abhaengig von der **Kennung** des Angemeldeten, nicht vom Sitzungsobjekt.
+   *
+   * `sitzung` bekommt bei jedem Auffrischen des Tokens eine neue Identitaet, und der
+   * Effekt lief dadurch mehrfach: im Container waren es zwei Abrufe derselben
+   * `authorization_id` hintereinander, im Netzwerkmitschnitt gut zu sehen. Harmlos
+   * gelesen, aber eine Autorisierungsanfrage ist nichts, was man zweimal abholt.
+   */
+  const angemeldetAls = sitzung?.user.id ?? null;
+
   useEffect(() => {
-    if (!kennung || !sitzung) return;
+    if (!kennung || !angemeldetAls) return;
 
     void (async () => {
       const { data, error } = await supabase.auth.oauth.getAuthorizationDetails(kennung);
@@ -74,7 +84,7 @@ export function ZustimmungRoute() {
       }
       setzeLaedt(false);
     })();
-  }, [kennung, sitzung]);
+  }, [kennung, angemeldetAls]);
 
   // Noch nicht angemeldet: hin zur Anmeldung, und die Kennung mitnehmen, sonst ist die
   // Anfrage nach dem Anmelden verloren.

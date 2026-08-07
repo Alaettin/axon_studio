@@ -115,6 +115,17 @@ test("Der Admin sieht alle Nutzer und kann eine Freischaltung entziehen", async 
   await expect(schalter).toHaveAttribute("aria-checked", "true", { timeout: 15_000 });
 });
 
+test("Die Zustimmungsseite ohne Kennung sagt, was fehlt", async ({ page }) => {
+  /*
+   * Der Rest der Seite laesst sich erst pruefen, wenn der OAuth-2.1-Server eingeschaltet
+   * ist; heute antwortet er mit `OAuth server is disabled`. Was schon jetzt gilt und nie
+   * brechen darf: ohne `authorization_id` steht dort ein Satz und keine leere Karte.
+   */
+  await melde(page, NUTZER);
+  await page.goto("/zustimmung");
+  await expect(page.getByText("In der Adresse fehlt die Kennung der Anfrage.")).toBeVisible();
+});
+
 test("Der Einladen-Dialog sagt, dass keine Mail verschickt wird", async ({ page }) => {
   /*
    * Hier wird bewusst **nicht** abgeschickt: jeder Durchlauf legte sonst einen Nutzer im

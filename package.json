@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "//packageManager": "Festgenagelt, damit der Container dasselbe pnpm benutzt wie dieser Rechner. Ohne die Zeile zieht corepack im Abbild die neueste Fassung, und deren strengere Lieferketten-Regel (minimumReleaseAge) lehnte einen Lockfile ab, den derselbe Befehl hier anstandslos gebaut hatte.",
+  "packageManager": "pnpm@10.30.3",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
