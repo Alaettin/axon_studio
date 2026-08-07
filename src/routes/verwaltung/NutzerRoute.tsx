@@ -149,8 +149,15 @@ export function NutzerRoute() {
                   <span className="font-sans text-base text-axon-schrift-leise">
                     {zeile.role === "admin" ? "Administrator" : "Nutzer"}
                   </span>
+                  {/*
+                    Nur zaehlen, was im Katalog steht. `user_tool_access` ist mit der AAS
+                    Tools Platform geteilt und traegt auch Kennungen von Werkzeugen, die
+                    keine Programme des Hubs sind. Ohne den Filter stand dort "3 von 1",
+                    sobald der Katalog kleiner wurde als der Bestand an Freischaltungen.
+                  */}
                   <span className="font-mono text-xs text-axon-schrift-leise" data-numeric>
-                    {zeile.programme.length} von {katalog.length}
+                    {zeile.programme.filter((p) => katalog.some((k) => k.id === p)).length} von{" "}
+                    {katalog.length}
                   </span>
                   <span className="font-mono text-xs text-axon-schrift-leise" data-numeric>
                     {alsDatum(zeile.zuletzt_angemeldet)}

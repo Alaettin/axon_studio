@@ -39,16 +39,31 @@ test("Anmeldung weist falsche Zugangsdaten ab, ohne zu verraten, wer ein Konto h
   await expect(page.getByText("E-Mail oder Passwort stimmt nicht.")).toBeVisible();
 });
 
-test("Nutzer sieht genau seine drei Kacheln und die gesperrten als eine", async ({ page }) => {
+test("Der Katalog enthaelt nur echte Clients des Hubs", async ({ page }) => {
+  /*
+   * Im Katalog steht genau ein Programm: der AXON Editor. Die acht Werkzeuge der
+   * AAS Tools Platform standen dort am 07.08.2026 kurzzeitig, weil `user_tool_access`
+   * bereits Freischaltungen auf ihre Kennungen trug. Das war ein Fehlschluss: vorhandene
+   * Freischaltungen sind kein Auftrag, die Werkzeuge aufzunehmen. Sie sind keine Clients
+   * des Hubs, ihre Kacheln fuehrten zu einer zweiten Anmeldung, und die Akte sieht ihren
+   * Umzug ausdruecklich fuer **spaeter** vor.
+   *
+   * Diese Pruefung haelt das fest: taucht hier wieder ein fremdes Werkzeug auf, ist es
+   * eine Entscheidung und kein Versehen.
+   */
   await melde(page, NUTZER);
 
-  await expect(page.getByRole("link", { name: /AAS Editor/ })).toBeVisible();
-  await expect(page.getByRole("link", { name: /Excel Connector/ })).toBeVisible();
-  await expect(page.getByRole("link", { name: /IEC 61406 QR/ })).toBeVisible();
-  // Acht im Katalog, drei frei, also fuenf hinter der gestrichelten Kachel. Ausgeschrieben,
-  // wie in der Vorlage ("Drei weitere Programme").
-  await expect(page.getByText("Fünf weitere Programme")).toBeVisible();
-  await expect(page.getByText("Zugang anfragen")).toBeVisible();
+  const kacheln = page.locator('a[href]:has-text("ÖFFNEN")');
+  await expect(kacheln).toHaveCount(1);
+  await expect(page.getByRole("link", { name: /AXON Editor/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /AXON Editor/ })).toHaveAttribute(
+    "href",
+    "https://axon-editor.sliplane.app",
+  );
+
+  // Nichts Gesperrtes: was nicht im Katalog steht, geht den Hub nichts an.
+  await expect(page.getByText("Zugang anfragen")).toHaveCount(0);
+  await expect(page.getByText("Excel Connector")).toHaveCount(0);
 });
 
 test("Ein normaler Nutzer bekommt die Verwaltung nirgends zu sehen", async ({ page }) => {
@@ -65,11 +80,11 @@ test("Ein normaler Nutzer bekommt die Verwaltung nirgends zu sehen", async ({ pa
   await expect(page).toHaveURL(/\/$/);
 });
 
-test("Die Palette findet ein Programm und oeffnet es", async ({ page }) => {
+test("Die Palette findet ein Programm", async ({ page }) => {
   await melde(page, NUTZER);
   await page.keyboard.press("ControlOrMeta+k");
-  await page.getByPlaceholder("Suchen").fill("excel");
-  await expect(page.getByRole("option", { name: /Excel Connector/ })).toBeVisible();
+  await page.getByPlaceholder("Suchen").fill("editor");
+  await expect(page.getByRole("option", { name: /AXON Editor/ })).toBeVisible();
 });
 
 test("Der Nutzer aendert seinen Namen, und er bleibt nach dem Neuladen stehen", async ({
@@ -101,11 +116,22 @@ test("Der Admin sieht alle Nutzer und kann eine Freischaltung entziehen", async 
   await page.getByPlaceholder("Nutzer suchen").fill("axon-probe-nutzer");
 
   const zeile = page.getByRole("button", { name: /Probe Nutzer/ });
-  await expect(zeile).toBeVisible();
-  await expect(zeile).toContainText("3 von 8");
+  /*
+   * Laengere Frist als die Vorgabe von fuenf Sekunden: die Liste kommt aus der Edge
+   * Function `verwaltung`, und deren Kaltstart hat diese Zusage in einem Lauf schon
+   * gerissen. Drei Laeufe danach waren gruen, was den Verdacht bestaetigt: es war die
+   * Wartezeit, nicht die Sache.
+   */
+  await expect(zeile).toBeVisible({ timeout: 20_000 });
+  /*
+   * Gezaehlt wird nur, was im Katalog steht. Der Probenutzer hat drei Freischaltungen in
+   * `user_tool_access`, aber zwei davon gehoeren Werkzeugen der Tools-Plattform, die keine
+   * Programme des Hubs sind. Ohne den Filter stuende hier "3 von 1".
+   */
+  await expect(zeile).toContainText("1 von 1");
 
   await zeile.click();
-  const schalter = page.getByRole("switch", { name: /Excel Connector/ });
+  const schalter = page.getByRole("switch", { name: /AXON Editor/ });
   await expect(schalter).toHaveAttribute("aria-checked", "true");
   await schalter.click();
   await expect(schalter).toHaveAttribute("aria-checked", "false", { timeout: 15_000 });

@@ -1,0 +1,25 @@
+-- Rueckbau: der Katalog enthaelt nur noch Programme, die wirklich Clients des Hubs sind.
+--
+-- Am 07.08.2026 wurden acht Eintraege aus der Registry der AAS Tools Platform uebernommen,
+-- weil `user_tool_access` bereits Freischaltungen auf diese Kennungen trug und die
+-- Kachelwand sonst leer gewesen waere. Das war ein Fehlschluss: vorhandene Freischaltungen
+-- sind kein Auftrag, die zugehoerigen Werkzeuge in den Hub aufzunehmen.
+--
+-- Die Akte ist an der Stelle eindeutig: "Die AAS Tools Platform bleibt, wie sie ist. Ihre
+-- acht Werkzeuge sollen **spaeter** hierher wandern, nicht umgekehrt." Aus dem "spaeter"
+-- wurde ein "jetzt", und der Hub wurde damit zu einem Starter fuer fremde Werkzeuge, die
+-- keine Clients von ihm sind: die Kacheln zeigten auf dti.workspaces.neoception.dev, wo
+-- man sich ein zweites Mal anmelden muss. Genau das soll der Hub abschaffen.
+--
+-- Uebrig bleibt der AXON Editor, das Programm, um das es in diesem Projekt geht und das
+-- als erster OIDC-Client vorgesehen ist (M5).
+--
+-- `user_tool_access` wird **nicht** angefasst. Die Freischaltungen gehoeren der
+-- Tools-Plattform und steuern dort, was ein Nutzer sieht. Sie zu loeschen waere ein
+-- Eingriff in eine Anwendung, die hier ausdruecklich nicht angefasst wird. Der Hub liest
+-- den Schnitt aus Katalog und Freischaltungen; was nicht im Katalog steht, spielt fuer ihn
+-- keine Rolle.
+--
+-- Folge in der Oberflaeche: die Nutzerliste zaehlte "Freischaltungen von Katalogumfang"
+-- und haette danach "3 von 1" angezeigt. Sie filtert jetzt auf den Katalog.
+delete from public.hub_apps where id <> 'aas-editor';
