@@ -178,24 +178,33 @@ export function ZustimmungRoute() {
             </p>
           ) : (
             <>
-              <p className="font-display text-2xl font-light text-axon-schrift">
-                {programm ? (
-                  <>
-                    <span
-                      aria-hidden
-                      style={{ backgroundColor: programm.akzent }}
-                      className="mr-3 inline-block size-[9px] rounded-full align-middle"
-                    />
-                    {programm.name}
-                  </>
-                ) : (
-                  "Ein unbekanntes Programm"
-                )}
-                <span className="font-sans text-base text-axon-schrift-leise">
-                  {" "}
+              {/*
+                Ein Satz, eine Groesse, wie in der Vorlage. Vorher trug der Name
+                `font-display text-2xl` und der Rest `font-sans text-base`: zwei Schriften
+                und zwei Farben in einem Absatz, der Umbruch fiel mitten hinein und der
+                Satz zerfiel optisch in Ueberschrift und Nachsatz.
+
+                Und er erscheint erst mit `details`. Sonst stand hier waehrend des Ladens
+                "Ein unbekanntes Programm", also die alarmierendste Aussage dieser Seite,
+                ueber ein Programm, ueber das noch nichts bekannt war.
+              */}
+              {details && (
+                <p className="text-pretty font-display text-2xl font-light text-axon-schrift">
+                  {programm ? (
+                    <>
+                      <span
+                        aria-hidden
+                        style={{ backgroundColor: programm.akzent }}
+                        className="mr-3 inline-block size-[9px] rounded-full align-middle"
+                      />
+                      <span className="font-medium">{programm.name}</span>
+                    </>
+                  ) : (
+                    <span className="font-medium">Ein unbekanntes Programm</span>
+                  )}{" "}
                   möchte auf dein Konto zugreifen.
-                </span>
-              </p>
+                </p>
+              )}
               {/*
                 Der Rueckweg ist der eigentliche Vertrauensanker: der Name steht in unserem
                 Katalog, die Adresse dagegen hat Supabase gegen die registrierte
@@ -300,9 +309,14 @@ export function ZustimmungRoute() {
           </div>
         )}
 
-        <p className="border-t border-axon-linie-fein px-7 py-4 font-sans text-sm text-axon-schrift-fein">
-          Du bist als {profil?.email ?? "…"} angemeldet. Die Freigabe lässt sich später
-          zurücknehmen.
+        {/*
+          Wer angemeldet ist, steht hier erst, wenn es feststeht. Vorher las sich die Zeile
+          als "Du bist als … angemeldet", und Auslassungspunkte sind keine Auskunft. Der
+          zweite Satz gilt ohnehin unabhaengig davon und bleibt deshalb stehen.
+        */}
+        <p className="border-t border-axon-linie-fein px-7 py-4 text-pretty font-sans text-sm text-axon-schrift-fein">
+          {profil?.email ? `Du bist als ${profil.email} angemeldet. ` : ""}
+          Die Freigabe lässt sich im Profil jederzeit zurücknehmen.
         </p>
       </div>
     </Flaeche>
