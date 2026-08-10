@@ -17,9 +17,12 @@ import { cn } from "@/lib/utils";
  * | Schleier   | Wofuer                           | Vorlage        |
  * |------------|----------------------------------|----------------|
  * | `buehne`   | Anmeldung, das Bild traegt       | 01             |
- * | `sammlung` | Kachelwand, Tabellen, Formulare  | 02, 07, 11-15  |
+ * | `sammlung` | Kachelwand, Tabellen, Formulare  | 02, 06, 07, 11-15 |
  * | `mitte`    | Zustimmung, eine Karte in Ruhe   | 04             |
- * | `dicht`    | Palette und Dialoge darueber     | 03, 05, 06, 08 |
+ * | `dicht`    | Palette und Dialoge darueber     | 03, 05, 08     |
+ *
+ * Die Vorlage zeigt 06 (Profil) mit offener Palette, also im gedaempften Zustand. Das ist
+ * kein eigener Grundton der Seite: in Ruhe traegt sie `sammlung` wie jede andere Vollseite.
  */
 
 export type Schleier = "buehne" | "sammlung" | "mitte" | "dicht";

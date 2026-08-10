@@ -77,7 +77,7 @@ export function ProfilRoute() {
   const geaendert = profil ? name.trim() !== (profil.display_name ?? "") : false;
 
   return (
-    <Flaeche schleier="dicht" className="px-14 pt-[30px] pb-9">
+    <Flaeche schleier={paletteOffen ? "dicht" : "sammlung"} className="px-14 pt-[30px] pb-9">
       <Kopfzeile oeffnePalette={() => setzePaletteOffen(true)} gedaempft={paletteOffen} />
 
       <div className="flex min-h-0 flex-1 flex-col items-center pt-9">
