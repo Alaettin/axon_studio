@@ -105,6 +105,23 @@ export async function clientAnlegen(
     .maybeSingle();
 
   /*
+   * Wie der Client sich am Token-Endpunkt ausweist, haengt daran, **wer** ihn benutzt.
+   *
+   * Unsere eigenen Programme tauschen den Code mit HTTP-Basic; so macht es der AXON
+   * Editor in `auth/oidc.ts`, und dabei bleibt es. Ein fremder Klient richtet sich nicht
+   * nach uns: claude.ai schickt die Zugangsdaten im Rumpf (`client_secret_post`) und
+   * kennt die registrierte Methode gar nicht, weil es sie bei einem vorab angelegten
+   * Client nirgends erfaehrt. Der Aussteller weist den Tausch dann mit "client is
+   * registered for client_secret_basic but client_secret_post was used" ab, und zwar
+   * erst im letzten Schritt, nachdem Anmeldung und Zustimmung schon durch sind
+   * (gemessen am 11.08.2026 in den Auth-Protokollen).
+   *
+   * Beide Methoden sind gleich stark: das Geheimnis geht so oder so ueber TLS an
+   * denselben Endpunkt, nur einmal in der Kopfzeile und einmal im Rumpf.
+   */
+  const ausweisart = umgebung === "connector" ? "client_secret_post" : "client_secret_basic";
+
+  /*
    * **Vertraulich**, nicht oeffentlich. Der Codetausch laeuft im Server des
    * Unterprogramms, das Token verlaesst ihn nie. Ein oeffentlicher Client legte das Token
    * in den Browser und waere gegenueber einer Anmeldung mit Passwort ein Rueckschritt.
@@ -113,7 +130,7 @@ export async function clientAnlegen(
     name: `${name || appId} (${umgebung})`,
     redirect_uris: [rueckweg],
     client_type: "confidential",
-    token_endpoint_auth_method: "client_secret_basic",
+    token_endpoint_auth_method: ausweisart,
   });
   if (error) return antwort({ fehler: error.message }, 400, cors);
 
