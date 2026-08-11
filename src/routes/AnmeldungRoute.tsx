@@ -4,6 +4,7 @@ import { Navigate, useSearchParams } from "react-router";
 import { AxonKeyvisual } from "@/components/Keyvisual/AxonKeyvisual";
 import logo from "@/assets/neoception-weiss.png";
 import { supabase } from "@/lib/supabase";
+import { nurEigenerPfad } from "@/lib/utils";
 import { useSitzung } from "@/store/sitzung";
 
 /**
@@ -28,7 +29,10 @@ export function AnmeldungRoute() {
   const [fehler, setzeFehler] = useState<string | null>(null);
   const [hinweis, setzeHinweis] = useState<string | null>(null);
 
-  if (sitzung) return <Navigate to={parameter.get("weiter") ?? "/"} replace />;
+  // `weiter` kommt aus der Adresszeile. `nurEigenerPfad` haelt es im eigenen Programm:
+  // `//boesewicht.invalid` ist ein protokollrelativer Pfad und fuehrte sonst nach der
+  // Anmeldung auf eine fremde Seite.
+  if (sitzung) return <Navigate to={nurEigenerPfad(parameter.get("weiter"))} replace />;
 
   const anmelden = async (ereignis: FormEvent) => {
     ereignis.preventDefault();

@@ -41,9 +41,18 @@ export function SchrittAdresse({
 
   const maengel = umgebungen.map((u) => pruefeRueckweg(u.redirect_uri));
   const basisMangel = pruefeBasis(entwurf.basis_adresse);
+  /*
+   * Dieselbe Pruefung fuer die Adresse der Kachel, und zwar nicht aus Ordnungsliebe: der
+   * Wert landet in `hub_apps.url` und von dort in ein `href` und in `location.assign`.
+   * Ohne Schema koennte dort `javascript:` stehen, und dann fuehrte ein Administrator Code
+   * im Browser jedes Nutzers aus. Die Datenbank haelt dieselbe Regel als CHECK; hier steht
+   * sie, damit der Mangel unter dem Feld erscheint und nicht als Datenbankmeldung.
+   * Leer ist erlaubt, dann gilt die Basis-Adresse.
+   */
+  const urlMangel = entwurf.url.trim() ? pruefeBasis(entwurf.url) : null;
   const offen = UMGEBUNGEN.filter((u) => !umgebungen.some((v) => v.umgebung === u.wert));
   const vollstaendig =
-    !basisMangel && umgebungen.length > 0 && maengel.every((m) => m === null);
+    !basisMangel && !urlMangel && umgebungen.length > 0 && maengel.every((m) => m === null);
 
   return (
     <div className="flex flex-col gap-7">
@@ -71,7 +80,11 @@ export function SchrittAdresse({
             wert={entwurf.url}
             setze={(url) => setzeEntwurf((e) => ({ ...e, url }))}
             platzhalter={entwurf.basis_adresse || "https://axon-editor.sliplane.app"}
-            hinweis="Wohin die Kachel auf der Bühne führt. Leer heißt: die Basis-Adresse."
+            hinweis={
+              beruehrt && urlMangel
+                ? urlMangel
+                : "Wohin die Kachel auf der Bühne führt. Leer heißt: die Basis-Adresse."
+            }
           />
         </div>
       </Glasflaeche>

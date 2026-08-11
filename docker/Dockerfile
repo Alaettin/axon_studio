@@ -22,14 +22,29 @@ COPY . .
 RUN pnpm build
 
 # --- Auslieferung ---
-FROM nginx:1.29-alpine AS laufzeit
+#
+# **nginx-unprivileged, nicht nginx.** Das gewoehnliche Abbild startet seinen Hauptprozess
+# als root; dieses laeuft durchgehend als uid 101 und lauscht von Haus aus auf 8080, also
+# genau dem Port, den die Konfiguration ohnehin setzt. Ein Abbild, das nur statische
+# Dateien ausliefert, braucht keine Rechte.
+FROM nginxinc/nginx-unprivileged:1.29-alpine AS laufzeit
 
-# Die Vorgabekonfiguration lauscht auf 80 und kennt keinen SPA-Rueckfall.
-RUN rm /etc/nginx/conf.d/default.conf
+# Die Vorgabekonfiguration kennt keinen SPA-Rueckfall. `-f`, weil sie je nach Abbild
+# fehlen darf und ein fehlender Loeschversuch kein Baufehler sein soll.
+RUN rm -f /etc/nginx/conf.d/default.conf
 COPY docker/nginx.conf /etc/nginx/conf.d/hub.conf
+# **Nicht** nach conf.d: alles dort wird von nginx selbst in den http-Block eingebunden,
+# und die Koepfe stuenden dann zweimal an zwei Ebenen.
+COPY docker/sicherheitskopf.conf /etc/nginx/sicherheitskopf.conf
 COPY --from=build /app/dist /usr/share/nginx/html
 
 EXPOSE 8080
+
+# Das Abbild setzt uid 101 bereits selbst, und `docker exec … id` bestaetigt es. Die Zeile
+# steht trotzdem hier: sie ist die einzige Stelle, an der **im Text** steht, dass hier
+# nichts als root laeuft. Ohne sie ist die Aussage nur eine Messung, die niemand
+# wiederholt, und semgrep meldet die Datei weiter.
+USER nginx
 
 # nginx im Vordergrund, sonst beendet sich der Container sofort.
 CMD ["nginx", "-g", "daemon off;"]

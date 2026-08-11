@@ -89,16 +89,40 @@ Hellmodus, sondern Kernblau statt des dunklen Grunds.
   **jede** Anmeldung, nicht nur auf die des betroffenen Nutzers.
 - **Kein Formular vorbelegen, bevor die Daten da sind.** Ein Effekt an `[profil]`
   überschreibt getippten Text, sobald `aktualisiere()` beim Fensterwechsel läuft.
+- **`add_header` in einem nginx-`location` löscht alle Köpfe der äußeren Ebene**, still und
+  ohne Warnung. Drei der vier `location` setzen Cache-Control oder Content-Type, also
+  hätten drei von vier Wegen die Sicherheitskopfzeilen verloren. Deshalb
+  `docker/sicherheitskopf.conf` und ein `include` an jeder Stelle. Wer die Köpfe nur auf
+  Serverebene setzt und gegen `/` misst, sieht den Fehler nie.
+- **RLS kennt keine Spaltenbedingung, und eine Liste geschützter Spalten wächst nicht mit.**
+  Der Trigger `schuetze_rolle_und_status()` deckte `role` und `status` ab; `email` blieb
+  offen, obwohl die Nutzerverwaltung genau sie anzeigt. Kommt eine Spalte dazu, die niemand
+  über sich selbst setzen darf, gehört sie in denselben Trigger.
+- **Eine Sperrliste über Hostnamen prüft die Schreibweise, nicht das Ziel.** `2130706433`
+  und `[::ffff:127.0.0.1]` sind `127.0.0.1`, und ein öffentlicher Name darf auf `10.0.0.5`
+  zeigen. `adressen.ts` urteilt deshalb über aufgelöste Adressen gegen Bereiche. Und
+  `fetch` folgt Weiterleitungen von selbst: ohne `redirect: "manual"` prüft man den ersten
+  Sprung und lädt den letzten.
 
 ## Verifikation
 
 ```
 pnpm typecheck            tsc, muss still bleiben
-pnpm test                 Waechter ueber der Erscheinung
-pnpm e2e                  Acht Pruefungen im Browser, gegen die echte Datenbank
+pnpm test                 Waechter ueber Erscheinung und Adresspruefung
+pnpm e2e                  Sechzehn Pruefungen im Browser, gegen die echte Datenbank
 node scripts/bewegung.mjs Zaehlt rAF-Bilder mit und ohne prefers-reduced-motion
 node scripts/bildschirme.mjs   Legt Bilder aller Bildschirme in test-results ab
 node scripts/sperren-rundlauf.mjs  Sperren und Entsperren ueber die Edge Function
+node scripts/kopfzeilen-pruefen.mjs <adresse>   Die sechs Sicherheitskopfzeilen
+```
+
+**Die Kopfzeilen sieht `pnpm e2e` nicht.** Playwright laeuft gegen den Vite-Dev-Server, die
+Koepfe entstehen erst in nginx. Sie brauchen den gebauten Container:
+
+```
+docker build -f docker/Dockerfile -t axon-hub .
+docker run -d --name hub -p 8081:8080 axon-hub
+node scripts/kopfzeilen-pruefen.mjs http://localhost:8081
 ```
 
 **Die Browserprüfungen brauchen zwei Wegwerf-Zugänge**, die in der Datenbank stehen:

@@ -39,6 +39,31 @@ test("Anmeldung weist falsche Zugangsdaten ab, ohne zu verraten, wer ein Konto h
   await expect(page.getByText("E-Mail oder Passwort stimmt nicht.")).toBeVisible();
 });
 
+test("Nach der Anmeldung fuehrt kein weiter= aus dem Programm heraus", async ({ page }) => {
+  /*
+   * Befund 6 des Sicherheitsaudits vom 10.08.2026. `?weiter=` sagt der Anmeldung, wohin es
+   * danach geht, und der Wert kommt aus der Adresszeile. Zwei fuehrende Schraegstriche
+   * ergeben einen protokollrelativen Pfad: der Browser liest `//example.com` als fremde
+   * Adresse, und nach erfolgreicher Anmeldung landete man auf einer Seite, die dieselbe
+   * Maske nachbauen kann.
+   */
+  await page.goto("/anmeldung?weiter=%2F%2Fexample.com%2Fboese");
+  // Der eigene Ursprung, abgelesen statt fest hingeschrieben: die Pruefung soll auch dann
+  // stimmen, wenn der Dev-Server auf einem anderen Port laeuft.
+  const eigener = new URL(page.url()).origin;
+
+  await page.getByLabel("E-Mail").fill(NUTZER.email);
+  await page.getByLabel("Passwort").fill(NUTZER.passwort);
+  await page.getByRole("button", { name: "Anmelden" }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Guten", {
+    timeout: 20_000,
+  });
+
+  // Der eigentliche Nachweis: der Ursprung ist noch unserer.
+  expect(new URL(page.url()).origin).toBe(eigener);
+  expect(page.url()).not.toContain("example.com");
+});
+
 test("Der Katalog enthaelt nur echte Clients des Hubs", async ({ page }) => {
   /*
    * Im Katalog steht genau ein Programm: der AXON Editor. Die acht Werkzeuge der

@@ -6,6 +6,8 @@
  * passiert **vor** jedem Aufruf hier.
  */
 
+import { alsAdresse, pruefeAdresse, pruefeSchema } from "./adressen.ts";
+
 // deno-lint-ignore no-explicit-any
 export type Dienst = any;
 
@@ -35,6 +37,35 @@ export function pruefeRueckweg(u: string): string | null {
     return `Redirect-URI mit Abfrage oder Anker: ${u}`;
   }
   return null;
+}
+
+/**
+ * Gehoert diese Client-Kennung ueberhaupt zu einem Programm des Hubs?
+ *
+ * Ohne die Frage reichten `client-aendern`, `client-loeschen` und `geheimnis-erneuern` eine
+ * beliebige Kennung an den Aussteller weiter. Das Supabase-Projekt ist mit der AAS Tools
+ * Platform **geteilt**: ein Administrator (oder ein Fehler in der Oberflaeche) haette damit
+ * jeden OAuth-Client des Projekts loeschen oder sein Geheimnis erneuern koennen, auch einen,
+ * der nicht dem Hub gehoert. `hub_app_clients` ist die Liste dessen, was uns gehoert.
+ *
+ * Befund 5 des Sicherheitsaudits vom 10.08.2026.
+ */
+async function gehoertUns(dienst: Dienst, clientId: string): Promise<boolean> {
+  const { data } = await dienst
+    .from("hub_app_clients")
+    .select("oauth_client_id")
+    .eq("oauth_client_id", clientId)
+    .maybeSingle();
+  return data !== null;
+}
+
+/** Die immer gleiche Antwort darauf. 404, weil die Kennung fuer uns nicht existiert. */
+function nichtUnserer(clientId: string, cors: HeadersInit): Response {
+  return antwort(
+    { fehler: `Zu dieser Client-Kennung gibt es kein Programm im Katalog: ${clientId}` },
+    404,
+    cors,
+  );
 }
 
 export async function clientAnlegen(
@@ -126,6 +157,7 @@ export async function clientAendern(
   const clientId = String(auftrag["oauth_client_id"] ?? "").trim();
   const rueckweg = String(auftrag["redirect_uri"] ?? "").trim();
   if (!clientId) return antwort({ fehler: "Es fehlt die Client-Kennung." }, 400, cors);
+  if (!(await gehoertUns(dienst, clientId))) return nichtUnserer(clientId, cors);
   const mangel = pruefeRueckweg(rueckweg);
   if (mangel) return antwort({ fehler: mangel }, 400, cors);
 
@@ -150,6 +182,7 @@ export async function clientLoeschen(
 ): Promise<Response> {
   const clientId = String(auftrag["oauth_client_id"] ?? "").trim();
   if (!clientId) return antwort({ fehler: "Es fehlt die Client-Kennung." }, 400, cors);
+  if (!(await gehoertUns(dienst, clientId))) return nichtUnserer(clientId, cors);
 
   const { error } = await dienst.auth.admin.oauth.deleteClient(clientId);
   // Ist er beim Aussteller schon weg, ist das kein Grund, unsere Zeile stehen zu lassen.
@@ -167,6 +200,7 @@ export async function geheimnisErneuern(
 ): Promise<Response> {
   const clientId = String(auftrag["oauth_client_id"] ?? "").trim();
   if (!clientId) return antwort({ fehler: "Es fehlt die Client-Kennung." }, 400, cors);
+  if (!(await gehoertUns(dienst, clientId))) return nichtUnserer(clientId, cors);
 
   const { data, error } = await dienst.auth.admin.oauth.regenerateClientSecret(clientId);
   if (error) return antwort({ fehler: error.message }, 400, cors);
@@ -183,27 +217,78 @@ interface Punkt {
 /**
  * Verhindert, dass die Abnahme zum Fernrohr ins innere Netz wird.
  *
- * Sie holt eine Adresse, die ein Administrator eingetragen hat, und tut das vom Server
- * aus. Das ist gewollt, sonst scheiterte sie an CORS. Es heisst aber auch, dass hier
- * jemand mit Verwaltungsrechten Adressen abfragen lassen koennte, die er selbst nicht
- * erreicht. Oeffentliche Programme haben oeffentliche Adressen; alles andere wird
- * abgewiesen.
+ * Das Urteil ueber eine Adresse steht in `adressen.ts`, hier steht der Weg dorthin: aus
+ * dem Hostnamen wird eine Adresse, notfalls ueber die Namensaufloesung.
+ *
+ * **Der Name wird aufgeloest, nicht gelesen.** Ein oeffentlicher Name darf auf `10.0.0.5`
+ * zeigen, und genau das sah die alte Musterliste nicht. Ein Rest bleibt und gehoert
+ * benannt: zwischen dieser Aufloesung und dem eigentlichen Aufruf kann die Antwort des
+ * Namensdienstes wechseln. Dagegen hilft nur, selbst zur Adresse zu verbinden, und das
+ * kann `fetch` nicht.
  */
-function adresseErlaubt(u: URL): string | null {
-  if (u.protocol !== "http:" && u.protocol !== "https:") return "Nur http oder https.";
+async function zielErlaubt(u: URL): Promise<string | null> {
+  const schemaMangel = pruefeSchema(u.protocol);
+  if (schemaMangel) return schemaMangel;
+
   const host = u.hostname.toLowerCase();
-  const verboten =
-    host === "localhost" ||
-    host === "0.0.0.0" ||
-    host.endsWith(".internal") ||
-    host.endsWith(".local") ||
-    /^127\./.test(host) ||
-    /^10\./.test(host) ||
-    /^192\.168\./.test(host) ||
-    /^172\.(1[6-9]|2\d|3[01])\./.test(host) ||
-    /^169\.254\./.test(host) ||
-    host === "[::1]";
-  return verboten ? `Diese Abnahme prueft nur oeffentliche Adressen, nicht ${host}.` : null;
+
+  // Steht die Adresse schon da, gibt es nichts aufzuloesen.
+  const unmittelbar = alsAdresse(host);
+  if (unmittelbar !== null) return pruefeAdresse(unmittelbar);
+
+  // `localhost` und die Sondernamen aufzuloesen ginge auch, aber sie hier abzuweisen ist
+  // ehrlicher: sie bedeuten in jedem Netz etwas anderes.
+  if (host === "localhost" || host.endsWith(".internal") || host.endsWith(".local")) {
+    return `Diese Abnahme prueft nur oeffentliche Adressen, nicht ${host}.`;
+  }
+
+  const adressen: string[] = [];
+  for (const art of ["A", "AAAA"] as const) {
+    try {
+      adressen.push(...(await Deno.resolveDns(host, art)));
+    } catch {
+      // Ein Name muss nicht beide Arten fuehren. Erst wenn beide leer bleiben, ist es ein
+      // Mangel, und das steht unten.
+    }
+  }
+  if (adressen.length === 0) return `Dieser Name loest nicht auf: ${host}.`;
+
+  for (const adresse of adressen) {
+    const mangel = pruefeAdresse(adresse);
+    if (mangel) return mangel;
+  }
+  return null;
+}
+
+/** Wie viele Weiterleitungen die Abnahme mitgeht. Drei reichen fuer jeden ehrlichen Dienst. */
+const SPRUENGE = 3;
+
+/**
+ * Holt eine Adresse und prueft **vor jedem Sprung** neu.
+ *
+ * Das ist der eigentliche Befund 2: `fetch` folgt Weiterleitungen von sich aus, und die
+ * Pruefung lief nur einmal, auf der eingetragenen Adresse. Ein oeffentlicher Server, der
+ * mit `302 Location: http://169.254.169.254/` antwortet, fuehrte an der ganzen Liste
+ * vorbei. Mit `redirect: "manual"` gehoert jeder Sprung uns.
+ */
+async function holeGeprueft(start: URL): Promise<Response> {
+  let ziel = start;
+  for (let sprung = 0; sprung <= SPRUENGE; sprung += 1) {
+    const mangel = await zielErlaubt(ziel);
+    if (mangel) throw new Error(mangel);
+
+    const r = await fetch(ziel.toString(), {
+      redirect: "manual",
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (r.status < 300 || r.status > 399) return r;
+
+    const weiter = r.headers.get("location");
+    if (weiter === null) return r;
+    await r.body?.cancel();
+    ziel = new URL(weiter, ziel);
+  }
+  throw new Error(`Mehr als ${String(SPRUENGE)} Weiterleitungen, das ist keine Abnahme mehr.`);
 }
 
 export async function abnahme(
@@ -238,26 +323,23 @@ export async function abnahme(
   } else {
     try {
       const ziel = new URL(app.gesundheitspfad ?? "/api/health", app.basis_adresse);
-      const verboten = adresseErlaubt(ziel);
-      if (verboten) {
-        punkte.push({ name: "Dienst antwortet", gut: false, befund: verboten });
-      } else {
-        const r = await fetch(ziel.toString(), { signal: AbortSignal.timeout(10_000) });
-        // Manche Dienste melden ihre Fassung im Gesundheitspfad. Wenn ja, nehmen wir sie
-        // mit; wenn nicht, ist das kein Mangel.
-        try {
-          const rumpf = (await r.clone().json()) as Record<string, unknown>;
-          const v = rumpf["version"] ?? rumpf["fassung"];
-          if (typeof v === "string") fassung = v;
-        } catch {
-          // Kein JSON. Auch gut, der Statuscode ist die eigentliche Aussage.
-        }
-        punkte.push({
-          name: "Dienst antwortet",
-          gut: r.ok,
-          befund: `${ziel.pathname} → ${String(r.status)}${fassung ? `, Fassung ${fassung}` : ""}`,
-        });
+      // Wird die Adresse abgewiesen, wirft `holeGeprueft`, und der Grund landet im
+      // `catch` unten. Ein Zweig weniger, und der Grund steht trotzdem im Befund.
+      const r = await holeGeprueft(ziel);
+      // Manche Dienste melden ihre Fassung im Gesundheitspfad. Wenn ja, nehmen wir sie
+      // mit; wenn nicht, ist das kein Mangel.
+      try {
+        const rumpf = (await r.clone().json()) as Record<string, unknown>;
+        const v = rumpf["version"] ?? rumpf["fassung"];
+        if (typeof v === "string") fassung = v;
+      } catch {
+        // Kein JSON. Auch gut, der Statuscode ist die eigentliche Aussage.
       }
+      punkte.push({
+        name: "Dienst antwortet",
+        gut: r.ok,
+        befund: `${ziel.pathname} → ${String(r.status)}${fassung ? `, Fassung ${fassung}` : ""}`,
+      });
     } catch (ursache) {
       punkte.push({
         name: "Dienst antwortet",
