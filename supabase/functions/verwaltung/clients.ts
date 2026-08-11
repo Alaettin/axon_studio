@@ -79,7 +79,14 @@ export async function clientAnlegen(
   const name = String(auftrag["name"] ?? "").trim();
 
   if (!appId) return antwort({ fehler: "Es fehlt das Programm." }, 400, cors);
-  if (!["produktion", "test", "lokal"].includes(umgebung)) {
+  /*
+   * Dieselbe Liste steht an drei weiteren Stellen: in der Pruefbedingung von
+   * `hub_app_clients.umgebung`, im Typ `Umgebung` (src/lib/typen.ts) und in der Auswahl
+   * des Assistenten (SchrittAdresse.tsx). Wer eine Umgebung ergaenzt, muss alle vier
+   * anfassen; hier faellt es zuletzt auf, weil diese Funktion getrennt ausgerollt wird
+   * und die Oberflaeche den neuen Wert schon anbietet (11.08.2026, `connector`).
+   */
+  if (!["produktion", "test", "lokal", "connector"].includes(umgebung)) {
     return antwort({ fehler: `Unbekannte Umgebung: ${umgebung}` }, 400, cors);
   }
   const mangel = pruefeRueckweg(rueckweg);
