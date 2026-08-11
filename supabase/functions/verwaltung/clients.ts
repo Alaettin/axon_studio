@@ -51,12 +51,36 @@ export function pruefeRueckweg(u: string): string | null {
  * Befund 5 des Sicherheitsaudits vom 10.08.2026.
  */
 async function gehoertUns(dienst: Dienst, clientId: string): Promise<boolean> {
+  return (await umgebungVon(dienst, clientId)) !== null;
+}
+
+/** Die Umgebung dieses Clients, oder `null`, wenn er uns nicht gehoert. */
+async function umgebungVon(dienst: Dienst, clientId: string): Promise<string | null> {
   const { data } = await dienst
     .from("hub_app_clients")
-    .select("oauth_client_id")
+    .select("umgebung")
     .eq("oauth_client_id", clientId)
     .maybeSingle();
-  return data !== null;
+  return (data?.umgebung as string | undefined) ?? null;
+}
+
+/**
+ * Wie sich ein Client am Token-Endpunkt ausweist, haengt daran, **wer** ihn benutzt.
+ *
+ * Unsere eigenen Programme tauschen den Code mit HTTP-Basic; so macht es der AXON Editor
+ * in `auth/oidc.ts`, und dabei bleibt es. Ein fremder Klient richtet sich nicht nach uns:
+ * claude.ai schickt die Zugangsdaten im Rumpf (`client_secret_post`) und kennt die
+ * registrierte Methode gar nicht, weil es sie bei einem vorab angelegten Client nirgends
+ * erfaehrt. Der Aussteller weist den Tausch dann mit "client is registered for
+ * client_secret_basic but client_secret_post was used" ab, und zwar erst im letzten
+ * Schritt, nachdem Anmeldung und Zustimmung schon durch sind (gemessen am 11.08.2026 in
+ * den Auth-Protokollen).
+ *
+ * Beide Methoden sind gleich stark: das Geheimnis geht so oder so ueber TLS an denselben
+ * Endpunkt, nur einmal in der Kopfzeile und einmal im Rumpf.
+ */
+function ausweisartFuer(umgebung: string): "client_secret_post" | "client_secret_basic" {
+  return umgebung === "connector" ? "client_secret_post" : "client_secret_basic";
 }
 
 /** Die immer gleiche Antwort darauf. 404, weil die Kennung fuer uns nicht existiert. */
@@ -105,23 +129,6 @@ export async function clientAnlegen(
     .maybeSingle();
 
   /*
-   * Wie der Client sich am Token-Endpunkt ausweist, haengt daran, **wer** ihn benutzt.
-   *
-   * Unsere eigenen Programme tauschen den Code mit HTTP-Basic; so macht es der AXON
-   * Editor in `auth/oidc.ts`, und dabei bleibt es. Ein fremder Klient richtet sich nicht
-   * nach uns: claude.ai schickt die Zugangsdaten im Rumpf (`client_secret_post`) und
-   * kennt die registrierte Methode gar nicht, weil es sie bei einem vorab angelegten
-   * Client nirgends erfaehrt. Der Aussteller weist den Tausch dann mit "client is
-   * registered for client_secret_basic but client_secret_post was used" ab, und zwar
-   * erst im letzten Schritt, nachdem Anmeldung und Zustimmung schon durch sind
-   * (gemessen am 11.08.2026 in den Auth-Protokollen).
-   *
-   * Beide Methoden sind gleich stark: das Geheimnis geht so oder so ueber TLS an
-   * denselben Endpunkt, nur einmal in der Kopfzeile und einmal im Rumpf.
-   */
-  const ausweisart = umgebung === "connector" ? "client_secret_post" : "client_secret_basic";
-
-  /*
    * **Vertraulich**, nicht oeffentlich. Der Codetausch laeuft im Server des
    * Unterprogramms, das Token verlaesst ihn nie. Ein oeffentlicher Client legte das Token
    * in den Browser und waere gegenueber einer Anmeldung mit Passwort ein Rueckschritt.
@@ -130,7 +137,7 @@ export async function clientAnlegen(
     name: `${name || appId} (${umgebung})`,
     redirect_uris: [rueckweg],
     client_type: "confidential",
-    token_endpoint_auth_method: ausweisart,
+    token_endpoint_auth_method: ausweisartFuer(umgebung),
   });
   if (error) return antwort({ fehler: error.message }, 400, cors);
 
@@ -217,6 +224,17 @@ export async function clientLoeschen(
   return antwort({ geloescht: clientId }, 200, cors);
 }
 
+/**
+ * Ein frisches Geheimnis, und dabei gleich die richtige Ausweisart.
+ *
+ * Das Erneuern zieht die Ausweisart mit, statt nur das Geheimnis zu tauschen. Grund: ein
+ * Client, der vor dem 11.08.2026 angelegt wurde, traegt `client_secret_basic`, auch wenn
+ * er inzwischen in der Umgebung `connector` steht. Ohne diese Zeile bliebe er dabei, denn
+ * die Ausweisart laesst sich in der Oberflaeche nirgends anfassen, und der einzige Ausweg
+ * waere: Umgebung entfernen, ausfuehren, wieder anlegen. Drei Schritte fuer ein Feld.
+ *
+ * Fuer alle anderen Umgebungen ist es ein Nullgriff, sie stehen ohnehin auf Basic.
+ */
 export async function geheimnisErneuern(
   dienst: Dienst,
   auftrag: Record<string, unknown>,
@@ -224,7 +242,13 @@ export async function geheimnisErneuern(
 ): Promise<Response> {
   const clientId = String(auftrag["oauth_client_id"] ?? "").trim();
   if (!clientId) return antwort({ fehler: "Es fehlt die Client-Kennung." }, 400, cors);
-  if (!(await gehoertUns(dienst, clientId))) return nichtUnserer(clientId, cors);
+  const umgebung = await umgebungVon(dienst, clientId);
+  if (umgebung === null) return nichtUnserer(clientId, cors);
+
+  const { error: ausweisFehler } = await dienst.auth.admin.oauth.updateClient(clientId, {
+    token_endpoint_auth_method: ausweisartFuer(umgebung),
+  });
+  if (ausweisFehler) return antwort({ fehler: ausweisFehler.message }, 400, cors);
 
   const { data, error } = await dienst.auth.admin.oauth.regenerateClientSecret(clientId);
   if (error) return antwort({ fehler: error.message }, 400, cors);
