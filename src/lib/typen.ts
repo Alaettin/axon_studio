@@ -71,7 +71,12 @@ export const AKZENTE = [
 export const SCOPES = ["openid", "profile", "email", "phone", "offline_access"] as const;
 export type Scope = (typeof SCOPES)[number];
 
-export type Umgebung = "produktion" | "test" | "lokal";
+/**
+ * `connector` ist kein Betriebszustand des Programms, sondern ein fremder Klient, der auf
+ * es zeigt: claude.ai verbindet sich mit dem MCP-Zugang des Editors und braucht dafür
+ * einen eigenen Client mit Rückleitung auf `claude.ai`.
+ */
+export type Umgebung = "produktion" | "test" | "lokal" | "connector";
 export type Programmstatus = "entwurf" | "aktiv" | "pruefen";
 
 /** `public.hub_app_clients`: je Umgebung ein eigener Client mit eigenem Geheimnis. */

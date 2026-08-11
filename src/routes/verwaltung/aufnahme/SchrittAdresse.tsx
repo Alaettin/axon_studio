@@ -18,6 +18,7 @@ const UMGEBUNGEN: readonly { wert: Umgebung; wort: string }[] = [
   { wert: "produktion", wort: "Produktion" },
   { wert: "test", wort: "Test" },
   { wert: "lokal", wort: "Lokal" },
+  { wert: "connector", wort: "Connector" },
 ];
 
 interface Props {
