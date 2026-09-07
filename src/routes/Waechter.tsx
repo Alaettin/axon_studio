@@ -5,7 +5,7 @@ import { Flaeche } from "@/components/Flaeche";
 import { istAdmin, useSitzung } from "@/store/sitzung";
 
 /**
- * Die beiden Waechter.
+ * Die Waechter.
  *
  * Sie sind Bequemlichkeit, keine Sicherheit: was ein Nutzer wirklich sehen darf,
  * entscheidet RLS in der Datenbank. Ein Waechter, der sich umgehen laesst, gibt deshalb
@@ -43,6 +43,28 @@ export function BrauchtAdmin({ children }: { readonly children: ReactNode }) {
 
   if (!profil && laedt) return <Warten />;
   if (!admin) return <Navigate to="/" replace />;
+  return <>{children}</>;
+}
+
+/**
+ * Wer noch sein Startpasswort traegt.
+ *
+ * Ein Zugang entsteht mit einem Startpasswort, das der Administrator weitergibt und das
+ * damit zwei Leuten bekannt ist. Deshalb fuehrt bis zum Wechsel jeder Weg auf
+ * `/passwort-setzen`. Die Sicherheit liegt nicht in diesem Waechter, sondern darin, dass
+ * die Marke `passwortwechsel_faellig` nur mit dem neuen Passwort zusammen geloescht wird.
+ */
+export function BrauchtPasswortwechsel({ children }: { readonly children: ReactNode }) {
+  const profil = useSitzung((z) => z.profil);
+  const laedt = useSitzung((z) => z.laedt);
+  const ort = useLocation();
+
+  // Wie bei BrauchtAdmin: ohne das Warten blitzt die Buehne auf, bevor das Profil da ist.
+  if (!profil && laedt) return <Warten />;
+  if (profil?.passwortwechsel_faellig) {
+    const weiter = ort.pathname + ort.search;
+    return <Navigate to={`/passwort-setzen?weiter=${encodeURIComponent(weiter)}`} replace />;
+  }
   return <>{children}</>;
 }
 

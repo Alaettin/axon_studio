@@ -1,25 +1,34 @@
 import { useState, type FormEvent } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 
 import { Flaeche } from "@/components/Flaeche";
 import { Marke } from "@/components/Marke";
-import { supabase } from "@/lib/supabase";
+import { wechslePasswort } from "@/lib/konto";
+import { nurEigenerPfad } from "@/lib/utils";
 import { useSitzung } from "@/store/sitzung";
 
 /**
- * Wo eine Einladung und ein Passwort-Zurücksetzen landen.
+ * Wo jeder Passwortwechsel landet.
  *
- * Beide Wege enden mit einem Link, den Supabase in eine Sitzung eintauscht
- * (`detectSessionInUrl`). Wer hier ankommt, ist also bereits angemeldet und setzt nur noch
- * sein Passwort. Ohne Sitzung ist der Link abgelaufen oder schon benutzt, und genau das
- * gehoert dann dagestanden statt eines leeren Formulars.
+ * Drei Wege fuehren hierher, und alle drei enden im selben Formular: die erste Anmeldung
+ * mit dem Startpasswort (der Waechter leitet um, solange `passwortwechsel_faellig` steht),
+ * ein zurueckgesetztes Passwort und der Wunsch, es aus dem Profil heraus zu aendern.
+ *
+ * Gewechselt wird ueber die Edge Function `konto`, nicht ueber `supabase.auth.updateUser`:
+ * das Passwort und die Marke gehoeren zusammen, und die Marke darf der Nutzer nicht selbst
+ * loeschen. Ohne Sitzung ist hier nichts zu tun, und genau das gehoert dagestanden statt
+ * eines leeren Formulars.
  */
 
 const MINDESTLAENGE = 10;
 
 export function PasswortSetzenRoute() {
   const sitzung = useSitzung((z) => z.sitzung);
+  const profil = useSitzung((z) => z.profil);
+  const aktualisiere = useSitzung((z) => z.aktualisiere);
   const gehe = useNavigate();
+  const [parameter] = useSearchParams();
+  const erstesMal = profil?.passwortwechsel_faellig === true;
 
   const [passwort, setzePasswort] = useState("");
   const [wiederholung, setzeWiederholung] = useState("");
@@ -34,13 +43,20 @@ export function PasswortSetzenRoute() {
     setzeLaeuft(true);
     setzeFehler(null);
 
-    const { error } = await supabase.auth.updateUser({ password: passwort });
-    if (error) {
-      setzeFehler(error.message);
+    try {
+      await wechslePasswort(passwort);
+    } catch (ursache) {
+      setzeFehler(ursache instanceof Error ? ursache.message : "Unbekannter Fehler.");
       setzeLaeuft(false);
       return;
     }
-    void gehe("/", { replace: true });
+
+    // Erst das Profil neu holen, dann weiter: sonst steht die Marke im Speicher noch, und
+    // der Waechter schickt einen umgehend hierher zurueck.
+    await aktualisiere();
+    // `weiter` wird beim Verbrauchen geprueft, nicht beim Setzen, genau wie an der
+    // Anmeldung: `//boesewicht.invalid` waere sonst ein Weg nach draussen.
+    void gehe(nurEigenerPfad(parameter.get("weiter")), { replace: true });
   };
 
   return (
@@ -56,8 +72,8 @@ export function PasswortSetzenRoute() {
 
         {sitzung === null && (
           <p className="font-sans text-base text-axon-schrift-leise">
-            Dieser Link ist abgelaufen oder wurde schon benutzt. Lass dir über „Passwort
-            vergessen" einen neuen schicken.
+            Dazu musst du angemeldet sein. Melde dich mit deinem bisherigen Passwort an;
+            kennst du es nicht mehr, setzt eine Person mit Verwaltungsrechten es zurück.
           </p>
         )}
 
@@ -66,6 +82,13 @@ export function PasswortSetzenRoute() {
             <h1 className="font-display text-3xl font-extralight tracking-titel text-axon-schrift">
               Passwort setzen
             </h1>
+
+            {erstesMal && (
+              <p className="font-sans text-base text-axon-schrift-leise">
+                Dein Zugang trägt noch das Startpasswort aus der Verwaltung, und das kennst
+                nicht nur du. Vergib ein eigenes, dann geht es weiter.
+              </p>
+            )}
 
             <label className="flex flex-col gap-[9px]">
               <span className="font-mono text-etikett tracking-etikett uppercase text-axon-schrift-still">

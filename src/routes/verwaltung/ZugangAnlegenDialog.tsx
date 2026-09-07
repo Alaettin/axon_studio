@@ -3,21 +3,22 @@ import { useState, type FormEvent } from "react";
 import { Aktion, Etikett, Nebenaktion, Unterlinienfeld } from "@/components/Bausteine";
 import { Modal } from "@/components/Modal";
 import type { Rolle } from "@/lib/typen";
-import { ladeEinladung } from "@/lib/verwaltung";
+import { legeZugangAn } from "@/lib/verwaltung";
 import { useSitzung } from "@/store/sitzung";
 
 /**
  * Bildschirm 09 der Vorlage: einen Zugang anlegen.
  *
- * **Es wird keine Mail verschickt.** Der Dialog legt den Nutzer an und zeigt den
- * Einladungslink; weitergeschickt wird er von Hand (Entscheidung 07.08.2026). Der
- * eingebaute Versand von Supabase ist nicht fuer den Betrieb gedacht, und ein eigener
- * SMTP-Dienst braucht Absender und DNS-Eintraege, die es beide noch nicht gibt.
+ * **Es wird keine Mail verschickt.** Der Dialog legt den Zugang an und zeigt das
+ * Startpasswort; weitergegeben wird es von Hand (Entscheidung 07.09.2026). Der eingebaute
+ * Versand von Supabase ist nicht fuer den Betrieb gedacht, und ein eigener SMTP-Dienst
+ * braucht Absender und DNS-Eintraege, die es beide noch nicht gibt.
  *
- * Der Link ist damit das Ergebnis dieses Dialogs, nicht eine Randnotiz: er ist der einzige
- * Weg herein. Deshalb steht er vollstaendig da, auswaehlbar, mit einer Schaltflaeche zum
- * Kopieren, und der Hinweis, dass keine Mail unterwegs ist, steht vor dem Link und nicht
- * darunter.
+ * Das Startpasswort ist damit das Ergebnis dieses Dialogs, nicht eine Randnotiz: es steht
+ * nirgends sonst und ist der einzige Weg herein. Deshalb steht es vollstaendig da,
+ * auswaehlbar, mit einer Schaltflaeche zum Kopieren, und der Hinweis, dass es genau einmal
+ * zu sehen ist, steht davor und nicht darunter. Wechseln muss der Neue es ohnehin, bevor
+ * er den Hub benutzen kann.
  */
 
 interface Props {
@@ -25,7 +26,7 @@ interface Props {
   readonly neuLaden: () => Promise<void>;
 }
 
-export function EinladenDialog({ schliesse, neuLaden }: Props) {
+export function ZugangAnlegenDialog({ schliesse, neuLaden }: Props) {
   const katalog = useSitzung((z) => z.katalog);
 
   const [email, setzeEmail] = useState("");
@@ -33,7 +34,7 @@ export function EinladenDialog({ schliesse, neuLaden }: Props) {
   const [gewaehlt, setzeGewaehlt] = useState<readonly string[]>([]);
   const [laeuft, setzeLaeuft] = useState(false);
   const [fehler, setzeFehler] = useState<string | null>(null);
-  const [fertig, setzeFertig] = useState<{ email: string; link: string } | null>(null);
+  const [fertig, setzeFertig] = useState<{ email: string; startpasswort: string } | null>(null);
   const [kopiert, setzeKopiert] = useState(false);
 
   const umschalten = (id: string) => {
@@ -47,8 +48,8 @@ export function EinladenDialog({ schliesse, neuLaden }: Props) {
     setzeLaeuft(true);
     setzeFehler(null);
     try {
-      const { email: adresse, link } = await ladeEinladung(email, rolle, gewaehlt);
-      setzeFertig({ email: adresse, link });
+      const { email: adresse, startpasswort } = await legeZugangAn(email, rolle, gewaehlt);
+      setzeFertig({ email: adresse, startpasswort });
       await neuLaden();
     } catch (ursache) {
       setzeFehler(ursache instanceof Error ? ursache.message : "Unbekannter Fehler.");
@@ -57,10 +58,10 @@ export function EinladenDialog({ schliesse, neuLaden }: Props) {
   };
 
   return (
-    <Modal titel="Nutzer einladen" breite="520px" schliesse={schliesse}>
+    <Modal titel="Zugang anlegen" breite="520px" schliesse={schliesse}>
       <header className="flex flex-col gap-2 border-b border-axon-linie px-[26px] pt-6 pb-5">
-        <Etikett>Zugang nur auf Einladung</Etikett>
-        <h2 className="font-display text-2xl font-light text-axon-schrift">Nutzer einladen</h2>
+        <Etikett>Zugang nur über die Verwaltung</Etikett>
+        <h2 className="font-display text-2xl font-light text-axon-schrift">Zugang anlegen</h2>
       </header>
 
       {fertig ? (
@@ -70,43 +71,43 @@ export function EinladenDialog({ schliesse, neuLaden }: Props) {
             angelegt.
           </p>
           {/*
-            Es wird bewusst keine Mail verschickt. Der Link steht deshalb hier, und zwar
-            vollstaendig und auswaehlbar: er ist der einzige Weg herein, und wer ihn
-            verliert, muss die Einladung neu erzeugen.
+            Es wird bewusst keine Mail verschickt. Das Passwort steht deshalb hier, und zwar
+            vollstaendig und auswaehlbar: es ist der einzige Weg herein, und wer diesen
+            Dialog schliesst, sieht es nicht wieder.
           */}
           <p className="font-sans text-base text-axon-schrift-fein">
             Es wurde <strong className="text-axon-schrift">keine Mail verschickt</strong>.
-            Schick diesen Link selbst weiter. Er gilt einmalig und führt zum Setzen des
-            Passworts.
+            Gib E-Mail und Startpasswort selbst weiter. Das Passwort steht{" "}
+            <strong className="text-axon-schrift">nur hier</strong> und ist nach dem
+            Schließen weg.
           </p>
 
           <label className="flex flex-col gap-[9px]">
-            <Etikett>Einladungslink</Etikett>
-            <textarea
+            <Etikett>Startpasswort</Etikett>
+            <input
               readOnly
-              rows={3}
-              value={fertig.link}
+              value={fertig.startpasswort}
               onFocus={(e) => e.currentTarget.select()}
-              className="resize-none border border-axon-linie bg-axon-flaeche p-3 font-mono text-xs break-all text-axon-schrift outline-none focus:border-axon-fokus"
+              className="border border-axon-linie bg-axon-flaeche p-3 font-mono text-md tracking-fein break-all text-axon-schrift outline-none focus:border-axon-fokus"
             />
           </label>
 
           <div className="flex items-center gap-3">
             <Aktion
               onClick={() => {
-                void navigator.clipboard.writeText(fertig.link).then(() => {
+                void navigator.clipboard.writeText(fertig.startpasswort).then(() => {
                   setzeKopiert(true);
                 });
               }}
             >
-              {kopiert ? "Kopiert" : "Link kopieren"}
+              {kopiert ? "Kopiert" : "Passwort kopieren"}
             </Aktion>
             <Nebenaktion onClick={schliesse}>Fertig</Nebenaktion>
           </div>
 
           <p className="font-sans text-sm text-axon-schrift-fein">
-            Bis der Link benutzt wird, steht der Zugang in der Liste mit „Nie" als letzter
-            Anmeldung.
+            Bei der ersten Anmeldung muss der Neue ein eigenes Passwort vergeben. Bis dahin
+            steht der Zugang in der Liste mit „Nie" als letzter Anmeldung.
           </p>
         </div>
       ) : (
@@ -161,7 +162,7 @@ export function EinladenDialog({ schliesse, neuLaden }: Props) {
               })}
             </div>
             <p className="font-sans text-sm text-axon-schrift-fein">
-              Was hier nicht gewählt ist, sieht der Eingeladene als „Zugang anfragen".
+              Was hier nicht gewählt ist, sieht der Neue als „Zugang anfragen".
             </p>
           </div>
 

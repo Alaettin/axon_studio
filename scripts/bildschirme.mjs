@@ -46,9 +46,9 @@ await shot('08-nutzerdetail');
 await p.keyboard.press('Escape');
 await p.waitForTimeout(500);
 
-await p.getByRole('button', { name: /Einladen/ }).click();
+await p.getByRole('button', { name: 'Neuer Zugang' }).click();
 await p.waitForTimeout(900);
-await shot('09-einladen');
+await shot('09-zugang-anlegen');
 await p.keyboard.press('Escape');
 await p.waitForTimeout(500);
 

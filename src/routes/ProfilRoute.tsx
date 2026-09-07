@@ -64,16 +64,6 @@ export function ProfilRoute() {
     setzeLaeuft(false);
   };
 
-  const passwortAendern = async () => {
-    if (!profil?.email) return;
-    setzeFehler(null);
-    const { error } = await supabase.auth.resetPasswordForEmail(profil.email, {
-      redirectTo: `${window.location.origin}/passwort-setzen`,
-    });
-    if (error) setzeFehler(error.message);
-    else setzeMeldung("Die Mail zum Ändern des Passworts ist unterwegs.");
-  };
-
   const geaendert = profil ? name.trim() !== (profil.display_name ?? "") : false;
 
   return (
@@ -151,13 +141,18 @@ export function ProfilRoute() {
                   >
                     Speichern
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => void passwortAendern()}
-                    className="h-(--h-knopf) cursor-pointer border border-axon-linie px-5 font-sans text-sm tracking-[0.14em] uppercase text-axon-schrift-leise transition-colors duration-calm hover:border-axon-fokus hover:text-axon-schrift"
+                  {/*
+                    Ein Link auf das Formular, keine Mail. Der Knopf rief bisher
+                    `resetPasswordForEmail` und meldete "die Mail ist unterwegs"; verschickt
+                    wurde nie eine, es gibt keinen SMTP-Dienst. Ein Knopf, der stumm endet,
+                    ist schlimmer als keiner.
+                  */}
+                  <Link
+                    to="/passwort-setzen"
+                    className="flex h-(--h-knopf) cursor-pointer items-center border border-axon-linie px-5 font-sans text-sm tracking-[0.14em] uppercase text-axon-schrift-leise transition-colors duration-calm hover:border-axon-fokus hover:text-axon-schrift"
                   >
                     Passwort ändern
-                  </button>
+                  </Link>
                 </div>
               </div>
               )}

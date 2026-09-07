@@ -5,7 +5,7 @@ import { Aktion, Brotkrume, Glasflaeche, Seitentitel } from "@/components/Bauste
 import { Flaeche } from "@/components/Flaeche";
 import { Kopfzeile } from "@/components/Kopfzeile";
 import { Palette } from "@/components/Palette";
-import { EinladenDialog } from "@/routes/verwaltung/EinladenDialog";
+import { ZugangAnlegenDialog } from "@/routes/verwaltung/ZugangAnlegenDialog";
 import { NutzerDetail } from "@/routes/verwaltung/NutzerDetail";
 import { initialen, type Nutzerzeile } from "@/lib/typen";
 import { ladeNutzer } from "@/lib/verwaltung";
@@ -18,7 +18,7 @@ const SPALTEN = "2.2fr 2fr 1fr 1.1fr 1.3fr 1fr";
 export function NutzerRoute() {
   const katalog = useSitzung((z) => z.katalog);
   const [paletteOffen, setzePaletteOffen] = useState(false);
-  const [einladenOffen, setzeEinladenOffen] = useState(false);
+  const [anlegenOffen, setzeAnlegenOffen] = useState(false);
   const [gewaehlt, setzeGewaehlt] = useState<string | null>(null);
 
   const [nutzer, setzeNutzer] = useState<readonly Nutzerzeile[]>([]);
@@ -66,7 +66,7 @@ export function NutzerRoute() {
 
   return (
     <Flaeche
-      schleier={paletteOffen || gewaehlt || einladenOffen ? "dicht" : "sammlung"}
+      schleier={paletteOffen || gewaehlt || anlegenOffen ? "dicht" : "sammlung"}
       className="px-14 pt-[30px] pb-9"
     >
       <Kopfzeile oeffnePalette={() => setzePaletteOffen(true)} gedaempft={paletteOffen} />
@@ -99,8 +99,8 @@ export function NutzerRoute() {
               />
             </div>
 
-            <Aktion onClick={() => setzeEinladenOffen(true)}>
-              Einladen <span aria-hidden className="text-lg">+</span>
+            <Aktion onClick={() => setzeAnlegenOffen(true)}>
+              Neuer Zugang <span aria-hidden className="text-lg">+</span>
             </Aktion>
           </div>
 
@@ -201,9 +201,9 @@ export function NutzerRoute() {
           neuLaden={() => neuLaden(true)}
         />
       )}
-      {einladenOffen && (
-        <EinladenDialog
-          schliesse={() => setzeEinladenOffen(false)}
+      {anlegenOffen && (
+        <ZugangAnlegenDialog
+          schliesse={() => setzeAnlegenOffen(false)}
           neuLaden={() => neuLaden(true)}
         />
       )}

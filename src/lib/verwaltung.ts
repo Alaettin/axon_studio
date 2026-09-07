@@ -1,3 +1,4 @@
+import { rufe as rufeFunktion } from "@/lib/funktion";
 import { mitFrist, supabase } from "@/lib/supabase";
 import type {
   Abnahmepunkt,
@@ -17,38 +18,8 @@ import type {
  * sind nur Bequemlichkeit.
  */
 
-async function rufe<T>(handlung: string, rest: Record<string, unknown> = {}): Promise<T> {
-  const { data, error } = await mitFrist(
-    supabase.functions.invoke<T & { fehler?: string }>("verwaltung", {
-      body: { handlung, ...rest },
-    }),
-  );
-
-  if (error) {
-    // FunctionsHttpError verschweigt den Rumpf. Ohne dieses Auspacken steht in der
-    // Oberflaeche "Edge Function returned a non-2xx status code" und niemand weiss, warum.
-    const rumpf = await ausFehler(error);
-    throw new Error(rumpf ?? error.message);
-  }
-  if (data && "fehler" in data && data.fehler) throw new Error(data.fehler);
-  return data as T;
-}
-
-async function ausFehler(fehler: unknown): Promise<string | null> {
-  if (
-    typeof fehler === "object" &&
-    fehler !== null &&
-    "context" in fehler &&
-    fehler.context instanceof Response
-  ) {
-    try {
-      const rumpf = (await fehler.context.json()) as { fehler?: string };
-      return rumpf.fehler ?? null;
-    } catch {
-      return null;
-    }
-  }
-  return null;
+function rufe<T>(handlung: string, rest: Record<string, unknown> = {}): Promise<T> {
+  return rufeFunktion<T>("verwaltung", handlung, rest);
 }
 
 export function ladeNutzer(): Promise<{ nutzer: Nutzerzeile[] }> {
@@ -56,22 +27,26 @@ export function ladeNutzer(): Promise<{ nutzer: Nutzerzeile[] }> {
 }
 
 /**
- * Legt den Nutzer an und gibt den Einladungslink zurueck. Es wird **keine Mail
- * verschickt**: der Admin gibt den Link selbst weiter (Entscheidung 07.08.2026).
+ * Legt den Zugang an und gibt das Startpasswort zurueck. Es wird **keine Mail verschickt**:
+ * der Admin gibt das Passwort selbst weiter (Entscheidung 07.09.2026). Beim ersten
+ * Anmelden muss der Neue es wechseln.
  */
-export function ladeEinladung(
+export function legeZugangAn(
   email: string,
   rolle: Rolle,
   apps: readonly string[],
-): Promise<{ kennung: string; email: string; link: string }> {
-  return rufe("einladen", {
-    email,
-    rolle,
-    apps,
-    // Wohin der Link aus der Mail fuehrt. Muss in den Redirect-URLs des Projekts stehen,
-    // sonst landet der Eingeladene auf der Site URL und wundert sich.
-    ziel: `${window.location.origin}/passwort-setzen`,
-  });
+): Promise<{ kennung: string; email: string; startpasswort: string }> {
+  return rufe("anlegen", { email, rolle, apps });
+}
+
+/**
+ * Neues Startpasswort fuer einen bestehenden Zugang. Der einzige Weg zurueck, wenn jemand
+ * sein Passwort vergisst: eine Mail zum Zuruecksetzen kann niemand verschicken.
+ */
+export function setzePasswortZurueck(
+  kennung: string,
+): Promise<{ kennung: string; startpasswort: string }> {
+  return rufe("passwort-zuruecksetzen", { kennung });
 }
 
 export function setzeStatus(kennung: string, gesperrt: boolean): Promise<unknown> {

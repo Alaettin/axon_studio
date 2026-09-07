@@ -9,7 +9,12 @@ import { ProfilRoute } from "@/routes/ProfilRoute";
 import { AufnahmeRoute } from "@/routes/verwaltung/aufnahme/AufnahmeRoute";
 import { KatalogRoute } from "@/routes/verwaltung/KatalogRoute";
 import { NutzerRoute } from "@/routes/verwaltung/NutzerRoute";
-import { BrauchtAdmin, BrauchtAnmeldung, NichtGesperrt } from "@/routes/Waechter";
+import {
+  BrauchtAdmin,
+  BrauchtAnmeldung,
+  BrauchtPasswortwechsel,
+  NichtGesperrt,
+} from "@/routes/Waechter";
 import { ZustimmungRoute } from "@/routes/ZustimmungRoute";
 import { beobachteSichtbarkeit } from "@/lib/supabase";
 import { useSitzung } from "@/store/sitzung";
@@ -43,7 +48,9 @@ function App() {
         element={
           <BrauchtAnmeldung>
             <NichtGesperrt>
-              <BuehneRoute />
+              <BrauchtPasswortwechsel>
+                <BuehneRoute />
+              </BrauchtPasswortwechsel>
             </NichtGesperrt>
           </BrauchtAnmeldung>
         }
@@ -53,7 +60,9 @@ function App() {
         element={
           <BrauchtAnmeldung>
             <NichtGesperrt>
-              <ProfilRoute />
+              <BrauchtPasswortwechsel>
+                <ProfilRoute />
+              </BrauchtPasswortwechsel>
             </NichtGesperrt>
           </BrauchtAnmeldung>
         }
@@ -63,9 +72,11 @@ function App() {
         element={
           <BrauchtAnmeldung>
             <NichtGesperrt>
-              <BrauchtAdmin>
-                <NutzerRoute />
-              </BrauchtAdmin>
+              <BrauchtPasswortwechsel>
+                <BrauchtAdmin>
+                  <NutzerRoute />
+                </BrauchtAdmin>
+              </BrauchtPasswortwechsel>
             </NichtGesperrt>
           </BrauchtAnmeldung>
         }
@@ -81,9 +92,11 @@ function App() {
         element={
           <BrauchtAnmeldung>
             <NichtGesperrt>
-              <BrauchtAdmin>
-                <KatalogRoute />
-              </BrauchtAdmin>
+              <BrauchtPasswortwechsel>
+                <BrauchtAdmin>
+                  <KatalogRoute />
+                </BrauchtAdmin>
+              </BrauchtPasswortwechsel>
             </NichtGesperrt>
           </BrauchtAnmeldung>
         }
@@ -93,9 +106,11 @@ function App() {
         element={
           <BrauchtAnmeldung>
             <NichtGesperrt>
-              <BrauchtAdmin>
-                <AufnahmeRoute />
-              </BrauchtAdmin>
+              <BrauchtPasswortwechsel>
+                <BrauchtAdmin>
+                  <AufnahmeRoute />
+                </BrauchtAdmin>
+              </BrauchtPasswortwechsel>
             </NichtGesperrt>
           </BrauchtAnmeldung>
         }

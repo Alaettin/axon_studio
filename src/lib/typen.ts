@@ -17,6 +17,12 @@ export interface Profil {
   readonly avatar_url: string | null;
   readonly role: Rolle;
   readonly status: Status;
+  /**
+   * Der Nutzer traegt noch sein Startpasswort. Solange die Marke steht, fuehrt jeder Weg
+   * auf `/passwort-setzen`. Loeschen darf sie nur die Edge Function `konto`, zusammen mit
+   * dem neuen Passwort.
+   */
+  readonly passwortwechsel_faellig: boolean;
   readonly created_at: string;
   readonly updated_at: string | null;
 }

@@ -142,6 +142,16 @@ export function ZustimmungRoute() {
     return <Navigate to={`/anmeldung?weiter=${encodeURIComponent(ziel)}`} replace />;
   }
 
+  /*
+   * Diese Seite steht ausserhalb der Waechter und braucht die Pruefung deshalb selbst: wer
+   * noch sein Startpasswort traegt, darf keinem Unterprogramm ein Token bewilligen. Die
+   * Anfrage geht dabei nicht verloren, sie steht nach dem Wechsel wieder in der Adresse.
+   */
+  if (profil?.passwortwechsel_faellig) {
+    const ziel = `/zustimmung?authorization_id=${encodeURIComponent(kennung ?? "")}`;
+    return <Navigate to={`/passwort-setzen?weiter=${encodeURIComponent(ziel)}`} replace />;
+  }
+
   const entscheide = async (erlauben: boolean) => {
     if (!kennung) return;
     setzeEntscheidet(true);

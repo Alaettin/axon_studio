@@ -3,7 +3,12 @@ import { useState } from "react";
 import { Etikett } from "@/components/Bausteine";
 import { Modal } from "@/components/Modal";
 import { initialen, type Nutzerzeile, type Rolle } from "@/lib/typen";
-import { setzeFreischaltung, setzeRolle, setzeStatus } from "@/lib/verwaltung";
+import {
+  setzeFreischaltung,
+  setzePasswortZurueck,
+  setzeRolle,
+  setzeStatus,
+} from "@/lib/verwaltung";
 import { useSitzung } from "@/store/sitzung";
 
 /**
@@ -25,6 +30,10 @@ export function NutzerDetail({ nutzer, schliesse, neuLaden }: Props) {
   const ich = useSitzung((z) => z.profil);
   const [laeuft, setzeLaeuft] = useState<string | null>(null);
   const [fehler, setzeFehler] = useState<string | null>(null);
+  // Das neue Startpasswort steht nur hier, solange der Dialog offen ist. Ein zweites Mal
+  // gibt es nicht, also gehoert es sichtbar dagestanden und nicht in eine Meldung.
+  const [neuesPasswort, setzeNeuesPasswort] = useState<string | null>(null);
+  const [kopiert, setzeKopiert] = useState(false);
 
   // Sich selbst die Rechte zu nehmen ist der eine Weg, sich auszusperren. Der Trigger in
   // der Datenbank verhindert das nicht: als Admin darf man es. Also hier.
@@ -139,6 +148,64 @@ export function NutzerDetail({ nutzer, schliesse, neuLaden }: Props) {
               );
             })}
           </ul>
+        </section>
+
+        <section className="flex flex-col gap-3">
+          <Etikett>Passwort</Etikett>
+          {neuesPasswort ? (
+            <>
+              <p className="font-sans text-base text-axon-schrift-fein">
+                Neues Startpasswort. Es steht{" "}
+                <strong className="text-axon-schrift">nur hier</strong>, ist nach dem
+                Schließen weg, und alle Sitzungen dieses Zugangs sind beendet.
+              </p>
+              <input
+                readOnly
+                value={neuesPasswort}
+                aria-label="Neues Startpasswort"
+                onFocus={(e) => e.currentTarget.select()}
+                className="border border-axon-linie bg-axon-flaeche p-3 font-mono text-md tracking-fein break-all text-axon-schrift outline-none focus:border-axon-fokus"
+              />
+              <div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void navigator.clipboard.writeText(neuesPasswort).then(() => {
+                      setzeKopiert(true);
+                    });
+                  }}
+                  className="h-(--h-knopf) cursor-pointer border border-axon-linie px-5 font-sans text-sm tracking-[0.14em] uppercase text-axon-schrift-leise transition-colors duration-calm hover:border-axon-fokus hover:text-axon-schrift"
+                >
+                  {kopiert ? "Kopiert" : "Passwort kopieren"}
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="font-sans text-base text-axon-schrift-fein">
+                {nutzer.passwortwechsel_faellig
+                  ? "Dieser Zugang trägt noch sein Startpasswort und muss es bei der nächsten Anmeldung wechseln."
+                  : "Ein eigenes Passwort ist gesetzt."}{" "}
+                Zurücksetzen vergibt ein neues Startpasswort und beendet alle Sitzungen.
+              </p>
+              <div>
+                <button
+                  type="button"
+                  disabled={binIchSelbst || laeuft !== null}
+                  onClick={() =>
+                    void tue("passwort", async () => {
+                      const { startpasswort } = await setzePasswortZurueck(nutzer.id);
+                      setzeNeuesPasswort(startpasswort);
+                      setzeKopiert(false);
+                    })
+                  }
+                  className="h-(--h-knopf) cursor-pointer border border-axon-linie px-5 font-sans text-sm tracking-[0.14em] uppercase text-axon-schrift-leise transition-colors duration-calm hover:border-axon-fokus hover:text-axon-schrift disabled:cursor-not-allowed disabled:opacity-45"
+                >
+                  {laeuft === "passwort" ? "Einen Moment" : "Passwort zurücksetzen"}
+                </button>
+              </div>
+            </>
+          )}
         </section>
 
         <p aria-live="polite" className="min-h-4 font-sans text-sm text-axon-fehler">

@@ -18,7 +18,9 @@ import {
  *   liste     Nutzer samt Rolle, Freischaltungen und letzter Anmeldung.
  *             `last_sign_in_at` steht in `auth.users` und ist ueber die Tabelle nicht
  *             lesbar, nur hier.
- *   einladen  Zugang anlegen und den Einladungslink zurueckgeben. Keine Mail.
+ *   anlegen   Zugang samt Startpasswort anlegen. Keine Mail, kein Link.
+ *   passwort-zuruecksetzen
+ *             Neues Startpasswort fuer einen bestehenden Zugang.
  *   status    Sperren und entsperren. Setzt `banned_until` **und** `profiles.status`:
  *             das eine haelt die Anmeldung an, das andere ist die Angabe, die die
  *             Oberflaeche zeigt.
@@ -85,8 +87,10 @@ Deno.serve(async (anfrage) => {
   switch (auftrag.handlung) {
     case "liste":
       return await liste(dienst);
-    case "einladen":
-      return await einladen(dienst, auftrag, nutzer.user.id);
+    case "anlegen":
+      return await anlegen(dienst, auftrag, nutzer.user.id);
+    case "passwort-zuruecksetzen":
+      return await passwortZuruecksetzen(dienst, auftrag);
     case "status":
       return await status(dienst, auftrag);
     case "client-anlegen":
@@ -135,7 +139,35 @@ async function liste(dienst: Dienst): Promise<Response> {
   });
 }
 
-async function einladen(
+/**
+ * Ein Startpasswort.
+ *
+ * `crypto.getRandomValues` und ein Alphabet ohne verwechselbare Zeichen (kein I, l, 1, O,
+ * 0): das Passwort wird abgelesen und weitergesagt, und ein Zeichen, das man falsch liest,
+ * kostet genau die Anmeldung, die es ermoeglichen soll. Sechzehn Zeichen liegen deutlich
+ * ueber der Mindestlaenge von zehn, die die Oberflaeche beim Wechseln verlangt.
+ *
+ * Der Rest ist die Zuteilung: `% ALPHABET.length` waere leicht ungleich verteilt, deshalb
+ * werden Werte oberhalb des groessten Vielfachen verworfen.
+ */
+const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+
+function startpasswort(laenge = 16): string {
+  const grenze = Math.floor(256 / ALPHABET.length) * ALPHABET.length;
+  let wort = "";
+  while (wort.length < laenge) {
+    const puffer = new Uint8Array(laenge);
+    crypto.getRandomValues(puffer);
+    for (const wert of puffer) {
+      if (wert >= grenze) continue;
+      wort += ALPHABET[wert % ALPHABET.length];
+      if (wort.length === laenge) break;
+    }
+  }
+  return wort;
+}
+
+async function anlegen(
   dienst: Dienst,
   auftrag: Record<string, unknown>,
   von: string,
@@ -143,49 +175,50 @@ async function einladen(
   const email = String(auftrag["email"] ?? "").trim().toLowerCase();
   const rolle = auftrag["rolle"] === "admin" ? "admin" : "user";
   const apps = Array.isArray(auftrag["apps"]) ? (auftrag["apps"] as string[]) : [];
-  const ziel = typeof auftrag["ziel"] === "string" ? auftrag["ziel"] : undefined;
 
   if (!email.includes("@")) return antwort({ fehler: "Das ist keine E-Mail-Adresse." }, 400);
 
+  const passwort = startpasswort();
+
   /*
-   * `generateLink` statt `inviteUserByEmail`: es legt den Nutzer genauso an, verschickt
-   * aber **keine** Mail, sondern gibt den Link zurueck. Der Admin schickt ihn selbst.
+   * `createUser` statt `generateLink` (Entscheidung 07.09.2026). Der Einladungslink hing an
+   * der Site URL des Projekts, und die gehoert einer fremden Anwendung; er war ausserdem
+   * einmalig und lief ab, ohne dass es einen zweiten Weg herein gab. Das Konto steht jetzt
+   * sofort, und der Admin gibt das Startpasswort weiter.
    *
-   * Grund (Entscheidung 07.08.2026): der eingebaute Versand von Supabase ist nicht fuer den
-   * Betrieb gedacht, und ein eigener SMTP-Dienst braucht Absender und DNS-Eintraege, die es
-   * beide noch nicht gibt. Bei einer Handvoll interner Nutzer ist der Link ehrlicher als
-   * eine Mail-Einrichtung, und er ist sofort pruefbar: der Einladeweg war bisher der
-   * einzige Pfad, den niemand durchlaufen konnte.
+   * `email_confirm: true` ist noetig, nicht Bequemlichkeit: sonst wartet das Konto auf eine
+   * Bestaetigungsmail, und die verschickt hier niemand.
    */
-  const { data: eingeladen, error: einladeFehler } = await dienst.auth.admin.generateLink({
-    type: "invite",
+  const { data: angelegt, error: anlegeFehler } = await dienst.auth.admin.createUser({
     email,
-    options: ziel ? { redirectTo: ziel } : undefined,
+    password: passwort,
+    email_confirm: true,
   });
-  if (einladeFehler) {
+  if (anlegeFehler) {
     // Der haeufigste Fall ist "gibt es schon", und das ist kein Serverfehler.
-    const schon = /already|registered|exists/i.test(einladeFehler.message);
+    const schon = /already|registered|exists/i.test(anlegeFehler.message);
     return antwort(
       {
         fehler: schon
           ? "Zu dieser Adresse gibt es bereits ein Konto."
-          : einladeFehler.message,
+          : anlegeFehler.message,
       },
       400,
     );
   }
 
-  const neueKennung = eingeladen.user.id;
-  const link = eingeladen.properties.action_link;
+  const neueKennung = angelegt.user.id;
 
   /*
    * Die Zeile in `profiles` legt der Trigger `handle_new_user` an, und zwar immer mit der
-   * Rolle `user`. Die gewuenschte Rolle wird deshalb hier nachgezogen, nicht vorher.
+   * Rolle `user` und ohne die Marke fuer den Passwortwechsel. Beides wird deshalb hier
+   * nachgezogen, nicht vorher.
    */
-  if (rolle === "admin") {
-    const { error } = await dienst.from("profiles").update({ role: "admin" }).eq("id", neueKennung);
-    if (error) return antwort({ fehler: error.message }, 500);
-  }
+  const { error: profilFehler } = await dienst
+    .from("profiles")
+    .update({ passwortwechsel_faellig: true, ...(rolle === "admin" ? { role: "admin" } : {}) })
+    .eq("id", neueKennung);
+  if (profilFehler) return antwort({ fehler: profilFehler.message }, 500);
 
   if (apps.length > 0) {
     const { error } = await dienst
@@ -194,15 +227,49 @@ async function einladen(
     if (error) return antwort({ fehler: error.message }, 500);
   }
 
-  // Historie. Ein Konflikt hier darf die Einladung nicht scheitern lassen, der Nutzer ist
-  // schon angelegt: der eindeutige Index deckt nur offene Einladungen je Adresse ab.
-  await dienst
+  /*
+   * Historie. Der Fehler wird nicht mehr verschluckt: solange der Teilindex ueber offene
+   * Einladungen bestand, scheiterte jede zweite Zeile je Adresse, und niemand erfuhr davon.
+   * Der Index ist weg (Migration 20260907120000), also ist ein Fehler hier wieder einer.
+   */
+  const { error: historieFehler } = await dienst
     .from("hub_invitations")
     .insert({ email, rolle, apps, eingeladen_von: von });
+  if (historieFehler) return antwort({ fehler: historieFehler.message }, 500);
 
-  // Der Link ist das Ergebnis, nicht ein Nebenprodukt: ohne ihn kommt der Eingeladene
-  // nicht herein, und es gibt keinen zweiten Weg, ihn zu bekommen.
-  return antwort({ kennung: neueKennung, email, link });
+  // Das Startpasswort ist das Ergebnis, nicht ein Nebenprodukt: es steht nirgends sonst,
+  // und ohne es kommt der Neue nicht herein.
+  return antwort({ kennung: neueKennung, email, startpasswort: passwort });
+}
+
+async function passwortZuruecksetzen(
+  dienst: Dienst,
+  auftrag: Record<string, unknown>,
+): Promise<Response> {
+  const kennung = String(auftrag["kennung"] ?? "");
+  if (!kennung) return antwort({ fehler: "Es fehlt die Kennung des Nutzers." }, 400);
+
+  const passwort = startpasswort();
+
+  const { error: authFehler } = await dienst.auth.admin.updateUserById(kennung, {
+    password: passwort,
+  });
+  if (authFehler) return antwort({ fehler: authFehler.message }, 500);
+
+  const { error } = await dienst
+    .from("profiles")
+    .update({ passwortwechsel_faellig: true })
+    .eq("id", kennung);
+  if (error) return antwort({ fehler: error.message }, 500);
+
+  /*
+   * Dieselbe Ueberlegung wie beim Sperren: ein ausgegebenes Token ueberlebt die Aenderung
+   * des Passworts. Wer zuruecksetzt, will die alte Sitzung beenden, nicht nur das Passwort
+   * tauschen.
+   */
+  await dienst.auth.admin.signOut(kennung, "global");
+
+  return antwort({ kennung, startpasswort: passwort });
 }
 
 async function status(dienst: Dienst, auftrag: Record<string, unknown>): Promise<Response> {

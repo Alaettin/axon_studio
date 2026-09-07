@@ -57,17 +57,16 @@ export function AnmeldungRoute() {
     // aktiver Knopf davor sieht aus, als waere nichts passiert.
   };
 
-  const passwortVergessen = async () => {
-    if (!email) {
-      setzeFehler("Bitte zuerst die E-Mail-Adresse eintragen.");
-      return;
-    }
+  /*
+   * Kein Zuruecksetzen per Mail: es gibt keinen SMTP-Dienst, und der Knopf meldete bisher
+   * "die Mail ist unterwegs", ohne dass je eine losging. Wer sein Passwort vergisst,
+   * bekommt von einer Person mit Verwaltungsrechten ein neues Startpasswort.
+   */
+  const passwortVergessen = () => {
     setzeFehler(null);
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/passwort-setzen`,
-    });
-    if (error) setzeFehler(error.message);
-    else setzeHinweis("Wenn es zu dieser Adresse ein Konto gibt, ist die Mail unterwegs.");
+    setzeHinweis(
+      "Eine Person mit Verwaltungsrechten setzt dein Passwort zurück und gibt dir ein neues Startpasswort.",
+    );
   };
 
   return (
@@ -157,7 +156,7 @@ export function AnmeldungRoute() {
           <div className="flex items-center justify-between font-mono text-2xs tracking-fein text-axon-schrift-leise">
             <button
               type="button"
-              onClick={() => void passwortVergessen()}
+              onClick={passwortVergessen}
               className="cursor-pointer transition-colors duration-quick hover:text-axon-fokus"
             >
               Passwort vergessen

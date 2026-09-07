@@ -26,12 +26,13 @@ src/
   components/Keyvisual/   Aus dem AAS Editor portiert, tokengesteuert, kennt keine Farbe.
   components/             Flaeche, Marke, Kopfzeile, Kachel, Palette, Modal, Bausteine
   routes/                 Anmeldung, Buehne, Profil, Zustimmung, PasswortSetzen, Waechter
-  routes/verwaltung/      Nutzerliste, Nutzer-Detail, Einladen
-  lib/                    supabase, typen, verwaltung (Zugang zur Edge Function)
+  routes/verwaltung/      Nutzerliste, Nutzer-Detail, Zugang anlegen
+  lib/                    supabase, typen, funktion, verwaltung, konto (Edge Functions)
   store/sitzung.ts        Wer ist angemeldet, was darf er sehen
 supabase/
   migrations/             Alle mit `hub_` vorangestellt
-  functions/verwaltung/   Was den service_role-Schluessel braucht
+  functions/verwaltung/   Was den service_role-Schluessel braucht, nur fuer Admins
+  functions/konto/        Das eigene Passwort wechseln, fuer jeden Angemeldeten
 ```
 
 ## Supabase: der Hub sattelt auf einem fremden Projekt auf
@@ -43,6 +44,12 @@ Daraus folgen Regeln, die hier eingehalten werden:
 
 - **Eigene Tabellen tragen `hub_`**, wie dort `dti_`, `ucc_`, `doc_`, `excel_`, `aas_`.
 - **`profiles` und `user_tool_access` sind geteilt.** Sie werden benutzt, nicht umgebaut.
+- **Ein Zugang entsteht nur in der Verwaltung**, mit einem Startpasswort, das genau einmal
+  angezeigt wird. Kein Einladungslink mehr: der hing an der projektweiten Site URL, und die
+  gehört der AAS Tools Platform. Bis zum Wechsel steht `profiles.passwortwechsel_faellig`,
+  und löschen darf die Marke nur die Edge Function `konto`, zusammen mit dem neuen Passwort.
+  **Im Hub** gibt es keinen zweiten Weg herein; die Selbstregistrierung der Tools Platform
+  legt aber weiterhin Konten an, die hier gültig sind.
   Einzige Ausnahme bisher: die additive Spalte `profiles.status`.
 - **Kein Fremdschlüssel von `user_tool_access` auf `hub_apps`.** Die Tools-Plattform
   schreibt dort, und ein nachträglicher Fremdschlüssel könnte ihre Schreibvorgänge brechen.
@@ -113,6 +120,7 @@ pnpm e2e                  Sechzehn Pruefungen im Browser, gegen die echte Datenb
 node scripts/bewegung.mjs Zaehlt rAF-Bilder mit und ohne prefers-reduced-motion
 node scripts/bildschirme.mjs   Legt Bilder aller Bildschirme in test-results ab
 node scripts/sperren-rundlauf.mjs  Sperren und Entsperren ueber die Edge Function
+node scripts/zugang-rundlauf.mjs   Zugang anlegen, Startpasswort, Wechsel erzwungen
 node scripts/kopfzeilen-pruefen.mjs <adresse>   Die sechs Sicherheitskopfzeilen
 ```
 
