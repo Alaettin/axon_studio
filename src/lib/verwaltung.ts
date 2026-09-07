@@ -127,6 +127,52 @@ export async function ladeOrganisationen(): Promise<
   });
 }
 
+/**
+ * Wer in dieser Organisation ist.
+ *
+ * Zwei Abfragen und kein `select` mit eingebetteter Tabelle: `hub_organisation_mitglieder`
+ * zeigt auf `auth.users`, nicht auf `profiles`, und ohne Fremdschlüssel kennt PostgREST die
+ * Beziehung nicht. Ein zweiter Fremdschlüssel nur für die Bequemlichkeit einer Abfrage wäre
+ * eine Änderung an der geteilten Tabelle für nichts.
+ *
+ * **Mit ausdrücklichem Filter auf die Organisation.** Die Policy lässt einen Administrator alle
+ * Mitgliedschaften lesen; wer sich hier auf RLS verließe, bekäme den ganzen Bestand.
+ */
+export async function ladeMitglieder(organisationId: string): Promise<
+  { id: string; name: string | null; email: string | null; rolle: Mitgliedsrolle }[]
+> {
+  const { data: zeilen, error } = await mitFrist(
+    supabase
+      .from("hub_organisation_mitglieder")
+      .select("user_id, rolle")
+      .eq("organisation_id", organisationId),
+  );
+  if (error) throw new Error(error.message);
+  if ((zeilen ?? []).length === 0) return [];
+
+  const kennungen = (zeilen ?? []).map((z: { user_id: string }) => z.user_id);
+  const { data: profile, error: profilFehler } = await mitFrist(
+    supabase.from("profiles").select("id, display_name, email").in("id", kennungen),
+  );
+  if (profilFehler) throw new Error(profilFehler.message);
+
+  const nach = new Map(
+    (profile ?? []).map((p: { id: string; display_name: string | null; email: string | null }) => [
+      p.id,
+      p,
+    ]),
+  );
+
+  return (zeilen ?? [])
+    .map((z: { user_id: string; rolle: Mitgliedsrolle }) => ({
+      id: z.user_id,
+      name: nach.get(z.user_id)?.display_name ?? null,
+      email: nach.get(z.user_id)?.email ?? null,
+      rolle: z.rolle,
+    }))
+    .sort((a, b) => (a.name ?? a.email ?? "").localeCompare(b.name ?? b.email ?? "", "de"));
+}
+
 export async function legeOrganisationAn(name: string): Promise<Organisation> {
   const { data, error } = await supabase
     .from("hub_organisationen")

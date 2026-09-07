@@ -186,7 +186,7 @@ export function ProfilRoute() {
             </Glasflaeche>
           </div>
 
-          <MeineOrganisationen />
+          {profil && <MeineOrganisationen kennung={profil.id} />}
 
           <Freigaben />
         </div>
@@ -312,16 +312,16 @@ function Freigaben() {
  * in einem Unterprogramm plötzlich fremde Konnektoren stehen: sie sind nicht fremd, sie
  * gehoeren der Organisation.
  */
-function MeineOrganisationen() {
+function MeineOrganisationen({ kennung }: { readonly kennung: string }) {
   const [organisationen, setzeOrganisationen] = useState<readonly Mitgliedschaft[]>([]);
   const [laedt, setzeLaedt] = useState(true);
 
   useEffect(() => {
-    void ladeMeineOrganisationen()
+    void ladeMeineOrganisationen(kennung)
       .then(setzeOrganisationen)
       .catch(() => setzeOrganisationen([]))
       .finally(() => setzeLaedt(false));
-  }, []);
+  }, [kennung]);
 
   if (laedt || organisationen.length === 0) return null;
 

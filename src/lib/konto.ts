@@ -17,15 +17,21 @@ export function wechslePasswort(passwort: string): Promise<{ kennung: string }> 
 /**
  * Die eigenen Organisationen, für das Profil.
  *
- * Über die Tabelle: RLS gibt jedem seine eigenen Zeilen frei, und der Hub ist selbst angemeldet.
- * Die Edge Function `konto` beantwortet dieselbe Frage, sie ist für die **Unterprogramme** da,
- * die keinen Zugriff auf die Tabellen haben.
+ * Über die Tabelle, aber **mit** Filter auf die eigene Kennung. Sich auf RLS zu verlassen wäre
+ * hier falsch: die Policy lässt einen Administrator *alle* Mitgliedschaften lesen, und ohne den
+ * Filter stand im Profil jede Zeile jeder Organisation. Bei zwei Mitgliedern in „Neoception"
+ * hieß das zweimal „Neoception", und zwar nur für Administratoren, also für niemanden, der es
+ * gemeldet hätte (gefunden am 07.09.2026, im Bild eines Nutzers).
+ *
+ * Die Edge Function `konto` beantwortet dieselbe Frage für die **Unterprogramme**, die keinen
+ * Zugriff auf die Tabellen haben; sie filtert von jeher selbst.
  */
-export async function ladeMeineOrganisationen(): Promise<Mitgliedschaft[]> {
+export async function ladeMeineOrganisationen(kennung: string): Promise<Mitgliedschaft[]> {
   const { data, error } = await mitFrist(
     supabase
       .from("hub_organisation_mitglieder")
-      .select("rolle, hub_organisationen(id, name)"),
+      .select("rolle, hub_organisationen(id, name)")
+      .eq("user_id", kennung),
   );
   if (error) throw new Error(error.message);
 

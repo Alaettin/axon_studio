@@ -6,9 +6,10 @@ import { Flaeche } from "@/components/Flaeche";
 import { Kopfzeile } from "@/components/Kopfzeile";
 import { Modal } from "@/components/Modal";
 import { Palette } from "@/components/Palette";
-import type { Organisation } from "@/lib/typen";
+import { initialen, type Mitgliedsrolle, type Organisation } from "@/lib/typen";
 import {
   benenneOrganisation,
+  ladeMitglieder,
   ladeOrganisationen,
   legeOrganisationAn,
   loescheOrganisation,
@@ -193,11 +194,6 @@ function NeueOrganisation({
           platzhalter="Neoception"
           autoComplete="off"
         />
-        <p className="font-sans text-sm text-axon-schrift-fein">
-          Der Name steht auch in den Unterprogrammen, dort heißt er je nach Programm anders
-          (im AXON Connector: der Arbeitsbereich).
-        </p>
-
         <p aria-live="polite" className="min-h-4 font-sans text-sm text-axon-fehler">
           {fehler ?? ""}
         </p>
@@ -228,6 +224,18 @@ function OrganisationDetail({
   const [laeuft, setzeLaeuft] = useState<string | null>(null);
   const [fehler, setzeFehler] = useState<string | null>(null);
   const [loeschen, setzeLoeschen] = useState(false);
+  const [mitglieder, setzeMitglieder] = useState<
+    readonly { id: string; name: string | null; email: string | null; rolle: Mitgliedsrolle }[]
+  >([]);
+  const [ladeFehler, setzeLadeFehler] = useState<string | null>(null);
+
+  useEffect(() => {
+    void ladeMitglieder(organisation.id)
+      .then(setzeMitglieder)
+      .catch((ursache: unknown) =>
+        setzeLadeFehler(ursache instanceof Error ? ursache.message : "Unbekannter Fehler."),
+      );
+  }, [organisation.id]);
 
   const geaendert = name.trim() !== organisation.name && name.trim().length > 0;
 
@@ -255,7 +263,7 @@ function OrganisationDetail({
         </h2>
       </header>
 
-      <div className="flex flex-col gap-6 px-[26px] py-6">
+      <div className="flex flex-col gap-6 overflow-y-auto px-[26px] py-6">
         <Unterlinienfeld
           beschriftung="Name"
           typ="text"
@@ -264,6 +272,46 @@ function OrganisationDetail({
           platzhalter="Name der Organisation"
           autoComplete="off"
         />
+
+        <section className="flex flex-col gap-3">
+          <Etikett>Mitglieder</Etikett>
+          {ladeFehler ? (
+            <p role="alert" className="font-sans text-sm text-axon-fehler">
+              {ladeFehler}
+            </p>
+          ) : mitglieder.length === 0 ? (
+            <p className="font-sans text-base text-axon-schrift-fein">
+              Noch niemand. Zugeordnet wird im Nutzerdialog unter Verwaltung, Nutzer.
+            </p>
+          ) : (
+            <ul className="flex flex-col border border-axon-linie-fein">
+              {mitglieder.map((mitglied) => (
+                <li
+                  key={mitglied.id}
+                  className="flex items-center gap-3 border-b border-axon-zeile-linie px-4 py-[10px] last:border-b-0"
+                >
+                  <span
+                    aria-hidden
+                    className="flex size-7 shrink-0 items-center justify-center rounded-full border border-axon-linie-fein bg-axon-avatar-still font-sans text-2xs text-axon-schrift-leise"
+                  >
+                    {initialen({ display_name: mitglied.name, email: mitglied.email })}
+                  </span>
+                  <span className="flex min-w-0 flex-col">
+                    <span className="truncate font-sans text-md text-axon-schrift">
+                      {mitglied.name ?? "Ohne Namen"}
+                    </span>
+                    <span className="truncate font-mono text-2xs text-axon-schrift-still">
+                      {mitglied.email}
+                    </span>
+                  </span>
+                  <span className="ml-auto font-mono text-2xs tracking-fein uppercase text-axon-schrift-fein">
+                    {mitglied.rolle === "verwalter" ? "Verwalter" : "Mitglied"}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
 
         {loeschen ? (
           <p className="font-sans text-base text-axon-schrift-fein">
@@ -276,7 +324,7 @@ function OrganisationDetail({
           </p>
         ) : (
           <p className="font-sans text-sm text-axon-schrift-fein">
-            Wer zu dieser Organisation gehört, wird im Nutzerdialog gesetzt.
+            Aufgenommen und entlassen wird im Nutzerdialog unter Verwaltung, Nutzer.
           </p>
         )}
 
