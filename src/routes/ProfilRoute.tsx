@@ -6,7 +6,8 @@ import { Flaeche } from "@/components/Flaeche";
 import { Kopfzeile } from "@/components/Kopfzeile";
 import { Palette } from "@/components/Palette";
 import { supabase } from "@/lib/supabase";
-import { initialen } from "@/lib/typen";
+import { ladeMeineOrganisationen } from "@/lib/konto";
+import { initialen, type Mitgliedschaft } from "@/lib/typen";
 import { useKatalogteile, useSitzung } from "@/store/sitzung";
 
 /**
@@ -185,6 +186,8 @@ export function ProfilRoute() {
             </Glasflaeche>
           </div>
 
+          <MeineOrganisationen />
+
           <Freigaben />
         </div>
       </div>
@@ -298,6 +301,48 @@ function Freigaben() {
           </li>
         ))}
       </ul>
+    </Glasflaeche>
+  );
+}
+
+/**
+ * Wozu ich gehoere.
+ *
+ * Lesend: zugeordnet wird in der Verwaltung. Es steht trotzdem hier, weil es erklaert, warum
+ * in einem Unterprogramm plötzlich fremde Konnektoren stehen: sie sind nicht fremd, sie
+ * gehoeren der Organisation.
+ */
+function MeineOrganisationen() {
+  const [organisationen, setzeOrganisationen] = useState<readonly Mitgliedschaft[]>([]);
+  const [laedt, setzeLaedt] = useState(true);
+
+  useEffect(() => {
+    void ladeMeineOrganisationen()
+      .then(setzeOrganisationen)
+      .catch(() => setzeOrganisationen([]))
+      .finally(() => setzeLaedt(false));
+  }, []);
+
+  if (laedt || organisationen.length === 0) return null;
+
+  return (
+    <Glasflaeche titel="Meine Organisationen">
+      <ul className="flex flex-col">
+        {organisationen.map((organisation) => (
+          <li
+            key={organisation.id}
+            className="flex items-center gap-3 border-b border-axon-zeile-linie px-[22px] py-[13px] last:border-b-0"
+          >
+            <span className="font-sans text-md text-axon-schrift">{organisation.name}</span>
+            <span className="ml-auto font-mono text-2xs tracking-fein uppercase text-axon-schrift-fein">
+              {organisation.rolle === "verwalter" ? "Verwalter" : "Mitglied"}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <p className="px-[22px] py-4 font-sans text-sm text-axon-schrift-fein">
+        Wer in derselben Organisation ist, teilt sich in den Unterprogrammen den Arbeitsbereich.
+      </p>
     </Glasflaeche>
   );
 }

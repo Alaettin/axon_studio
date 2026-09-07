@@ -9,6 +9,7 @@ import { ProfilRoute } from "@/routes/ProfilRoute";
 import { AufnahmeRoute } from "@/routes/verwaltung/aufnahme/AufnahmeRoute";
 import { KatalogRoute } from "@/routes/verwaltung/KatalogRoute";
 import { NutzerRoute } from "@/routes/verwaltung/NutzerRoute";
+import { OrganisationenRoute } from "@/routes/verwaltung/OrganisationenRoute";
 import {
   BrauchtAdmin,
   BrauchtAnmeldung,
@@ -87,6 +88,21 @@ function App() {
         neu an, `/verwaltung/katalog/:id` bearbeitet. Dieselben fuenf Schritte, damit es
         nicht zwei Masken gibt, die auseinanderlaufen.
       */}
+      <Route
+        path="/verwaltung/organisationen"
+        element={
+          <BrauchtAnmeldung>
+            <NichtGesperrt>
+              <BrauchtPasswortwechsel>
+                <BrauchtAdmin>
+                  <OrganisationenRoute />
+                </BrauchtAdmin>
+              </BrauchtPasswortwechsel>
+            </NichtGesperrt>
+          </BrauchtAnmeldung>
+        }
+      />
+
       <Route
         path="/verwaltung/katalog"
         element={

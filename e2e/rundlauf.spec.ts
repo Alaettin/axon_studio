@@ -249,6 +249,44 @@ test("Löschen fragt erst, was am Zugang hängt", async ({ page }) => {
   await expect(page.getByText("Freischaltungen")).toBeVisible();
 });
 
+test("Organisationen stehen nur Administratoren offen", async ({ page }) => {
+  await melde(page, NUTZER);
+  await page.goto("/verwaltung/organisationen");
+  await expect(page).toHaveURL(/\/$/);
+});
+
+test("Die Organisationsseite zeigt den Bestand und fragt nach einem Namen", async ({ page }) => {
+  /*
+   * Angelegt wird hier nichts: eine Organisation im echten Bestand bleibt sonst nach jedem
+   * Durchlauf stehen. Den ganzen Weg samt Zuordnung und der Frage, was ein Unterprogramm
+   * davon erfaehrt, belegt `scripts/organisationen-rundlauf.mjs`.
+   */
+  await melde(page, ADMIN);
+  await page.goto("/verwaltung/organisationen");
+
+  await expect(page.getByRole("heading", { name: "Organisationen" })).toBeVisible();
+  await page.getByRole("button", { name: "Neue Organisation" }).click();
+
+  const anlegen = page.getByRole("button", { name: "Anlegen", exact: true });
+  await expect(anlegen).toBeDisabled();
+  await page.getByLabel("Name").fill("Wird nicht abgeschickt");
+  await expect(anlegen).toBeEnabled();
+  await page.getByRole("button", { name: "Abbrechen" }).click();
+});
+
+test("Der Nutzerdialog fuehrt die Organisationen", async ({ page }) => {
+  await melde(page, ADMIN);
+  await page.goto("/verwaltung/nutzer");
+  await page.getByPlaceholder("Nutzer suchen").fill("axon-probe-nutzer");
+  await page.getByRole("button", { name: /Probe Nutzer/ }).click();
+
+  // Der Abschnitt steht auch dann da, wenn es noch keine Organisation gibt: dann sagt er das.
+  await expect(page.getByText("Organisationen", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("teilt sich in den Unterprogrammen den Arbeitsbereich", { exact: false }),
+  ).toBeVisible();
+});
+
 test("Der Programmkatalog steht nur Administratoren offen", async ({ page }) => {
   await melde(page, NUTZER);
   await page.goto("/verwaltung/katalog");

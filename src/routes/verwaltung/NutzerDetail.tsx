@@ -1,12 +1,20 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Etikett } from "@/components/Bausteine";
 import { Modal } from "@/components/Modal";
-import { initialen, type Loeschvorschau, type Nutzerzeile, type Rolle } from "@/lib/typen";
+import {
+  initialen,
+  type Loeschvorschau,
+  type Nutzerzeile,
+  type Organisation,
+  type Rolle,
+} from "@/lib/typen";
 import {
   ladeLoeschvorschau,
+  ladeOrganisationen,
   loescheNutzer,
   setzeFreischaltung,
+  setzeMitgliedschaft,
   setzePasswortZurueck,
   setzeRolle,
   setzeStatus,
@@ -63,6 +71,16 @@ export function NutzerDetail({ nutzer, schliesse, neuLaden }: Props) {
   // `undefined` heisst: der Loeschzweig ist zu. `null` heisst: die Vorschau ist unterwegs.
   const [vorschau, setzeVorschau] = useState<Loeschvorschau | null | undefined>(undefined);
   const [abgetippt, setzeAbgetippt] = useState("");
+  /*
+   * Der Katalog der Organisationen, einmal beim Oeffnen. Nicht im Sitzungsspeicher: den
+   * braucht nur dieser Dialog, und ein Feld dort waere ein zweiter Zeitpunkt, an dem es
+   * falsch sein kann. Welche davon der Nutzer traegt, steht in `nutzer.organisationen` und
+   * kommt mit der Liste, die nach jeder Aenderung ohnehin neu geholt wird.
+   */
+  const [organisationen, setzeOrganisationen] = useState<readonly Organisation[]>([]);
+  useEffect(() => {
+    void ladeOrganisationen().then(setzeOrganisationen).catch(() => setzeOrganisationen([]));
+  }, []);
 
   // Sich selbst die Rechte zu nehmen ist der eine Weg, sich auszusperren. Der Trigger in
   // der Datenbank verhindert das nicht: als Admin darf man es. Also hier.
@@ -199,6 +217,81 @@ export function NutzerDetail({ nutzer, schliesse, neuLaden }: Props) {
                 );
               })}
             </ul>
+          </section>
+
+          {/*
+            Organisationen stehen hier und nicht auf der Organisationsseite: alles andere, was
+            einen Nutzer betrifft, steht auch hier, und zwei Orte fuer dieselbe Zuordnung waeren
+            zwei Orte, an denen sie fehlen kann.
+          */}
+          <section className="flex flex-col gap-3">
+            <Etikett>Organisationen</Etikett>
+            {organisationen.length === 0 ? (
+              <p className="font-sans text-sm text-axon-schrift-fein">
+                Es gibt noch keine Organisation. Angelegt werden sie unter Verwaltung,
+                Organisationen.
+              </p>
+            ) : (
+              <ul className="flex flex-col border border-axon-linie-fein">
+                {organisationen.map((organisation) => {
+                  const drin = nutzer.organisationen.find((o) => o.id === organisation.id);
+                  return (
+                    <li
+                      key={organisation.id}
+                      className="flex items-center gap-3 border-b border-axon-zeile-linie px-4 py-3 last:border-b-0"
+                    >
+                      <span className="truncate font-sans text-md text-axon-schrift">
+                        {organisation.name}
+                      </span>
+                      {drin && (
+                        <button
+                          type="button"
+                          disabled={laeuft !== null}
+                          onClick={() =>
+                            void tue(`rolle-${organisation.id}`, () =>
+                              setzeMitgliedschaft(
+                                organisation.id,
+                                nutzer.id,
+                                drin.rolle === "verwalter" ? "mitglied" : "verwalter",
+                              ),
+                            )
+                          }
+                          className="cursor-pointer border border-axon-linie px-[10px] py-1 font-mono text-2xs tracking-fein uppercase text-axon-schrift-leise transition-colors duration-quick hover:text-axon-schrift disabled:cursor-wait"
+                        >
+                          {drin.rolle === "verwalter" ? "Verwalter" : "Mitglied"}
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={drin !== undefined}
+                        aria-label={`${nutzer.display_name ?? nutzer.email ?? "Diesen Nutzer"} zu ${organisation.name} zuordnen`}
+                        disabled={laeuft !== null}
+                        onClick={() =>
+                          void tue(organisation.id, () =>
+                            setzeMitgliedschaft(organisation.id, nutzer.id, drin ? null : "mitglied"),
+                          )
+                        }
+                        className="ml-auto h-5 w-9 shrink-0 cursor-pointer border border-axon-linie bg-transparent transition-colors duration-quick aria-checked:border-axon-aktion aria-checked:bg-axon-schalter-an disabled:cursor-wait"
+                      >
+                        <span
+                          aria-hidden
+                          className={
+                            drin
+                              ? "block size-3 translate-x-[18px] bg-axon-aktion transition-transform duration-quick"
+                              : "block size-3 translate-x-[2px] bg-axon-schalter-aus transition-transform duration-quick"
+                          }
+                        />
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+            <p className="font-sans text-sm text-axon-schrift-fein">
+              Wer zusammen in einer Organisation ist, teilt sich in den Unterprogrammen den
+              Arbeitsbereich. Rechte vergibt sie keine.
+            </p>
           </section>
 
           <section className="flex flex-col gap-3">

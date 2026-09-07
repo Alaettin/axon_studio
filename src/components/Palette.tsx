@@ -49,6 +49,12 @@ export function Palette({ offen, setzeOffen }: Props) {
         { id: "nutzer", name: "Nutzer", hinweis: "Verwaltung", gehe: "/verwaltung/nutzer" },
         { id: "katalog", name: "Katalog", hinweis: "Verwaltung", gehe: "/verwaltung/katalog" },
         {
+          id: "organisationen",
+          name: "Organisationen",
+          hinweis: "Verwaltung",
+          gehe: "/verwaltung/organisationen",
+        },
+        {
           id: "aufnehmen",
           name: "Programm aufnehmen",
           hinweis: "Verwaltung",

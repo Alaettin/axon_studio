@@ -129,6 +129,29 @@ export const SCOPE_TEXT: Record<Scope, { titel: string; detail: string }> = {
   },
 };
 
+/** Die Rolle innerhalb einer Organisation. Zwei reichen, wie bei den Rollen des Hubs. */
+export type Mitgliedsrolle = "mitglied" | "verwalter";
+
+/** `public.hub_organisationen`. */
+export interface Organisation {
+  readonly id: string;
+  readonly name: string;
+  readonly angelegt_am: string;
+  readonly angelegt_von: string | null;
+}
+
+/**
+ * Eine Organisation aus der Sicht eines Nutzers: dieselbe Zeile, plus seine Rolle darin.
+ *
+ * Genau diese Form geht auch an die Unterprogramme (`konto`, Handlung `organisationen`), damit
+ * die Verwaltung und der Vertrag nach außen nicht zwei Sprachen sprechen.
+ */
+export interface Mitgliedschaft {
+  readonly id: string;
+  readonly name: string;
+  readonly rolle: Mitgliedsrolle;
+}
+
 /**
  * Was an einem Zugang hängt, abgeleitet aus den Fremdschlüsseln (`hub_loeschvorschau`).
  *
@@ -166,6 +189,7 @@ export interface Einladung {
  */
 export interface Nutzerzeile extends Profil {
   readonly programme: readonly string[];
+  readonly organisationen: readonly Mitgliedschaft[];
   readonly zuletzt_angemeldet: string | null;
 }
 

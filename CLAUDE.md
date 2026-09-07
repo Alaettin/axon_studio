@@ -26,13 +26,13 @@ src/
   components/Keyvisual/   Aus dem AAS Editor portiert, tokengesteuert, kennt keine Farbe.
   components/             Flaeche, Marke, Kopfzeile, Kachel, Palette, Modal, Bausteine
   routes/                 Anmeldung, Buehne, Profil, Zustimmung, PasswortSetzen, Waechter
-  routes/verwaltung/      Nutzerliste, Nutzer-Detail, Zugang anlegen
+  routes/verwaltung/      Nutzerliste, Nutzer-Detail, Zugang anlegen, Organisationen
   lib/                    supabase, typen, funktion, verwaltung, konto (Edge Functions)
   store/sitzung.ts        Wer ist angemeldet, was darf er sehen
 supabase/
   migrations/             Alle mit `hub_` vorangestellt
   functions/verwaltung/   Was den service_role-Schluessel braucht, nur fuer Admins
-  functions/konto/        Das eigene Passwort wechseln, fuer jeden Angemeldeten
+  functions/konto/        Eigenes Passwort und eigene Organisationen, fuer jeden Angemeldeten
 ```
 
 ## Supabase: der Hub sattelt auf einem fremden Projekt auf
@@ -51,6 +51,12 @@ Daraus folgen Regeln, die hier eingehalten werden:
   unkenntlich. Deshalb zeigt die Verwaltung erst eine Vorschau und verlangt die abgetippte
   Adresse. Die Vorschau wird in `hub_loeschvorschau()` **aus `pg_constraint` abgeleitet**, nicht
   gepflegt: eine Liste im Code wäre falsch, sobald die Tools-Plattform eine Tabelle ergänzt.
+- **Organisationen sagen, wer zusammengehört, und sonst nichts.** `hub_organisationen` und
+  `hub_organisation_mitglieder` (mehrere je Nutzer, Rolle `mitglied` oder `verwalter`), beide
+  **nicht** in `profiles`: dort dürfte jeder seine eigene Zeile ändern und sich damit selbst in
+  eine fremde Organisation eintragen. Die Unterprogramme fragen über die Edge Function `konto`,
+  Handlung `organisationen`, mit dem OAuth-Zugriffstoken aus ihrem eigenen Codetausch. Kein
+  Anspruch im Token: der Hook dafür liefe bei jeder Tokenausstellung des geteilten Projekts.
 - **Ein Zugang entsteht nur in der Verwaltung**, mit einem Startpasswort, das genau einmal
   angezeigt wird. Kein Einladungslink mehr: der hing an der projektweiten Site URL, und die
   gehört der AAS Tools Platform. Bis zum Wechsel steht `profiles.passwortwechsel_faellig`,
@@ -111,6 +117,15 @@ Hellmodus, sondern Kernblau statt des dunklen Grunds.
   Der Trigger `schuetze_rolle_und_status()` deckte `role` und `status` ab; `email` blieb
   offen, obwohl die Nutzerverwaltung genau sie anzeigt. Kommt eine Spalte dazu, die niemand
   über sich selbst setzen darf, gehört sie in denselben Trigger.
+- **Ein Recht zu entziehen heißt, es zweimal zu entziehen.** `revoke ... from public` nimmt weg,
+  was PUBLIC hat; Supabase vergibt EXECUTE über Vorgaberechte **zusätzlich einzeln** an `anon`,
+  `authenticated` und `service_role`. Wer nur eines von beidem tut, sieht den Advisor weiter
+  meckern und hat die Funktion nicht geschlossen.
+- **Ein OAuth-Zugriffstoken eines Unterprogramms ist ein vollwertiges Nutzertoken.** Es trägt
+  `role: authenticated` und die Kennung, also kann ein Programm damit alles, was der Nutzer
+  selbst darf, auch in der AAS Tools Platform. Die Scopes der Zustimmungsseite schränken **nur**
+  ein, was der Aussteller in den Anspruch schreibt, nicht was PostgREST erlaubt. Gemessen am
+  07.09.2026 mit `scripts/oauth-rundlauf.mjs`.
 - **Eine Sperrliste über Hostnamen prüft die Schreibweise, nicht das Ziel.** `2130706433`
   und `[::ffff:127.0.0.1]` sind `127.0.0.1`, und ein öffentlicher Name darf auf `10.0.0.5`
   zeigen. `adressen.ts` urteilt deshalb über aufgelöste Adressen gegen Bereiche. Und
@@ -128,6 +143,8 @@ node scripts/bildschirme.mjs   Legt Bilder aller Bildschirme in test-results ab
 node scripts/sperren-rundlauf.mjs  Sperren und Entsperren ueber die Edge Function
 node scripts/zugang-rundlauf.mjs   Zugang anlegen, Startpasswort, Wechsel erzwungen
 node scripts/loeschen-rundlauf.mjs Vorschau, Bestaetigung, Loeschen, Nachschau
+node scripts/organisationen-rundlauf.mjs  Anlegen, zuordnen, und was ein Programm erfaehrt
+node scripts/oauth-rundlauf.mjs .oauth-client-lokal.json   Der ganze Anmeldeweg eines Programms
 node scripts/kopfzeilen-pruefen.mjs <adresse>   Die sechs Sicherheitskopfzeilen
 ```
 

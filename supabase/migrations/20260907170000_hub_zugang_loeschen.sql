@@ -86,9 +86,14 @@ end;
 $$;
 
 /*
- * Aufrufen darf sie nur der Dienst, also die Edge Function. Der Entzug muss `from public` lauten:
- * Postgres vergibt EXECUTE an PUBLIC, und `anon` wie `authenticated` erben davon. Nur diesen
- * beiden das Recht zu nehmen, laesst es stehen (gemessen am 07.08.2026 am Advisor).
+ * Aufrufen darf sie nur der Dienst, also die Edge Function.
+ *
+ * **Beide Entzuege sind noetig.** `from public` nimmt das Recht weg, das Postgres an PUBLIC
+ * vergibt und von dem `anon` und `authenticated` erben (gemessen am 07.08.2026 am Advisor).
+ * Damit ist es aber nicht getan: Supabase legt fuer das Schema `public` Vorgaberechte fest und
+ * vergibt EXECUTE **zusaetzlich einzeln** an `anon`, `authenticated` und `service_role`. Wer nur
+ * PUBLIC entzieht, sieht den Advisor weiter meckern und hat recht damit (gemessen am
+ * 07.09.2026).
  */
-revoke execute on function public.hub_loeschvorschau(uuid) from public;
+revoke execute on function public.hub_loeschvorschau(uuid) from public, anon, authenticated;
 grant execute on function public.hub_loeschvorschau(uuid) to service_role;

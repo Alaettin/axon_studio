@@ -15,7 +15,7 @@ import {
  * der eigentliche Sicherheitspunkt, und sie soll an genau einer Stelle stehen. Eine Kopie
  * je Handlung waere eine Gelegenheit je Handlung, sie zu vergessen.
  *
- *   liste     Nutzer samt Rolle, Freischaltungen und letzter Anmeldung.
+ *   liste     Nutzer samt Rolle, Freischaltungen, Organisationen und letzter Anmeldung.
  *             `last_sign_in_at` steht in `auth.users` und ist ueber die Tabelle nicht
  *             lesbar, nur hier.
  *   anlegen   Zugang samt Startpasswort anlegen. Keine Mail, kein Link.
@@ -27,6 +27,10 @@ import {
  *   status    Sperren und entsperren. Setzt `banned_until` **und** `profiles.status`:
  *             das eine haelt die Anmeldung an, das andere ist die Angabe, die die
  *             Oberflaeche zeigt.
+ *
+ * Organisationen haben hier **keine** eigene Handlung: sie stehen in `hub_organisationen`
+ * und `hub_organisation_mitglieder`, und RLS laesst Administratoren dort schreiben. Der
+ * Dienstschluessel wird dafuer nicht gebraucht, also wird er auch nicht bemueht.
  *
  * Alles rund um Programme liegt in `clients.ts`, damit diese Datei nicht zwei Themen
  * traegt: `client-anlegen`, `client-aendern`, `client-loeschen`, `geheimnis-erneuern`,
@@ -118,13 +122,16 @@ Deno.serve(async (anfrage) => {
 type Dienst = ReturnType<typeof createClient>;
 
 async function liste(dienst: Dienst): Promise<Response> {
-  const [profile, zugriffe, anmeldungen] = await Promise.all([
+  const [profile, zugriffe, anmeldungen, mitglieder] = await Promise.all([
     dienst.from("profiles").select("*").order("created_at", { ascending: true }),
     dienst.from("user_tool_access").select("user_id, tool_id"),
     dienst.auth.admin.listUsers({ perPage: 1000 }),
+    dienst
+      .from("hub_organisation_mitglieder")
+      .select("user_id, rolle, hub_organisationen(id, name)"),
   ]);
 
-  const fehler = profile.error ?? zugriffe.error ?? anmeldungen.error;
+  const fehler = profile.error ?? zugriffe.error ?? anmeldungen.error ?? mitglieder.error;
   if (fehler) return antwort({ fehler: fehler.message }, 500);
 
   const zuletzt = new Map(
@@ -137,10 +144,26 @@ async function liste(dienst: Dienst): Promise<Response> {
     programme.set(zeile.user_id as string, bisher);
   }
 
+  // Dieselbe Form wie bei den Programmen: eine Karte je Nutzer, damit die Liste nicht je Zeile
+  // durch alle Mitgliedschaften laeuft.
+  const organisationen = new Map<string, { id: string; name: string; rolle: string }[]>();
+  for (const zeile of mitglieder.data ?? []) {
+    // Objekt oder einelementiges Feld, siehe `konto/index.ts`: beides zulassen.
+    const roh = (zeile as Record<string, unknown>)["hub_organisationen"];
+    const org = (Array.isArray(roh) ? roh[0] : roh) as { id: string; name: string } | null;
+    if (!org) continue;
+    const bisher = organisationen.get(zeile.user_id as string) ?? [];
+    bisher.push({ id: org.id, name: org.name, rolle: zeile.rolle as string });
+    organisationen.set(zeile.user_id as string, bisher);
+  }
+
   return antwort({
     nutzer: (profile.data ?? []).map((p) => ({
       ...p,
       programme: programme.get(p.id as string) ?? [],
+      organisationen: (organisationen.get(p.id as string) ?? []).sort((a, b) =>
+        a.name.localeCompare(b.name, "de"),
+      ),
       zuletzt_angemeldet: zuletzt.get(p.id as string) ?? null,
     })),
   });

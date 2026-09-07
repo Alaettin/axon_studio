@@ -3,7 +3,9 @@ import { mitFrist, supabase } from "@/lib/supabase";
 import type {
   Abnahmepunkt,
   Loeschvorschau,
+  Mitgliedsrolle,
   Nutzerzeile,
+  Organisation,
   Posten,
   Programm,
   Programmclient,
@@ -94,6 +96,90 @@ export async function setzeFreischaltung(
         .delete()
         .eq("user_id", kennung)
         .eq("tool_id", programm);
+  if (error) throw new Error(error.message);
+}
+
+/* --- Organisationen --------------------------------------------------------------- */
+
+/**
+ * Der Katalog der Organisationen samt Mitgliederzahl.
+ *
+ * Über die Tabelle, nicht über die Edge Function: RLS lässt Angemeldete lesen und Admins
+ * schreiben, damit ist der Dienstschlüssel hier nirgends nötig. Die Zahl kommt aus derselben
+ * Abfrage (`count` über die verknüpfte Tabelle), nicht aus einer zweiten Runde.
+ */
+export async function ladeOrganisationen(): Promise<
+  (Organisation & { mitglieder: number })[]
+> {
+  const { data, error } = await mitFrist(
+    supabase
+      .from("hub_organisationen")
+      .select("*, hub_organisation_mitglieder(count)")
+      .order("name", { ascending: true }),
+  );
+  if (error) throw new Error(error.message);
+
+  return (data ?? []).map((zeile) => {
+    const { hub_organisation_mitglieder: zaehler, ...rest } = zeile as Organisation & {
+      hub_organisation_mitglieder: { count: number }[];
+    };
+    return { ...rest, mitglieder: zaehler[0]?.count ?? 0 };
+  });
+}
+
+export async function legeOrganisationAn(name: string): Promise<Organisation> {
+  const { data, error } = await supabase
+    .from("hub_organisationen")
+    .insert({ name: name.trim() })
+    .select("*")
+    .single();
+  // Der eindeutige Index über `lower(name)` ist die Stelle, an der doppelte Namen scheitern.
+  // Die Meldung von Postgres nennt den Index, nicht die Sache, also hier übersetzen.
+  if (error) {
+    throw new Error(
+      error.code === "23505" ? "Eine Organisation dieses Namens gibt es schon." : error.message,
+    );
+  }
+  return data as Organisation;
+}
+
+export async function benenneOrganisation(id: string, name: string): Promise<void> {
+  const { error } = await supabase
+    .from("hub_organisationen")
+    .update({ name: name.trim() })
+    .eq("id", id);
+  if (error) {
+    throw new Error(
+      error.code === "23505" ? "Eine Organisation dieses Namens gibt es schon." : error.message,
+    );
+  }
+}
+
+/** Nimmt die Zugehörigkeit weg, keine Konten: `hub_organisation_mitglieder` hängt am Cascade. */
+export async function loescheOrganisation(id: string): Promise<void> {
+  const { error } = await supabase.from("hub_organisationen").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+/** `null` als Rolle heißt: raus aus der Organisation. */
+export async function setzeMitgliedschaft(
+  organisationId: string,
+  kennung: string,
+  rolle: Mitgliedsrolle | null,
+): Promise<void> {
+  const { error } =
+    rolle === null
+      ? await supabase
+          .from("hub_organisation_mitglieder")
+          .delete()
+          .eq("organisation_id", organisationId)
+          .eq("user_id", kennung)
+      : await supabase
+          .from("hub_organisation_mitglieder")
+          .upsert(
+            { organisation_id: organisationId, user_id: kennung, rolle },
+            { onConflict: "organisation_id,user_id" },
+          );
   if (error) throw new Error(error.message);
 }
 
