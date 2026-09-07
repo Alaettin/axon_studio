@@ -66,7 +66,8 @@ test("Nach der Anmeldung fuehrt kein weiter= aus dem Programm heraus", async ({ 
 
 test("Der Katalog enthaelt nur echte Clients des Hubs", async ({ page }) => {
   /*
-   * Im Katalog steht genau ein Programm: der AXON Editor. Die acht Werkzeuge der
+   * Im Katalog stehen zwei Programme: der AXON Editor und, seit dem 12.08.2026, der AXON
+   * Connector. Die acht Werkzeuge der
    * AAS Tools Platform standen dort am 07.08.2026 kurzzeitig, weil `user_tool_access`
    * bereits Freischaltungen auf ihre Kennungen trug. Das war ein Fehlschluss: vorhandene
    * Freischaltungen sind kein Auftrag, die Werkzeuge aufzunehmen. Sie sind keine Clients
@@ -86,9 +87,14 @@ test("Der Katalog enthaelt nur echte Clients des Hubs", async ({ page }) => {
     "https://axon-editor.sliplane.app",
   );
 
-  // Nichts Gesperrtes: was nicht im Katalog steht, geht den Hub nichts an.
-  await expect(page.getByText("Zugang anfragen")).toHaveCount(0);
+  /*
+   * Seit dem 12.08.2026 steht ein zweites echtes Programm im Katalog, der AXON Connector.
+   * Dieser Nutzer ist dafuer nicht freigeschaltet, also sieht er dort "Zugang anfragen",
+   * und genau das ist richtig. Gemessen wird deshalb nicht "nichts Gesperrtes", sondern
+   * die eine Aussage, um die es geht: **kein fremdes Werkzeug**.
+   */
   await expect(page.getByText("Excel Connector")).toHaveCount(0);
+  await expect(page.getByText("IEC 61406")).toHaveCount(0);
 });
 
 test("Ein normaler Nutzer bekommt die Verwaltung nirgends zu sehen", async ({ page }) => {
@@ -151,9 +157,9 @@ test("Der Admin sieht alle Nutzer und kann eine Freischaltung entziehen", async 
   /*
    * Gezaehlt wird nur, was im Katalog steht. Der Probenutzer hat drei Freischaltungen in
    * `user_tool_access`, aber zwei davon gehoeren Werkzeugen der Tools-Plattform, die keine
-   * Programme des Hubs sind. Ohne den Filter stuende hier "3 von 1".
+   * Programme des Hubs sind. Ohne den Filter stuende hier "3 von 2".
    */
-  await expect(zeile).toContainText("1 von 1");
+  await expect(zeile).toContainText("1 von 2");
 
   await zeile.click();
   const schalter = page.getByRole("switch", { name: /AXON Editor/ });
@@ -208,6 +214,39 @@ test("Der Admin kann sich selbst nicht die Rechte nehmen", async ({ page }) => {
 
   await expect(page.getByRole("button", { name: "Nutzer", exact: true })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Sperren" })).toBeDisabled();
+  // Sich selbst zu loeschen ist der eine Weg, den Hub ohne Administrator zurueckzulassen.
+  // Die Edge Function weist es ebenfalls ab, hier steht nur der Knopf zur Probe.
+  await expect(page.getByRole("button", { name: "Löschen", exact: true })).toBeDisabled();
+});
+
+test("Löschen fragt erst, was am Zugang hängt", async ({ page }) => {
+  /*
+   * Wieder ohne Abschicken: ein Durchlauf loeschte sonst einen echten Zugang, und den bringt
+   * niemand zurueck. `scripts/loeschen-rundlauf.mjs` geht den ganzen Weg an einem eigens
+   * angelegten Zugang.
+   *
+   * Geprueft wird das, was der Dialog niemals ueberspringen darf: die Vorschau und die
+   * abgetippte Adresse. Solange dort etwas anderes steht, bleibt der Knopf gesperrt.
+   */
+  await melde(page, ADMIN);
+  await page.goto("/verwaltung/nutzer");
+  await page.getByPlaceholder("Nutzer suchen").fill("axon-probe-nutzer");
+  await page.getByRole("button", { name: /Probe Nutzer/ }).click();
+  await page.getByRole("button", { name: "Löschen", exact: true }).click();
+
+  await expect(page.getByText("Diesen Zugang endgültig löschen?")).toBeVisible();
+  await expect(page.getByText("Profil im Hub")).toBeVisible();
+
+  const endgueltig = page.getByRole("button", { name: "Endgültig löschen" });
+  await expect(endgueltig).toBeDisabled();
+  await page.getByLabel("Zum Bestätigen die Adresse eintippen").fill("falsch@example.invalid");
+  await expect(endgueltig).toBeDisabled();
+  await page.getByLabel("Zum Bestätigen die Adresse eintippen").fill(NUTZER.email);
+  await expect(endgueltig).toBeEnabled();
+
+  // Und wieder zurueck, ohne etwas anzufassen.
+  await page.getByRole("button", { name: "Zurück" }).click();
+  await expect(page.getByText("Freischaltungen")).toBeVisible();
 });
 
 test("Der Programmkatalog steht nur Administratoren offen", async ({ page }) => {
@@ -224,9 +263,10 @@ test("Der Katalog zeigt den Editor mit Umgebungen und Status", async ({ page }) 
   await expect(page.getByRole("heading", { name: "Katalog" })).toBeVisible();
   const zeile = page.getByRole("button", { name: /AXON Editor/ });
   await expect(zeile).toBeVisible({ timeout: 20_000 });
-  // Zwei Umgebungen: produktion und lokal. Die zweite steht als "+1" hinter dem Host.
+  // Drei Umgebungen: produktion, lokal und seit dem 11.08.2026 connector. Die beiden
+  // hinteren stehen als "+2" hinter dem Host.
   await expect(zeile).toContainText("axon-editor.sliplane.app");
-  await expect(zeile).toContainText("+1");
+  await expect(zeile).toContainText("+2");
 });
 
 test("Der Assistent laesst nicht vorspringen", async ({ page }) => {

@@ -2,7 +2,9 @@ import { rufe as rufeFunktion } from "@/lib/funktion";
 import { mitFrist, supabase } from "@/lib/supabase";
 import type {
   Abnahmepunkt,
+  Loeschvorschau,
   Nutzerzeile,
+  Posten,
   Programm,
   Programmclient,
   Programmstatus,
@@ -47,6 +49,27 @@ export function setzePasswortZurueck(
   kennung: string,
 ): Promise<{ kennung: string; startpasswort: string }> {
   return rufe("passwort-zuruecksetzen", { kennung });
+}
+
+/**
+ * Was hinge an diesem Zugang, wenn man ihn löscht.
+ *
+ * Wird **vor** dem Löschen gezeigt, nicht danach erklärt: das Projekt ist mit der AAS Tools
+ * Platform geteilt, und ein Cascade nimmt zwölf ihrer Tabellen mit.
+ */
+export function ladeLoeschvorschau(kennung: string): Promise<Loeschvorschau> {
+  return rufe("loeschvorschau", { kennung });
+}
+
+/**
+ * Endgültig. `bestaetigung` ist die abgetippte E-Mail-Adresse und wird auch serverseitig
+ * geprüft, sonst wäre sie nur Zierrat.
+ */
+export function loescheNutzer(
+  kennung: string,
+  bestaetigung: string,
+): Promise<{ kennung: string; email: string; entfernt: Posten[] }> {
+  return rufe("loeschen", { kennung, bestaetigung });
 }
 
 export function setzeStatus(kennung: string, gesperrt: boolean): Promise<unknown> {

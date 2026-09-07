@@ -129,6 +129,25 @@ export const SCOPE_TEXT: Record<Scope, { titel: string; detail: string }> = {
   },
 };
 
+/**
+ * Was an einem Zugang hängt, abgeleitet aus den Fremdschlüsseln (`hub_loeschvorschau`).
+ *
+ * `faellt_weg` verschwindet mit dem Zugang, `blockiert` verhindert das Löschen. Die Tabellen
+ * stehen mit ihrem eigenen Namen da: das Projekt ist geteilt, und die Liste wächst, ohne dass
+ * der Hub davon erfährt.
+ */
+export interface Posten {
+  readonly tabelle: string;
+  readonly anzahl: number;
+}
+
+export interface Loeschvorschau {
+  readonly kennung: string;
+  readonly email: string | null;
+  readonly faellt_weg: readonly Posten[];
+  readonly blockiert: readonly Posten[];
+}
+
 /** `public.hub_invitations`. */
 export interface Einladung {
   readonly id: string;

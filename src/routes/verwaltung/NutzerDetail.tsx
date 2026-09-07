@@ -2,14 +2,40 @@ import { useState } from "react";
 
 import { Etikett } from "@/components/Bausteine";
 import { Modal } from "@/components/Modal";
-import { initialen, type Nutzerzeile, type Rolle } from "@/lib/typen";
+import { initialen, type Loeschvorschau, type Nutzerzeile, type Rolle } from "@/lib/typen";
 import {
+  ladeLoeschvorschau,
+  loescheNutzer,
   setzeFreischaltung,
   setzePasswortZurueck,
   setzeRolle,
   setzeStatus,
 } from "@/lib/verwaltung";
 import { useSitzung } from "@/store/sitzung";
+
+/**
+ * Tabellennamen in Klartext.
+ *
+ * Nur fuer die Anzeige: was hier fehlt, steht mit seinem eigenen Namen da. Das Supabase-Projekt
+ * ist mit der AAS Tools Platform geteilt, ihre Tabellen wachsen ohne unser Zutun, und eine
+ * Zuordnung, die dann nichts findet, darf nichts verschweigen.
+ */
+const KLARTEXT: Record<string, string> = {
+  profiles: "Profil im Hub",
+  user_tool_access: "Freischaltungen",
+  user_doc_access: "Zugriffe auf Handbücher",
+  doc_manuals: "Handbücher",
+  aas_projects: "Projekte im AXON Editor",
+  aas_mcp_servers: "MCP-Server",
+  dti_connectors: "DTI-Connectors",
+  excel_connectors: "Excel-Connectors",
+  global_connectors: "Globale Connectors",
+  connector_proxies: "Connector-Proxys",
+  iec_qr_codes: "IEC-QR-Codes",
+  ucc_sources: "UCC-Quellen",
+  ucc_use_cases: "UCC-Anwendungsfälle",
+  ucc_evaluations: "UCC-Bewertungen",
+};
 
 /**
  * Bildschirm 08 der Vorlage: Rolle und Freischaltungen eines Nutzers.
@@ -34,6 +60,9 @@ export function NutzerDetail({ nutzer, schliesse, neuLaden }: Props) {
   // gibt es nicht, also gehoert es sichtbar dagestanden und nicht in eine Meldung.
   const [neuesPasswort, setzeNeuesPasswort] = useState<string | null>(null);
   const [kopiert, setzeKopiert] = useState(false);
+  // `undefined` heisst: der Loeschzweig ist zu. `null` heisst: die Vorschau ist unterwegs.
+  const [vorschau, setzeVorschau] = useState<Loeschvorschau | null | undefined>(undefined);
+  const [abgetippt, setzeAbgetippt] = useState("");
 
   // Sich selbst die Rechte zu nehmen ist der eine Weg, sich auszusperren. Der Trigger in
   // der Datenbank verhindert das nicht: als Admin darf man es. Also hier.
@@ -78,135 +107,282 @@ export function NutzerDetail({ nutzer, schliesse, neuLaden }: Props) {
         </button>
       </header>
 
-      <div className="flex flex-col gap-6 overflow-y-auto px-[26px] py-6">
-        <section className="flex flex-col gap-3">
-          <Etikett>Rolle</Etikett>
-          <div className="flex gap-0">
-            {(["user", "admin"] as const).map((rolle) => (
-              <button
-                key={rolle}
-                type="button"
-                disabled={binIchSelbst || laeuft !== null}
-                onClick={() => void tue("rolle", () => setzeRolle(nutzer.id, rolle as Rolle))}
-                aria-pressed={nutzer.role === rolle}
-                className="cursor-pointer border border-axon-linie px-[14px] py-[9px] font-mono text-2xs tracking-[0.16em] uppercase text-axon-schrift-leise transition-colors duration-quick not-first:border-l-0 hover:text-axon-schrift aria-pressed:border-axon-wahl-rand aria-pressed:bg-axon-wahl-flaeche aria-pressed:text-axon-schrift disabled:cursor-not-allowed disabled:opacity-45"
-              >
-                {rolle === "admin" ? "Administrator" : "Nutzer"}
-              </button>
-            ))}
-          </div>
-          {binIchSelbst && (
-            <p className="font-sans text-sm text-axon-schrift-fein">
-              Die eigene Rolle und den eigenen Zugang kannst du hier nicht ändern. Sonst
-              sperrst du dich mit einem Klick selbst aus.
-            </p>
-          )}
-        </section>
-
-        <section className="flex flex-col gap-3">
-          <Etikett>Freischaltungen</Etikett>
-          <ul className="flex flex-col border border-axon-linie-fein">
-            {katalog.map((programm) => {
-              const frei = nutzer.programme.includes(programm.id);
-              return (
-                <li
-                  key={programm.id}
-                  className="flex items-center gap-3 border-b border-axon-zeile-linie px-4 py-3 last:border-b-0"
+      {vorschau !== undefined ? (
+        <Loeschzweig
+          nutzer={nutzer}
+          vorschau={vorschau}
+          abgetippt={abgetippt}
+          setzeAbgetippt={setzeAbgetippt}
+          laeuft={laeuft === "loeschen"}
+          fehler={fehler}
+          zurueck={() => {
+            setzeVorschau(undefined);
+            setzeAbgetippt("");
+            setzeFehler(null);
+          }}
+          loesche={() =>
+            void tue("loeschen", async () => {
+              await loescheNutzer(nutzer.id, abgetippt);
+              schliesse();
+            })
+          }
+        />
+      ) : (
+        <>
+        <div className="flex flex-col gap-6 overflow-y-auto px-[26px] py-6">
+          <section className="flex flex-col gap-3">
+            <Etikett>Rolle</Etikett>
+            <div className="flex gap-0">
+              {(["user", "admin"] as const).map((rolle) => (
+                <button
+                  key={rolle}
+                  type="button"
+                  disabled={binIchSelbst || laeuft !== null}
+                  onClick={() => void tue("rolle", () => setzeRolle(nutzer.id, rolle as Rolle))}
+                  aria-pressed={nutzer.role === rolle}
+                  className="cursor-pointer border border-axon-linie px-[14px] py-[9px] font-mono text-2xs tracking-[0.16em] uppercase text-axon-schrift-leise transition-colors duration-quick not-first:border-l-0 hover:text-axon-schrift aria-pressed:border-axon-wahl-rand aria-pressed:bg-axon-wahl-flaeche aria-pressed:text-axon-schrift disabled:cursor-not-allowed disabled:opacity-45"
                 >
-                  <span
-                    aria-hidden
-                    style={{ backgroundColor: programm.akzent }}
-                    className="size-[6px] shrink-0 rounded-full"
-                  />
-                  <span className="font-sans text-md text-axon-schrift">{programm.name}</span>
-                  <span className="font-mono text-2xs uppercase text-axon-schrift-fein">
-                    {programm.kuerzel}
-                  </span>
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={frei}
-                    aria-label={`${programm.name} für ${nutzer.display_name ?? nutzer.email ?? "diesen Nutzer"} freischalten`}
-                    disabled={laeuft !== null}
-                    onClick={() =>
-                      void tue(programm.id, () =>
-                        setzeFreischaltung(nutzer.id, programm.id, !frei),
-                      )
-                    }
-                    className="ml-auto h-5 w-9 shrink-0 cursor-pointer border border-axon-linie bg-transparent transition-colors duration-quick aria-checked:border-axon-aktion aria-checked:bg-axon-schalter-an disabled:cursor-wait"
+                  {rolle === "admin" ? "Administrator" : "Nutzer"}
+                </button>
+              ))}
+            </div>
+            {binIchSelbst && (
+              <p className="font-sans text-sm text-axon-schrift-fein">
+                Die eigene Rolle und den eigenen Zugang kannst du hier nicht ändern. Sonst
+                sperrst du dich mit einem Klick selbst aus.
+              </p>
+            )}
+          </section>
+
+          <section className="flex flex-col gap-3">
+            <Etikett>Freischaltungen</Etikett>
+            <ul className="flex flex-col border border-axon-linie-fein">
+              {katalog.map((programm) => {
+                const frei = nutzer.programme.includes(programm.id);
+                return (
+                  <li
+                    key={programm.id}
+                    className="flex items-center gap-3 border-b border-axon-zeile-linie px-4 py-3 last:border-b-0"
                   >
                     <span
                       aria-hidden
-                      className={
-                        frei
-                          ? "block size-3 translate-x-[18px] bg-axon-aktion transition-transform duration-quick"
-                          : "block size-3 translate-x-[2px] bg-axon-schalter-aus transition-transform duration-quick"
-                      }
+                      style={{ backgroundColor: programm.akzent }}
+                      className="size-[6px] shrink-0 rounded-full"
                     />
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
+                    <span className="font-sans text-md text-axon-schrift">{programm.name}</span>
+                    <span className="font-mono text-2xs uppercase text-axon-schrift-fein">
+                      {programm.kuerzel}
+                    </span>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={frei}
+                      aria-label={`${programm.name} für ${nutzer.display_name ?? nutzer.email ?? "diesen Nutzer"} freischalten`}
+                      disabled={laeuft !== null}
+                      onClick={() =>
+                        void tue(programm.id, () =>
+                          setzeFreischaltung(nutzer.id, programm.id, !frei),
+                        )
+                      }
+                      className="ml-auto h-5 w-9 shrink-0 cursor-pointer border border-axon-linie bg-transparent transition-colors duration-quick aria-checked:border-axon-aktion aria-checked:bg-axon-schalter-an disabled:cursor-wait"
+                    >
+                      <span
+                        aria-hidden
+                        className={
+                          frei
+                            ? "block size-3 translate-x-[18px] bg-axon-aktion transition-transform duration-quick"
+                            : "block size-3 translate-x-[2px] bg-axon-schalter-aus transition-transform duration-quick"
+                        }
+                      />
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
 
-        <section className="flex flex-col gap-3">
-          <Etikett>Passwort</Etikett>
-          {neuesPasswort ? (
-            <>
-              <p className="font-sans text-base text-axon-schrift-fein">
-                Neues Startpasswort. Es steht{" "}
-                <strong className="text-axon-schrift">nur hier</strong>, ist nach dem
-                Schließen weg, und alle Sitzungen dieses Zugangs sind beendet.
-              </p>
-              <input
-                readOnly
-                value={neuesPasswort}
-                aria-label="Neues Startpasswort"
-                onFocus={(e) => e.currentTarget.select()}
-                className="border border-axon-linie bg-axon-flaeche p-3 font-mono text-md tracking-fein break-all text-axon-schrift outline-none focus:border-axon-fokus"
-              />
-              <div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    void navigator.clipboard.writeText(neuesPasswort).then(() => {
-                      setzeKopiert(true);
-                    });
-                  }}
-                  className="h-(--h-knopf) cursor-pointer border border-axon-linie px-5 font-sans text-sm tracking-[0.14em] uppercase text-axon-schrift-leise transition-colors duration-calm hover:border-axon-fokus hover:text-axon-schrift"
-                >
-                  {kopiert ? "Kopiert" : "Passwort kopieren"}
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <p className="font-sans text-base text-axon-schrift-fein">
-                {nutzer.passwortwechsel_faellig
-                  ? "Dieser Zugang trägt noch sein Startpasswort und muss es bei der nächsten Anmeldung wechseln."
-                  : "Ein eigenes Passwort ist gesetzt."}{" "}
-                Zurücksetzen vergibt ein neues Startpasswort und beendet alle Sitzungen.
-              </p>
-              <div>
-                <button
-                  type="button"
-                  disabled={binIchSelbst || laeuft !== null}
-                  onClick={() =>
-                    void tue("passwort", async () => {
-                      const { startpasswort } = await setzePasswortZurueck(nutzer.id);
-                      setzeNeuesPasswort(startpasswort);
-                      setzeKopiert(false);
-                    })
-                  }
-                  className="h-(--h-knopf) cursor-pointer border border-axon-linie px-5 font-sans text-sm tracking-[0.14em] uppercase text-axon-schrift-leise transition-colors duration-calm hover:border-axon-fokus hover:text-axon-schrift disabled:cursor-not-allowed disabled:opacity-45"
-                >
-                  {laeuft === "passwort" ? "Einen Moment" : "Passwort zurücksetzen"}
-                </button>
-              </div>
-            </>
-          )}
-        </section>
+          <section className="flex flex-col gap-3">
+            <Etikett>Passwort</Etikett>
+            {neuesPasswort ? (
+              <>
+                <p className="font-sans text-base text-axon-schrift-fein">
+                  Neues Startpasswort. Es steht{" "}
+                  <strong className="text-axon-schrift">nur hier</strong>, ist nach dem
+                  Schließen weg, und alle Sitzungen dieses Zugangs sind beendet.
+                </p>
+                <input
+                  readOnly
+                  value={neuesPasswort}
+                  aria-label="Neues Startpasswort"
+                  onFocus={(e) => e.currentTarget.select()}
+                  className="border border-axon-linie bg-axon-flaeche p-3 font-mono text-md tracking-fein break-all text-axon-schrift outline-none focus:border-axon-fokus"
+                />
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void navigator.clipboard.writeText(neuesPasswort).then(() => {
+                        setzeKopiert(true);
+                      });
+                    }}
+                    className="h-(--h-knopf) cursor-pointer border border-axon-linie px-5 font-sans text-sm tracking-[0.14em] uppercase text-axon-schrift-leise transition-colors duration-calm hover:border-axon-fokus hover:text-axon-schrift"
+                  >
+                    {kopiert ? "Kopiert" : "Passwort kopieren"}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="font-sans text-base text-axon-schrift-fein">
+                  {nutzer.passwortwechsel_faellig
+                    ? "Dieser Zugang trägt noch sein Startpasswort und muss es bei der nächsten Anmeldung wechseln."
+                    : "Ein eigenes Passwort ist gesetzt."}{" "}
+                  Zurücksetzen vergibt ein neues Startpasswort und beendet alle Sitzungen.
+                </p>
+                <div>
+                  <button
+                    type="button"
+                    disabled={binIchSelbst || laeuft !== null}
+                    onClick={() =>
+                      void tue("passwort", async () => {
+                        const { startpasswort } = await setzePasswortZurueck(nutzer.id);
+                        setzeNeuesPasswort(startpasswort);
+                        setzeKopiert(false);
+                      })
+                    }
+                    className="h-(--h-knopf) cursor-pointer border border-axon-linie px-5 font-sans text-sm tracking-[0.14em] uppercase text-axon-schrift-leise transition-colors duration-calm hover:border-axon-fokus hover:text-axon-schrift disabled:cursor-not-allowed disabled:opacity-45"
+                  >
+                    {laeuft === "passwort" ? "Einen Moment" : "Passwort zurücksetzen"}
+                  </button>
+                </div>
+              </>
+            )}
+          </section>
+
+          <p aria-live="polite" className="min-h-4 font-sans text-sm text-axon-fehler">
+            {fehler ?? ""}
+          </p>
+        </div>
+
+        <footer className="flex items-center gap-3 border-t border-axon-linie px-[26px] py-5">
+          <span className="font-mono text-2xs tracking-fein uppercase text-axon-schrift-fein">
+            Zugang {nutzer.status === "gesperrt" ? "gesperrt" : "aktiv"}
+          </span>
+          <button
+            type="button"
+            disabled={binIchSelbst || laeuft !== null}
+            onClick={() =>
+              void tue("status", () => setzeStatus(nutzer.id, nutzer.status !== "gesperrt"))
+            }
+            className="ml-auto h-(--h-knopf) cursor-pointer border border-axon-linie px-5 font-sans text-sm tracking-[0.14em] uppercase text-axon-schrift-leise transition-colors duration-calm hover:border-axon-fehler-kraeftig hover:text-axon-schrift disabled:cursor-not-allowed disabled:opacity-45"
+          >
+            {nutzer.status === "gesperrt" ? "Entsperren" : "Sperren"}
+          </button>
+          {/*
+            Der Weg ins Loeschen fuehrt ueber die Vorschau, nie unmittelbar: was an einem Zugang
+            haengt, weiss nur die Datenbank, und der Administrator soll es sehen, bevor er
+            entscheidet.
+          */}
+          <button
+            type="button"
+            disabled={binIchSelbst || laeuft !== null}
+            onClick={() =>
+              void tue("vorschau", async () => {
+                setzeVorschau(null);
+                setzeVorschau(await ladeLoeschvorschau(nutzer.id));
+              })
+            }
+            className="h-(--h-knopf) cursor-pointer border border-axon-fehler-kraeftig px-5 font-sans text-sm tracking-[0.14em] uppercase text-axon-fehler transition-colors duration-calm hover:text-axon-schrift disabled:cursor-not-allowed disabled:opacity-45"
+          >
+            {laeuft === "vorschau" ? "Einen Moment" : "Löschen"}
+          </button>
+        </footer>
+        </>
+      )}
+    </Modal>
+  );
+}
+
+/**
+ * Der Loeschzweig: derselbe Dialog, anderer Inhalt.
+ *
+ * Kein zweites Modal ueber dem ersten. Zwei uebereinanderliegende Fenster verdecken genau die
+ * Angaben, wegen derer man das zweite geoeffnet hat.
+ */
+function Loeschzweig({
+  nutzer,
+  vorschau,
+  abgetippt,
+  setzeAbgetippt,
+  laeuft,
+  fehler,
+  zurueck,
+  loesche,
+}: {
+  readonly nutzer: Nutzerzeile;
+  readonly vorschau: Loeschvorschau | null;
+  readonly abgetippt: string;
+  readonly setzeAbgetippt: (wert: string) => void;
+  readonly laeuft: boolean;
+  readonly fehler: string | null;
+  readonly zurueck: () => void;
+  readonly loesche: () => void;
+}) {
+  const adresse = (nutzer.email ?? "").toLowerCase();
+  const stimmt = abgetippt.trim().toLowerCase() === adresse && adresse !== "";
+  const gesperrt = (vorschau?.blockiert.length ?? 0) > 0;
+
+  return (
+    <>
+      <div className="flex flex-col gap-5 overflow-y-auto px-[26px] py-6">
+        {vorschau === null ? (
+          <p className="font-mono text-2xs tracking-etikett uppercase text-axon-schrift-still">
+            Wird nachgesehen
+          </p>
+        ) : (
+          <>
+            <p className="font-sans text-lg text-axon-schrift">
+              Diesen Zugang endgültig löschen?
+            </p>
+
+            {gesperrt ? (
+              <>
+                <p className="font-sans text-base text-axon-schrift-fein">
+                  Das geht nicht. An diesem Zugang hängen Einträge, die die Datenbank nicht
+                  freigibt. Sie gehören der AAS Tools Platform und werden hier nicht angefasst.
+                  <strong className="text-axon-schrift"> Sperren</strong> geht stattdessen.
+                </p>
+                <Posten liste={vorschau.blockiert} />
+              </>
+            ) : (
+              <>
+                <p className="font-sans text-base text-axon-schrift-fein">
+                  Damit verschwindet auch alles, was daran hängt, und zwar{" "}
+                  <strong className="text-axon-schrift">ohne Weg zurück</strong>. Ein Teil davon
+                  sind Daten in der AAS Tools Platform, die dasselbe Konto benutzt.
+                </p>
+                {vorschau.faellt_weg.length > 0 ? (
+                  <Posten liste={vorschau.faellt_weg} />
+                ) : (
+                  <p className="font-sans text-base text-axon-schrift-fein">
+                    Außer dem Konto selbst hängt nichts daran.
+                  </p>
+                )}
+
+                <label className="flex flex-col gap-[9px]">
+                  <Etikett>Zum Bestätigen die Adresse eintippen</Etikett>
+                  <input
+                    value={abgetippt}
+                    onChange={(e) => setzeAbgetippt(e.target.value)}
+                    autoComplete="off"
+                    placeholder={adresse}
+                    className="h-8 border-0 border-b border-axon-feld-rand bg-transparent p-0 font-mono text-md text-axon-schrift transition-colors duration-feld outline-none placeholder:text-axon-platzhalter focus:border-axon-fokus"
+                  />
+                </label>
+              </>
+            )}
+          </>
+        )}
 
         <p aria-live="polite" className="min-h-4 font-sans text-sm text-axon-fehler">
           {fehler ?? ""}
@@ -214,20 +390,46 @@ export function NutzerDetail({ nutzer, schliesse, neuLaden }: Props) {
       </div>
 
       <footer className="flex items-center gap-3 border-t border-axon-linie px-[26px] py-5">
-        <span className="font-mono text-2xs tracking-fein uppercase text-axon-schrift-fein">
-          Zugang {nutzer.status === "gesperrt" ? "gesperrt" : "aktiv"}
-        </span>
         <button
           type="button"
-          disabled={binIchSelbst || laeuft !== null}
-          onClick={() =>
-            void tue("status", () => setzeStatus(nutzer.id, nutzer.status !== "gesperrt"))
-          }
-          className="ml-auto h-(--h-knopf) cursor-pointer border border-axon-linie px-5 font-sans text-sm tracking-[0.14em] uppercase text-axon-schrift-leise transition-colors duration-calm hover:border-axon-fehler-kraeftig hover:text-axon-schrift disabled:cursor-not-allowed disabled:opacity-45"
+          onClick={zurueck}
+          disabled={laeuft}
+          className="h-(--h-knopf) cursor-pointer border border-axon-linie px-5 font-sans text-sm tracking-[0.14em] uppercase text-axon-schrift-leise transition-colors duration-calm hover:border-axon-fokus hover:text-axon-schrift disabled:cursor-not-allowed disabled:opacity-45"
         >
-          {nutzer.status === "gesperrt" ? "Entsperren" : "Sperren"}
+          Zurück
         </button>
+        {!gesperrt && vorschau !== null && (
+          <button
+            type="button"
+            onClick={loesche}
+            disabled={!stimmt || laeuft}
+            className="ml-auto h-(--h-knopf) cursor-pointer border border-axon-fehler-kraeftig px-5 font-sans text-sm tracking-[0.14em] uppercase text-axon-fehler transition-colors duration-calm hover:text-axon-schrift disabled:cursor-not-allowed disabled:opacity-45"
+          >
+            {laeuft ? "Wird gelöscht" : "Endgültig löschen"}
+          </button>
+        )}
       </footer>
-    </Modal>
+    </>
+  );
+}
+
+/** Die Vorschau als Liste. Unbekannte Tabellen stehen mit ihrem eigenen Namen da. */
+function Posten({ liste }: { readonly liste: readonly { tabelle: string; anzahl: number }[] }) {
+  return (
+    <ul className="flex flex-col border border-axon-linie-fein">
+      {liste.map((posten) => (
+        <li
+          key={posten.tabelle}
+          className="flex items-center gap-3 border-b border-axon-zeile-linie px-4 py-[10px] last:border-b-0"
+        >
+          <span className="font-sans text-md text-axon-schrift">
+            {KLARTEXT[posten.tabelle] ?? posten.tabelle}
+          </span>
+          <span className="ml-auto font-mono text-xs text-axon-schrift-leise" data-numeric>
+            {posten.anzahl}
+          </span>
+        </li>
+      ))}
+    </ul>
   );
 }

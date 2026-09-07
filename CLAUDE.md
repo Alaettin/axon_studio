@@ -3,8 +3,8 @@
 Der **Hub**: eine zentrale Anlaufstelle für mehrere kleine Anwendungen, die selbst der
 Identitätsanbieter ist.
 
-**Die Projektakte liegt in Obsidian** unter `01 Projekte/02 Arbeit/06 AXON Studio/AXON Studio.md`
-und ist maßgeblich. Entscheidungen, verworfene Alternativen und Stolperfallen stehen dort,
+**Die Projektakte liegt in Outline** (`outline.adogan.de`) unter
+`01 Projekte → 02 Arbeit → 06 AXON Studio` und ist maßgeblich. Entscheidungen, verworfene Alternativen und Stolperfallen stehen dort,
 nicht hier. **Dort nachschlagen, nicht aus dem Code rekonstruieren.**
 
 ## Nicht verwechseln
@@ -44,13 +44,19 @@ Daraus folgen Regeln, die hier eingehalten werden:
 
 - **Eigene Tabellen tragen `hub_`**, wie dort `dti_`, `ucc_`, `doc_`, `excel_`, `aas_`.
 - **`profiles` und `user_tool_access` sind geteilt.** Sie werden benutzt, nicht umgebaut.
+  Ausnahmen sind zwei additive Spalten: `profiles.status` und `profiles.passwortwechsel_faellig`.
+- **Löschen ist im geteilten Projekt ein Lawinenabgang.** Dreizehn Tabellen hängen mit
+  `on delete cascade` an `auth.users`, zwölf davon gehören der AAS Tools Platform; eine
+  (`doc_manuals.created_by`) steht auf `no action` und sperrt, und ihr Fehler wird in GoTrue
+  unkenntlich. Deshalb zeigt die Verwaltung erst eine Vorschau und verlangt die abgetippte
+  Adresse. Die Vorschau wird in `hub_loeschvorschau()` **aus `pg_constraint` abgeleitet**, nicht
+  gepflegt: eine Liste im Code wäre falsch, sobald die Tools-Plattform eine Tabelle ergänzt.
 - **Ein Zugang entsteht nur in der Verwaltung**, mit einem Startpasswort, das genau einmal
   angezeigt wird. Kein Einladungslink mehr: der hing an der projektweiten Site URL, und die
   gehört der AAS Tools Platform. Bis zum Wechsel steht `profiles.passwortwechsel_faellig`,
   und löschen darf die Marke nur die Edge Function `konto`, zusammen mit dem neuen Passwort.
   **Im Hub** gibt es keinen zweiten Weg herein; die Selbstregistrierung der Tools Platform
   legt aber weiterhin Konten an, die hier gültig sind.
-  Einzige Ausnahme bisher: die additive Spalte `profiles.status`.
 - **Kein Fremdschlüssel von `user_tool_access` auf `hub_apps`.** Die Tools-Plattform
   schreibt dort, und ein nachträglicher Fremdschlüssel könnte ihre Schreibvorgänge brechen.
   Die Kopplung über `tool_id` = `hub_apps.id` ist Verabredung, nicht Zwang.
@@ -121,6 +127,7 @@ node scripts/bewegung.mjs Zaehlt rAF-Bilder mit und ohne prefers-reduced-motion
 node scripts/bildschirme.mjs   Legt Bilder aller Bildschirme in test-results ab
 node scripts/sperren-rundlauf.mjs  Sperren und Entsperren ueber die Edge Function
 node scripts/zugang-rundlauf.mjs   Zugang anlegen, Startpasswort, Wechsel erzwungen
+node scripts/loeschen-rundlauf.mjs Vorschau, Bestaetigung, Loeschen, Nachschau
 node scripts/kopfzeilen-pruefen.mjs <adresse>   Die sechs Sicherheitskopfzeilen
 ```
 
