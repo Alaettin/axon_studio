@@ -3,7 +3,6 @@ import { mitFrist, supabase } from "@/lib/supabase";
 import type {
   Abnahmepunkt,
   Loeschvorschau,
-  Mitgliedsrolle,
   Nutzerzeile,
   Organisation,
   Posten,
@@ -139,12 +138,12 @@ export async function ladeOrganisationen(): Promise<
  * Mitgliedschaften lesen; wer sich hier auf RLS verließe, bekäme den ganzen Bestand.
  */
 export async function ladeMitglieder(organisationId: string): Promise<
-  { id: string; name: string | null; email: string | null; rolle: Mitgliedsrolle }[]
+  { id: string; name: string | null; email: string | null }[]
 > {
   const { data: zeilen, error } = await mitFrist(
     supabase
       .from("hub_organisation_mitglieder")
-      .select("user_id, rolle")
+      .select("user_id")
       .eq("organisation_id", organisationId),
   );
   if (error) throw new Error(error.message);
@@ -164,11 +163,10 @@ export async function ladeMitglieder(organisationId: string): Promise<
   );
 
   return (zeilen ?? [])
-    .map((z: { user_id: string; rolle: Mitgliedsrolle }) => ({
+    .map((z: { user_id: string }) => ({
       id: z.user_id,
       name: nach.get(z.user_id)?.display_name ?? null,
       email: nach.get(z.user_id)?.email ?? null,
-      rolle: z.rolle,
     }))
     .sort((a, b) => (a.name ?? a.email ?? "").localeCompare(b.name ?? b.email ?? "", "de"));
 }
@@ -207,25 +205,24 @@ export async function loescheOrganisation(id: string): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
-/** `null` als Rolle heißt: raus aus der Organisation. */
+/** Dabei oder nicht. Mehr gibt es nicht zu entscheiden, es gibt keine Rollen. */
 export async function setzeMitgliedschaft(
   organisationId: string,
   kennung: string,
-  rolle: Mitgliedsrolle | null,
+  dabei: boolean,
 ): Promise<void> {
-  const { error } =
-    rolle === null
-      ? await supabase
-          .from("hub_organisation_mitglieder")
-          .delete()
-          .eq("organisation_id", organisationId)
-          .eq("user_id", kennung)
-      : await supabase
-          .from("hub_organisation_mitglieder")
-          .upsert(
-            { organisation_id: organisationId, user_id: kennung, rolle },
-            { onConflict: "organisation_id,user_id" },
-          );
+  const { error } = dabei
+    ? await supabase
+        .from("hub_organisation_mitglieder")
+        .upsert(
+          { organisation_id: organisationId, user_id: kennung },
+          { onConflict: "organisation_id,user_id" },
+        )
+    : await supabase
+        .from("hub_organisation_mitglieder")
+        .delete()
+        .eq("organisation_id", organisationId)
+        .eq("user_id", kennung);
   if (error) throw new Error(error.message);
 }
 

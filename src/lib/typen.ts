@@ -129,9 +129,6 @@ export const SCOPE_TEXT: Record<Scope, { titel: string; detail: string }> = {
   },
 };
 
-/** Die Rolle innerhalb einer Organisation. Zwei reichen, wie bei den Rollen des Hubs. */
-export type Mitgliedsrolle = "mitglied" | "verwalter";
-
 /** `public.hub_organisationen`. */
 export interface Organisation {
   readonly id: string;
@@ -141,15 +138,18 @@ export interface Organisation {
 }
 
 /**
- * Eine Organisation aus der Sicht eines Nutzers: dieselbe Zeile, plus seine Rolle darin.
+ * Eine Organisation aus der Sicht eines Nutzers.
  *
  * Genau diese Form geht auch an die Unterprogramme (`konto`, Handlung `organisationen`), damit
  * die Verwaltung und der Vertrag nach außen nicht zwei Sprachen sprechen.
+ *
+ * **Ohne Rolle.** Es gab eine (`mitglied`, `verwalter`), und sie entschied nirgends etwas: eine
+ * Unterscheidung, die keine ist, verspricht in der Oberfläche mehr, als der Hub hält
+ * (07.09.2026 entfernt). Braucht ein Programm eine, kommt sie zurück, dann mit Bedeutung.
  */
 export interface Mitgliedschaft {
   readonly id: string;
   readonly name: string;
-  readonly rolle: Mitgliedsrolle;
 }
 
 /**

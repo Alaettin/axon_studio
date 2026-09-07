@@ -128,7 +128,7 @@ async function liste(dienst: Dienst): Promise<Response> {
     dienst.auth.admin.listUsers({ perPage: 1000 }),
     dienst
       .from("hub_organisation_mitglieder")
-      .select("user_id, rolle, hub_organisationen(id, name)"),
+      .select("user_id, hub_organisationen(id, name)"),
   ]);
 
   const fehler = profile.error ?? zugriffe.error ?? anmeldungen.error ?? mitglieder.error;
@@ -146,14 +146,14 @@ async function liste(dienst: Dienst): Promise<Response> {
 
   // Dieselbe Form wie bei den Programmen: eine Karte je Nutzer, damit die Liste nicht je Zeile
   // durch alle Mitgliedschaften laeuft.
-  const organisationen = new Map<string, { id: string; name: string; rolle: string }[]>();
+  const organisationen = new Map<string, { id: string; name: string }[]>();
   for (const zeile of mitglieder.data ?? []) {
     // Objekt oder einelementiges Feld, siehe `konto/index.ts`: beides zulassen.
     const roh = (zeile as Record<string, unknown>)["hub_organisationen"];
     const org = (Array.isArray(roh) ? roh[0] : roh) as { id: string; name: string } | null;
     if (!org) continue;
     const bisher = organisationen.get(zeile.user_id as string) ?? [];
-    bisher.push({ id: org.id, name: org.name, rolle: zeile.rolle as string });
+    bisher.push({ id: org.id, name: org.name });
     organisationen.set(zeile.user_id as string, bisher);
   }
 

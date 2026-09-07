@@ -133,11 +133,15 @@ async function passwortWechseln(
  *
  * Sortiert nach Namen, damit ein Programm, das nur einen Arbeitsbereich kennt, immer denselben
  * ersten Eintrag bekommt und nicht bei jeder Anmeldung einen anderen.
+ *
+ * **Ohne Rolle.** Es gab eine (`mitglied`, `verwalter`), sie wurde nirgends ausgewertet, und eine
+ * Unterscheidung, die keine ist, verspricht den Programmen etwas, das der Hub nicht haelt
+ * (07.09.2026 entfernt). Sie kommt wieder, wenn ein Programm ihr eine Bedeutung gibt.
  */
 async function organisationen(dienst: Dienst, kennung: string): Promise<Response> {
   const { data, error } = await dienst
     .from("hub_organisation_mitglieder")
-    .select("rolle, seit, hub_organisationen(id, name)")
+    .select("seit, hub_organisationen(id, name)")
     .eq("user_id", kennung);
   if (error) return antwort({ fehler: error.message }, 500);
 
@@ -150,7 +154,7 @@ async function organisationen(dienst: Dienst, kennung: string): Promise<Response
     .map((zeile: Record<string, unknown>) => {
       const roh = zeile["hub_organisationen"];
       const org = (Array.isArray(roh) ? roh[0] : roh) as { id: string; name: string } | null;
-      return org ? { id: org.id, name: org.name, rolle: zeile["rolle"], seit: zeile["seit"] } : null;
+      return org ? { id: org.id, name: org.name, seit: zeile["seit"] } : null;
     })
     .filter((o: unknown): o is { id: string; name: string } => o !== null)
     .sort((a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name, "de"));

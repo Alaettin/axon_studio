@@ -6,7 +6,7 @@ import { Flaeche } from "@/components/Flaeche";
 import { Kopfzeile } from "@/components/Kopfzeile";
 import { Modal } from "@/components/Modal";
 import { Palette } from "@/components/Palette";
-import { initialen, type Mitgliedsrolle, type Organisation } from "@/lib/typen";
+import { initialen, type Organisation } from "@/lib/typen";
 import {
   benenneOrganisation,
   ladeMitglieder,
@@ -225,7 +225,7 @@ function OrganisationDetail({
   const [fehler, setzeFehler] = useState<string | null>(null);
   const [loeschen, setzeLoeschen] = useState(false);
   const [mitglieder, setzeMitglieder] = useState<
-    readonly { id: string; name: string | null; email: string | null; rolle: Mitgliedsrolle }[]
+    readonly { id: string; name: string | null; email: string | null }[]
   >([]);
   const [ladeFehler, setzeLadeFehler] = useState<string | null>(null);
 
@@ -303,9 +303,6 @@ function OrganisationDetail({
                     <span className="truncate font-mono text-2xs text-axon-schrift-still">
                       {mitglied.email}
                     </span>
-                  </span>
-                  <span className="ml-auto font-mono text-2xs tracking-fein uppercase text-axon-schrift-fein">
-                    {mitglied.rolle === "verwalter" ? "Verwalter" : "Mitglied"}
                   </span>
                 </li>
               ))}

@@ -234,7 +234,7 @@ export function NutzerDetail({ nutzer, schliesse, neuLaden }: Props) {
             ) : (
               <ul className="flex flex-col border border-axon-linie-fein">
                 {organisationen.map((organisation) => {
-                  const drin = nutzer.organisationen.find((o) => o.id === organisation.id);
+                  const drin = nutzer.organisationen.some((o) => o.id === organisation.id);
                   return (
                     <li
                       key={organisation.id}
@@ -243,33 +243,15 @@ export function NutzerDetail({ nutzer, schliesse, neuLaden }: Props) {
                       <span className="truncate font-sans text-md text-axon-schrift">
                         {organisation.name}
                       </span>
-                      {drin && (
-                        <button
-                          type="button"
-                          disabled={laeuft !== null}
-                          onClick={() =>
-                            void tue(`rolle-${organisation.id}`, () =>
-                              setzeMitgliedschaft(
-                                organisation.id,
-                                nutzer.id,
-                                drin.rolle === "verwalter" ? "mitglied" : "verwalter",
-                              ),
-                            )
-                          }
-                          className="cursor-pointer border border-axon-linie px-[10px] py-1 font-mono text-2xs tracking-fein uppercase text-axon-schrift-leise transition-colors duration-quick hover:text-axon-schrift disabled:cursor-wait"
-                        >
-                          {drin.rolle === "verwalter" ? "Verwalter" : "Mitglied"}
-                        </button>
-                      )}
                       <button
                         type="button"
                         role="switch"
-                        aria-checked={drin !== undefined}
+                        aria-checked={drin}
                         aria-label={`${nutzer.display_name ?? nutzer.email ?? "Diesen Nutzer"} zu ${organisation.name} zuordnen`}
                         disabled={laeuft !== null}
                         onClick={() =>
                           void tue(organisation.id, () =>
-                            setzeMitgliedschaft(organisation.id, nutzer.id, drin ? null : "mitglied"),
+                            setzeMitgliedschaft(organisation.id, nutzer.id, !drin),
                           )
                         }
                         className="ml-auto h-5 w-9 shrink-0 cursor-pointer border border-axon-linie bg-transparent transition-colors duration-quick aria-checked:border-axon-aktion aria-checked:bg-axon-schalter-an disabled:cursor-wait"
@@ -290,7 +272,7 @@ export function NutzerDetail({ nutzer, schliesse, neuLaden }: Props) {
             )}
             <p className="font-sans text-sm text-axon-schrift-fein">
               Wer zusammen in einer Organisation ist, teilt sich in den Unterprogrammen den
-              Arbeitsbereich. Rechte vergibt sie keine.
+              Arbeitsbereich. Rechte vergibt sie keine, und Abstufungen kennt sie nicht.
             </p>
           </section>
 

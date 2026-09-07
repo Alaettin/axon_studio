@@ -334,9 +334,6 @@ function MeineOrganisationen({ kennung }: { readonly kennung: string }) {
             className="flex items-center gap-3 border-b border-axon-zeile-linie px-[22px] py-[13px] last:border-b-0"
           >
             <span className="font-sans text-md text-axon-schrift">{organisation.name}</span>
-            <span className="ml-auto font-mono text-2xs tracking-fein uppercase text-axon-schrift-fein">
-              {organisation.rolle === "verwalter" ? "Verwalter" : "Mitglied"}
-            </span>
           </li>
         ))}
       </ul>

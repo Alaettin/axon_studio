@@ -1,6 +1,6 @@
 import { rufe } from "@/lib/funktion";
 import { mitFrist, supabase } from "@/lib/supabase";
-import type { Mitgliedschaft, Mitgliedsrolle } from "@/lib/typen";
+import type { Mitgliedschaft } from "@/lib/typen";
 
 /**
  * Das eigene Passwort wechseln.
@@ -30,15 +30,14 @@ export async function ladeMeineOrganisationen(kennung: string): Promise<Mitglied
   const { data, error } = await mitFrist(
     supabase
       .from("hub_organisation_mitglieder")
-      .select("rolle, hub_organisationen(id, name)")
+      .select("hub_organisationen(id, name)")
       .eq("user_id", kennung),
   );
   if (error) throw new Error(error.message);
 
   return (data ?? [])
     .map((zeile) => {
-      const { rolle, hub_organisationen: verknuepft } = zeile as unknown as {
-        rolle: Mitgliedsrolle;
+      const { hub_organisationen: verknuepft } = zeile as unknown as {
         /*
          * PostgREST liefert bei einer Beziehung nach oben ein Objekt, die erzeugten Typen von
          * supabase-js sagen ein Feld. Beides zulassen und hier einmal geradeziehen, statt sich
@@ -47,7 +46,7 @@ export async function ladeMeineOrganisationen(kennung: string): Promise<Mitglied
         hub_organisationen: { id: string; name: string } | { id: string; name: string }[] | null;
       };
       const org = Array.isArray(verknuepft) ? verknuepft[0] : verknuepft;
-      return org ? { id: org.id, name: org.name, rolle } : null;
+      return org ? { id: org.id, name: org.name } : null;
     })
     .filter((o): o is Mitgliedschaft => o !== null)
     .sort((a, b) => a.name.localeCompare(b.name, "de"));

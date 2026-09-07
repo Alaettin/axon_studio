@@ -67,7 +67,7 @@ console.log('4 Vorher (Nutzer fragt)  :', vorher.status, JSON.stringify(vorher.b
 
 const aufnehmen = await rest(admin.access_token, 'hub_organisation_mitglieder', {
   method: 'POST',
-  body: JSON.stringify({ organisation_id: organisation.id, user_id: nutzer.user.id, rolle: 'verwalter' }),
+  body: JSON.stringify({ organisation_id: organisation.id, user_id: nutzer.user.id }),
 });
 console.log('5 Admin nimmt auf        :', aufnehmen.status);
 
@@ -75,7 +75,6 @@ const nachher = await funktion('konto', nutzer.access_token, { handlung: 'organi
 const liste = nachher.body.organisationen ?? [];
 console.log('6 Nachher (Nutzer fragt) :', nachher.status, JSON.stringify(liste));
 console.log('   Genau diese eine      :', liste.length === 1 && liste[0].id === organisation.id ? 'ja' : 'NEIN');
-console.log('   Rolle mitgeliefert    :', liste[0]?.rolle === 'verwalter' ? 'ja' : 'NEIN');
 
 const fremd = await funktion('konto', admin.access_token, { handlung: 'organisationen' });
 const beimAdmin = (fremd.body.organisationen ?? []).some((o) => o.id === organisation.id);
